@@ -13,6 +13,7 @@ import {
 } from '../../utils/tournament'
 
 export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, onGenerateRound }) {
+  const [sortBy, setSortBy] = useState('table')
   const [setup, setSetup] = useState({
     name: tournament.name,
     maxSetsPerMatch: tournament.maxSetsPerMatch,
@@ -22,6 +23,10 @@ export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, on
     loss: tournament.pointAllocation.loss,
   })
   const currentMatches = getCurrentRoundMatches(tournament)
+  const sortedMatches = useMemo(
+    () => [...currentMatches].sort((a, b) => compareMatches(a, b, sortBy)),
+    [currentMatches, sortBy],
+  )
   const standings = useMemo(() => calculateStandings(tournament), [tournament])
   const alerts = currentMatches.filter((match) => deriveMatchStatus(match) === 'disputed')
   const canGenerate = canGenerateNextRound(tournament)
@@ -77,7 +82,28 @@ export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, on
           />
         </div>
 
-        <TableGrid tournament={tournament} matches={currentMatches} onClearAlert={onClearAlert} />
+        <div className="space-y-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Kārtot pēc</span>
+            <div className="grid grid-cols-2 rounded-md border border-nvssBorder bg-nvssBg p-1">
+              <button
+                type="button"
+                onClick={() => setSortBy('table')}
+                className={`min-h-[36px] rounded px-3 text-sm font-semibold ${sortBy === 'table' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
+              >
+                Galda
+              </button>
+              <button
+                type="button"
+                onClick={() => setSortBy('status')}
+                className={`min-h-[36px] rounded px-3 text-sm font-semibold ${sortBy === 'status' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
+              >
+                Statusa
+              </button>
+            </div>
+          </div>
+          <TableGrid tournament={tournament} matches={sortedMatches} onClearAlert={onClearAlert} />
+        </div>
       </section>
 
       <aside className="space-y-4">
@@ -116,3 +142,21 @@ export function StatPill({ icon: Icon, label, value }) {
 }
 
 export const organizerIcons = { Users, Clock, AlertTriangle, CheckCircle2 }
+
+function compareMatches(a, b, sortBy) {
+  if (sortBy === 'status') {
+    const statusOrder = {
+      disputed: 0,
+      in_progress: 1,
+      awaiting_confirmation: 2,
+      scheduled: 3,
+      completed: 4,
+      verified: 5,
+    }
+
+    const statusDiff = (statusOrder[deriveMatchStatus(a)] ?? 99) - (statusOrder[deriveMatchStatus(b)] ?? 99)
+    if (statusDiff !== 0) return statusDiff
+  }
+
+  return a.table - b.table
+}
