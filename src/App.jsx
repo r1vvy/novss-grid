@@ -12,6 +12,7 @@ import {
   confirmFinalScore,
   createRegistrationTournament,
   getPlayerById,
+  removeSetResult,
   requestReferee,
   updatePlayer,
 } from './utils/tournament'
@@ -109,7 +110,8 @@ export default function App() {
           tournament={tournament}
           player={selectedPlayer}
           onCheckIn={handleCheckIn}
-          onScoreSet={(matchId, winnerId) => setTournament((current) => appendSetResult(current, matchId, winnerId))}
+          onScoreAdd={(matchId, winnerId, actorPlayerId) => setTournament((current) => appendSetResult(current, matchId, winnerId, actorPlayerId))}
+          onScoreRemove={(matchId, winnerId, actorPlayerId) => setTournament((current) => removeSetResult(current, matchId, winnerId, actorPlayerId))}
           onConfirm={(matchId, playerId) => setTournament((current) => confirmFinalScore(current, matchId, playerId))}
           onCallReferee={(matchId) => setTournament((current) => requestReferee(current, matchId))}
           onSignOut={() => {

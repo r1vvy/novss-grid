@@ -4,14 +4,18 @@ import { RefereeButton } from './RefereeButton'
 import { ScoreStepper } from './ScoreStepper'
 import { deriveMatchStatus, getMatchPlayers, getOpponentId, getSetScore } from '../../utils/tournament'
 
-export function PlayerMatchCard({ tournament, match, player, onScoreSet, onConfirm, onCallReferee }) {
+export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScoreRemove, onConfirm, onCallReferee }) {
   const opponentId = getOpponentId(match, player.id)
   const { playerA, playerB } = getMatchPlayers(match, tournament.players)
   const opponent = opponentId === match.playerAId ? playerA : playerB
   const playerScore = getSetScore(match, player.id)
   const opponentScore = getSetScore(match, opponentId)
+  const playerAScore = getSetScore(match, match.playerAId)
+  const playerBScore = getSetScore(match, match.playerBId)
   const status = deriveMatchStatus(match)
-  const locked = ['disputed', 'awaiting_confirmation', 'verified'].includes(status)
+  const isScoreKeeper = player.id === match.playerAId
+  const scoreLocked = status === 'disputed'
+  const targetReached = Boolean(status === 'awaiting_confirmation' || status === 'verified')
   const playerConfirmed = Boolean(match.confirmations?.[player.id])
 
   return (
@@ -34,10 +38,23 @@ export function PlayerMatchCard({ tournament, match, player, onScoreSet, onConfi
       </div>
 
       <ScoreStepper
-        disabled={locked}
-        onPlayerWon={() => onScoreSet(match.id, player.id)}
-        onOpponentWon={() => onScoreSet(match.id, opponentId)}
+        disabled={scoreLocked || !isScoreKeeper}
+        targetReached={targetReached}
+        playerAName={playerA?.name || 'Spēlētājs A'}
+        playerBName={playerB?.name || 'Spēlētājs B'}
+        playerAScore={playerAScore}
+        playerBScore={playerBScore}
+        onPlayerAAdd={() => onScoreAdd(match.id, match.playerAId, player.id)}
+        onPlayerBAdd={() => onScoreAdd(match.id, match.playerBId, player.id)}
+        onPlayerARemove={() => onScoreRemove(match.id, match.playerAId, player.id)}
+        onPlayerBRemove={() => onScoreRemove(match.id, match.playerBId, player.id)}
       />
+
+      {!isScoreKeeper && (
+        <div className="mt-3 rounded border border-nvssBorder bg-nvssSurface p-3 text-center text-sm font-semibold text-nvssMuted">
+          Rezultātu ievada {playerA.name}. Tu vari apstiprināt rezultātu vai izsaukt tiesnesi.
+        </div>
+      )}
 
       {status === 'awaiting_confirmation' && (
         <button
@@ -63,7 +80,7 @@ export function PlayerMatchCard({ tournament, match, player, onScoreSet, onConfi
         </div>
       )}
 
-      <RefereeButton disabled={status === 'disputed' || status === 'verified'} onClick={() => onCallReferee(match.id)} />
+      <RefereeButton disabled={status === 'disputed'} onClick={() => onCallReferee(match.id)} />
     </section>
   )
 }

@@ -1,26 +1,70 @@
 import React from 'react'
-import { Plus } from 'lucide-react'
+import { Minus, Plus } from 'lucide-react'
 
-export function ScoreStepper({ disabled, onPlayerWon, onOpponentWon }) {
+export function ScoreStepper({
+  disabled,
+  targetReached,
+  playerAName,
+  playerBName,
+  playerAScore,
+  playerBScore,
+  onPlayerAAdd,
+  onPlayerBAdd,
+  onPlayerARemove,
+  onPlayerBRemove,
+}) {
   return (
     <div className="mt-5 grid gap-3">
-      <button
-        type="button"
+      <ScoreRow
+        name={playerAName}
+        label="Spēlētājs A"
+        score={playerAScore}
         disabled={disabled}
-        onClick={onPlayerWon}
-        className="flex min-h-[64px] items-center justify-center gap-2 rounded bg-nvssGreenAction px-4 text-xl font-black text-white disabled:cursor-not-allowed disabled:bg-nvssSlateAction disabled:text-nvssMuted"
-      >
-        <Plus size={24} />
-        Es uzvarēju setu
-      </button>
-      <button
-        type="button"
+        addDisabled={targetReached}
+        onAdd={onPlayerAAdd}
+        onRemove={onPlayerARemove}
+      />
+      <ScoreRow
+        name={playerBName}
+        label="Spēlētājs B"
+        score={playerBScore}
         disabled={disabled}
-        onClick={onOpponentWon}
-        className="min-h-[58px] rounded bg-nvssSlateAction px-4 text-lg font-black text-white disabled:cursor-not-allowed disabled:text-nvssMuted"
-      >
-        Pretinieks uzvarēja setu
-      </button>
+        addDisabled={targetReached}
+        onAdd={onPlayerBAdd}
+        onRemove={onPlayerBRemove}
+      />
+    </div>
+  )
+}
+
+function ScoreRow({ name, label, score, disabled, addDisabled, onAdd, onRemove }) {
+  return (
+    <div className="grid grid-cols-[1fr_auto] items-center gap-3 rounded border border-nvssBorder bg-nvssSurface p-3">
+      <div className="min-w-0">
+        <p className="text-xs uppercase text-nvssMuted">{label}</p>
+        <p className="truncate text-base font-black text-white">{name}</p>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          aria-label={`Noņemt setu: ${name}`}
+          disabled={disabled || score <= 0}
+          onClick={onRemove}
+          className="flex size-11 items-center justify-center rounded bg-nvssSlateAction text-white disabled:cursor-not-allowed disabled:text-nvssMuted"
+        >
+          <Minus size={20} />
+        </button>
+        <span className="min-w-8 text-center text-2xl font-black text-white">{score}</span>
+        <button
+          type="button"
+          aria-label={`Pievienot setu: ${name}`}
+          disabled={disabled || addDisabled}
+          onClick={onAdd}
+          className="flex size-11 items-center justify-center rounded bg-nvssGreenAction text-white disabled:cursor-not-allowed disabled:bg-nvssSlateAction disabled:text-nvssMuted"
+        >
+          <Plus size={20} />
+        </button>
+      </div>
     </div>
   )
 }
