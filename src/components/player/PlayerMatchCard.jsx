@@ -33,18 +33,6 @@ export function PlayerMatchCard({ tournament, match, player, onScoreSet, onConfi
         <PlayerName name={opponent?.name || 'Pretinieks'} label="Pretinieks" alignRight />
       </div>
 
-      <div className="mt-5 rounded border border-white/15 p-3">
-        <p className="mb-2 text-sm font-semibold text-nvssMuted">Setu vēsture</p>
-        <div className="flex flex-wrap gap-2">
-          {match.setResults.map((set, index) => (
-            <span key={`${set.winnerId}-${index}`} className={`rounded px-2 py-1 text-sm font-semibold ${set.winnerId === player.id ? 'bg-nvssGreenAction text-white' : 'bg-nvssSlateAction text-white'}`}>
-              {index + 1}: {set.winnerId === player.id ? 'Tu' : 'Pret.'} {set.score}
-            </span>
-          ))}
-          {match.setResults.length === 0 && <span className="text-sm text-nvssMuted">Seti vēl nav ievadīti.</span>}
-        </div>
-      </div>
-
       <ScoreStepper
         disabled={locked}
         onPlayerWon={() => onScoreSet(match.id, player.id)}
