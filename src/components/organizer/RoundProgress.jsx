@@ -1,18 +1,17 @@
 import React from 'react'
 import { CheckCircle2, Clock } from 'lucide-react'
 
-export function RoundProgress({ tournament, canGenerate, onGenerate }) {
+export function RoundProgress({ tournament, canGenerate, onGenerate, embedded = false }) {
   const percent = tournament.totalRounds > 0 ? Math.min(100, (tournament.currentRound / tournament.totalRounds) * 100) : 0
 
   return (
-    <section className="rounded-md border border-nvssBorder bg-nvssSurface p-4">
+    <section className={embedded ? 'px-4 py-3' : 'rounded-md border border-nvssBorder bg-nvssSurface p-4'}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-sm font-semibold">
+          <p className="flex items-center gap-2 text-sm text-nvssMuted">
             <Clock size={18} className="text-nvssGreen" />
-            Šveices kārtu cikls
-          </div>
-          <p className="mt-2 text-sm text-nvssMuted">Nākamo kārtu var ģenerēt tikai tad, kad visas pašreizējās kārtas spēles ir apstiprinātas.</p>
+            Nākamo kārtu var ģenerēt tikai tad, kad visas pašreizējās kārtas spēles ir apstiprinātas.
+          </p>
         </div>
         <button
           type="button"

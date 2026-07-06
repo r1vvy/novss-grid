@@ -11,7 +11,7 @@ const statusLabels = {
   verified: 'Apstiprināts',
 }
 
-export function TableGrid({ tournament, matches, onClearAlert }) {
+export function TableGrid({ tournament, matches, onClearAlert, headerContent = null }) {
   if (matches.length === 0) {
     return (
       <section className="rounded-md border border-dashed border-nvssBorder bg-nvssSurface p-6 text-sm text-nvssMuted">
@@ -23,9 +23,9 @@ export function TableGrid({ tournament, matches, onClearAlert }) {
   return (
     <section className="w-full overflow-hidden rounded-md border border-nvssBorder bg-nvssSurface">
       <div className="border-b border-nvssBorder px-4 py-3">
-        <h3 className="text-sm font-semibold text-white">Aktīvās kārtas spēles</h3>
-        <p className="mt-1 text-xs text-nvssMuted">Tabulas skats ir paredzēts lieliem turnīriem ar desmitiem vai simtiem vienlaicīgu spēļu.</p>
+        <h3 className="text-sm font-semibold text-white">Aktīvā kārta</h3>
       </div>
+      {headerContent ? <div className="border-b border-nvssBorder">{headerContent}</div> : null}
       <div className="w-full overflow-x-auto">
         <table className="w-full min-w-full table-fixed text-left text-sm">
           <colgroup>
