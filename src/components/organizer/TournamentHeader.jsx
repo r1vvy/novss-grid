@@ -1,9 +1,9 @@
 import React from 'react'
-import { AlertTriangle, CheckCircle2, Clock, Users } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Clock, Settings, Users } from 'lucide-react'
 import { StatPill } from './OrganizerDashboard'
 import { deriveMatchStatus } from '../../utils/tournament'
 
-export function TournamentHeader({ tournament, matches, alerts }) {
+export function TournamentHeader({ tournament, matches, alerts, onOpenSettings }) {
   const active = matches.filter((match) => ['in_progress', 'disputed'].includes(deriveMatchStatus(match))).length
   const verified = matches.filter((match) => deriveMatchStatus(match) === 'verified').length
 
@@ -15,11 +15,23 @@ export function TournamentHeader({ tournament, matches, alerts }) {
           <h2 className="mt-1 text-2xl font-semibold">{tournament.name}</h2>
           <p className="mt-1 text-sm text-nvssMuted">Statuss: <span className="font-semibold text-white">{tournament.status}</span></p>
         </div>
-        <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[620px] xl:grid-cols-4">
+        <div className="flex flex-col gap-3 xl:min-w-[620px]">
+          <div className="flex justify-start xl:justify-end">
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              className="flex min-h-[40px] items-center gap-2 rounded border border-nvssBorder bg-nvssBg px-3 text-sm font-semibold text-nvssMuted hover:text-white"
+            >
+              <Settings size={16} />
+              Iestatījumi
+            </button>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           <StatPill icon={Clock} label="Kārta" value={`${tournament.currentRound}/${tournament.totalRounds}`} />
           <StatPill icon={Users} label="Galdi" value={matches.length} />
           <StatPill icon={CheckCircle2} label="Apstiprināti" value={verified} />
           <StatPill icon={AlertTriangle} label="Brīdinājumi" value={alerts.length} />
+          </div>
         </div>
       </div>
     </header>

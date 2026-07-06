@@ -13,6 +13,7 @@ import {
 } from '../../utils/tournament'
 
 export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, onGenerateRound }) {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [sortBy, setSortBy] = useState('table')
   const [setup, setSetup] = useState({
     name: tournament.name,
@@ -38,7 +39,7 @@ export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, on
   return (
     <main className="mx-auto grid max-w-[1800px] gap-4 px-3 py-4 lg:grid-cols-[1fr_320px]">
       <section className="min-w-0 space-y-4">
-        <TournamentHeader tournament={tournament} matches={currentMatches} alerts={alerts} />
+        <TournamentHeader tournament={tournament} matches={currentMatches} alerts={alerts} onOpenSettings={() => setIsSettingsOpen(true)} />
 
         <div className="space-y-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
@@ -97,6 +98,63 @@ export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, on
           </div>
         </section>
       </aside>
+      {isSettingsOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-xl rounded-md border border-nvssBorder bg-nvssSurface p-4 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                <Trophy size={18} className="text-nvssGreen" />
+                Turnīra iestatījumi
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSettingsOpen(false)}
+                className="min-h-[36px] rounded border border-nvssBorder px-3 text-sm text-nvssMuted hover:text-white"
+              >
+                Aizvērt
+              </button>
+            </div>
+            <form
+              onSubmit={(event) => {
+                event.preventDefault()
+                onSetupSubmit(setup)
+                setIsSettingsOpen(false)
+              }}
+            >
+              <label className="block text-xs font-semibold text-nvssMuted">
+                Turnīra nosaukums
+                <input className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white" value={setup.name} onChange={(e) => updateSetup('name', e.target.value)} />
+              </label>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                {[
+                  ['maxSetsPerMatch', 'Maks. seti'],
+                  ['win', 'Uzvara'],
+                  ['draw', 'Neizšķirts'],
+                  ['closeWin', 'Cieša uzvara'],
+                  ['loss', 'Zaudējums'],
+                ].map(([field, label]) => (
+                  <label key={field} className="block text-xs font-semibold text-nvssMuted">
+                    {label}
+                    <input type="number" min="0" className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white" value={setup[field]} onChange={(e) => updateSetup(field, e.target.value)} />
+                  </label>
+                ))}
+              </div>
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsSettingsOpen(false)}
+                  className="min-h-[44px] rounded border border-nvssBorder px-4 font-semibold text-nvssMuted hover:text-white"
+                >
+                  Atcelt
+                </button>
+                <button type="submit" className="min-h-[44px] rounded bg-nvssGreenAction px-4 font-semibold text-white">
+                  Saglabāt iestatījumus
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </main>
   )
 }
