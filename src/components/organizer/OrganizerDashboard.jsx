@@ -12,7 +12,7 @@ import {
   getCurrentRoundMatches,
 } from '../../utils/tournament'
 
-export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, onGenerateRound }) {
+export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, onGenerateRound, onOpenPlayers }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [sortBy, setSortBy] = useState('table')
   const [setup, setSetup] = useState({
@@ -39,42 +39,48 @@ export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, on
   return (
     <main className="mx-auto grid max-w-[1800px] gap-4 px-3 py-4 lg:grid-cols-[1fr_320px]">
       <section className="min-w-0 space-y-4">
-        <TournamentHeader tournament={tournament} matches={currentMatches} alerts={alerts} onOpenSettings={() => setIsSettingsOpen(true)} />
+        <TournamentHeader
+          tournament={tournament}
+          matches={currentMatches}
+          alerts={alerts}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenPlayers={onOpenPlayers}
+        />
 
-        <div className="space-y-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Kārtot pēc</span>
-            <div className="grid grid-cols-2 rounded-md border border-nvssBorder bg-nvssBg p-1">
-              <button
-                type="button"
-                onClick={() => setSortBy('table')}
-                className={`min-h-[36px] rounded px-3 text-sm font-semibold ${sortBy === 'table' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
-              >
-                Galda
-              </button>
-              <button
-                type="button"
-                onClick={() => setSortBy('status')}
-                className={`min-h-[36px] rounded px-3 text-sm font-semibold ${sortBy === 'status' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
-              >
-                Statusa
-              </button>
+        <TableGrid
+          tournament={tournament}
+          matches={sortedMatches}
+          onClearAlert={onClearAlert}
+          titleActions={(
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Kārtot pēc</span>
+              <div className="grid grid-cols-2 rounded-md border border-nvssBorder bg-nvssBg p-1">
+                <button
+                  type="button"
+                  onClick={() => setSortBy('table')}
+                  className={`min-h-[36px] rounded px-3 text-sm font-semibold ${sortBy === 'table' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
+                >
+                  Galda
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSortBy('status')}
+                  className={`min-h-[36px] rounded px-3 text-sm font-semibold ${sortBy === 'status' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
+                >
+                  Statusa
+                </button>
+              </div>
             </div>
-          </div>
-          <TableGrid
-            tournament={tournament}
-            matches={sortedMatches}
-            onClearAlert={onClearAlert}
-            headerContent={(
-              <RoundProgress
-                tournament={tournament}
-                canGenerate={canGenerate}
-                onGenerate={() => onGenerateRound(generateNextSwissRound(tournament))}
-                embedded
-              />
-            )}
-          />
-        </div>
+          )}
+          headerContent={(
+            <RoundProgress
+              tournament={tournament}
+              canGenerate={canGenerate}
+              onGenerate={() => onGenerateRound(generateNextSwissRound(tournament))}
+              embedded
+            />
+          )}
+        />
       </section>
 
       <aside className="space-y-4">
@@ -98,8 +104,8 @@ export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, on
         </section>
       </aside>
       {isSettingsOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-xl rounded-md border border-nvssBorder bg-nvssSurface p-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6">
+          <div className="max-h-[calc(100vh-48px)] w-full max-w-3xl overflow-y-auto rounded-md border border-nvssBorder bg-nvssSurface p-4 shadow-2xl">
             <div className="mb-4 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-sm font-semibold text-white">
                 <Trophy size={18} className="text-nvssGreen" />

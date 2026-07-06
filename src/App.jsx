@@ -3,6 +3,7 @@ import { ShieldCheck, UserRound } from 'lucide-react'
 import { initialTournament } from './data/mockTournament'
 import { AppShell } from './components/AppShell'
 import { OrganizerDashboard } from './components/organizer/OrganizerDashboard'
+import { OrganizerPlayersView } from './components/organizer/OrganizerPlayersView'
 import { PlayerView } from './components/player/PlayerView'
 import {
   appendSetResult,
@@ -12,6 +13,7 @@ import {
   createRegistrationTournament,
   getPlayerById,
   requestReferee,
+  updatePlayer,
 } from './utils/tournament'
 
 const SESSION_KEY = 'nvssgrid.playerId'
@@ -19,6 +21,7 @@ const SESSION_KEY = 'nvssgrid.playerId'
 export default function App() {
   const [tournament, setTournament] = useState(initialTournament)
   const [screen, setScreen] = useState('home')
+  const [organizerView, setOrganizerView] = useState('dashboard')
   const [selectedPlayerId, setSelectedPlayerId] = useState(null)
   const [organizerAuthenticated, setOrganizerAuthenticated] = useState(false)
 
@@ -49,6 +52,7 @@ export default function App() {
     setTournament(createRegistrationTournament(config))
     setSelectedPlayerId(null)
     localStorage.removeItem(SESSION_KEY)
+    setOrganizerView('dashboard')
     setScreen('organizer')
   }
 
@@ -56,12 +60,18 @@ export default function App() {
     <AppShell
       title={screen === 'home' ? 'Turnīra izvēlne' : 'Novusa turnīra vadība'}
       showBack={screen !== 'home'}
-      onBack={() => setScreen('home')}
+      onBack={() => {
+        setOrganizerView('dashboard')
+        setScreen('home')
+      }}
     >
       {screen === 'home' ? (
         <HomeScreen
           hasPlayerSession={Boolean(selectedPlayer)}
-          onOrganizer={() => setScreen(organizerAuthenticated ? 'organizer' : 'organizer-login')}
+          onOrganizer={() => {
+            setOrganizerView('dashboard')
+            setScreen(organizerAuthenticated ? 'organizer' : 'organizer-login')
+          }}
           onPlayer={() => setScreen('player')}
         />
       ) : null}
@@ -70,18 +80,28 @@ export default function App() {
         <OrganizerLogin
           onSubmit={() => {
             setOrganizerAuthenticated(true)
+            setOrganizerView('dashboard')
             setScreen('organizer')
           }}
         />
       ) : null}
 
       {screen === 'organizer' ? (
-        <OrganizerDashboard
-          tournament={tournament}
-          onSetupSubmit={handleSetupSubmit}
-          onClearAlert={(matchId) => setTournament((current) => clearRefereeRequest(current, matchId))}
-          onGenerateRound={(nextTournament) => setTournament(nextTournament)}
-        />
+        organizerView === 'dashboard' ? (
+          <OrganizerDashboard
+            tournament={tournament}
+            onSetupSubmit={handleSetupSubmit}
+            onClearAlert={(matchId) => setTournament((current) => clearRefereeRequest(current, matchId))}
+            onGenerateRound={(nextTournament) => setTournament(nextTournament)}
+            onOpenPlayers={() => setOrganizerView('players')}
+          />
+        ) : (
+          <OrganizerPlayersView
+            tournament={tournament}
+            onBack={() => setOrganizerView('dashboard')}
+            onSavePlayer={(playerId, nextPlayer) => setTournament((current) => updatePlayer(current, playerId, nextPlayer))}
+          />
+        )
       ) : null}
 
       {screen === 'player' ? (

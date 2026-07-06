@@ -1,9 +1,9 @@
 import React from 'react'
-import { AlertTriangle, CheckCircle2, Clock, Settings, Users } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Clock, Settings, SquarePen, Users } from 'lucide-react'
 import { StatPill } from './OrganizerDashboard'
 import { deriveMatchStatus } from '../../utils/tournament'
 
-export function TournamentHeader({ tournament, matches, alerts, onOpenSettings }) {
+export function TournamentHeader({ tournament, matches, alerts, onOpenSettings, onOpenPlayers }) {
   const active = matches.filter((match) => ['in_progress', 'disputed'].includes(deriveMatchStatus(match))).length
   const verified = matches.filter((match) => deriveMatchStatus(match) === 'verified').length
 
@@ -16,7 +16,15 @@ export function TournamentHeader({ tournament, matches, alerts, onOpenSettings }
           <p className="mt-1 text-sm text-nvssMuted">Statuss: <span className="font-semibold text-white">{tournament.status}</span></p>
         </div>
         <div className="flex flex-col gap-3 xl:min-w-[620px]">
-          <div className="flex justify-start xl:justify-end">
+          <div className="flex flex-wrap justify-start gap-2 xl:justify-end">
+            <button
+              type="button"
+              onClick={onOpenPlayers}
+              className="flex min-h-[40px] items-center gap-2 rounded border border-nvssBorder bg-nvssBg px-3 text-sm font-semibold text-nvssMuted hover:text-white"
+            >
+              <SquarePen size={16} />
+              Spēlētāji
+            </button>
             <button
               type="button"
               onClick={onOpenSettings}

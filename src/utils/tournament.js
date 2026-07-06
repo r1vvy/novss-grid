@@ -112,6 +112,21 @@ export function checkInPlayerByCode(tournament, registrationCode) {
   }
 }
 
+export function updatePlayer(tournament, playerId, updates) {
+  return {
+    ...tournament,
+    players: tournament.players.map((player) => {
+      if (player.id !== playerId) return player
+
+      return {
+        ...player,
+        ...updates,
+        registrationCode: updates.registrationCode ? updates.registrationCode.trim().toUpperCase() : player.registrationCode,
+      }
+    }),
+  }
+}
+
 export function calculateStandings(tournament) {
   return tournament.players
     .map((player) => {
