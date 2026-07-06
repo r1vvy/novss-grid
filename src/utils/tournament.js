@@ -1,0 +1,256 @@
+export function getPlayerById(players, id) {
+  return players.find((player) => player.id === id)
+}
+
+export function getMatchPlayers(match, players) {
+  return {
+    playerA: getPlayerById(players, match.playerAId),
+    playerB: getPlayerById(players, match.playerBId),
+  }
+}
+
+export function getSetScore(match, playerId) {
+  return match.setResults.filter((set) => set.winnerId === playerId).length
+}
+
+export function getOpponentId(match, playerId) {
+  return match.playerAId === playerId ? match.playerBId : match.playerAId
+}
+
+export function hasReachedTargetWins(match, playerId) {
+  return getSetScore(match, playerId) >= match.targetWins
+}
+
+export function getMatchWinnerId(match) {
+  if (hasReachedTargetWins(match, match.playerAId)) return match.playerAId
+  if (hasReachedTargetWins(match, match.playerBId)) return match.playerBId
+  return null
+}
+
+export function deriveMatchStatus(match) {
+  if (match.refereeRequested || match.status === 'disputed') return 'disputed'
+  if (match.status === 'verified') return 'verified'
+  if (getMatchWinnerId(match)) {
+    const confirmed = Object.values(match.confirmations || {}).filter(Boolean).length
+    return confirmed >= 2 ? 'verified' : 'awaiting_confirmation'
+  }
+  if (match.setResults.length > 0) return 'in_progress'
+  return match.status || 'scheduled'
+}
+
+export function appendSetResult(tournament, matchId, winnerId) {
+  return updateMatch(tournament, matchId, (match) => {
+    if (deriveMatchStatus(match) === 'disputed' || getMatchWinnerId(match)) return match
+
+    const nextSetResults = [
+      ...match.setResults,
+      { winnerId, score: winnerId === match.playerAId ? '11-8' : '8-11' },
+    ]
+    const nextMatch = { ...match, setResults: nextSetResults, status: 'in_progress' }
+    const winnerReachedTarget = hasReachedTargetWins(nextMatch, winnerId)
+
+    return {
+      ...nextMatch,
+      status: winnerReachedTarget ? 'awaiting_confirmation' : 'in_progress',
+    }
+  })
+}
+
+export function confirmFinalScore(tournament, matchId, playerId) {
+  return updateMatch(tournament, matchId, (match) => {
+    if (!getMatchWinnerId(match) || deriveMatchStatus(match) === 'disputed') return match
+
+    const confirmations = { ...match.confirmations, [playerId]: true }
+    const fullyConfirmed = match.playerAId in confirmations
+      && match.playerBId in confirmations
+      && confirmations[match.playerAId]
+      && confirmations[match.playerBId]
+
+    return {
+      ...match,
+      confirmations,
+      status: fullyConfirmed ? 'verified' : 'awaiting_confirmation',
+    }
+  })
+}
+
+export function requestReferee(tournament, matchId) {
+  return updateMatch(tournament, matchId, (match) => ({
+    ...match,
+    refereeRequested: true,
+    status: 'disputed',
+  }))
+}
+
+export function clearRefereeRequest(tournament, matchId) {
+  return updateMatch(tournament, matchId, (match) => {
+    const restored = { ...match, refereeRequested: false }
+    return {
+      ...restored,
+      status: deriveMatchStatus(restored),
+    }
+  })
+}
+
+export function checkInPlayerByCode(tournament, registrationCode) {
+  const normalizedCode = registrationCode.trim().toUpperCase()
+  let checkedInPlayer = null
+
+  const players = tournament.players.map((player) => {
+    if (player.registrationCode.toUpperCase() !== normalizedCode) return player
+    checkedInPlayer = { ...player, status: 'checked_in' }
+    return checkedInPlayer
+  })
+
+  if (!checkedInPlayer) {
+    return { tournament, player: null }
+  }
+
+  return {
+    tournament: { ...tournament, players },
+    player: checkedInPlayer,
+  }
+}
+
+export function calculateStandings(tournament) {
+  return tournament.players
+    .map((player) => {
+      const verifiedMatches = tournament.matches.filter(
+        (match) =>
+          deriveMatchStatus(match) === 'verified'
+          && (match.playerAId === player.id || match.playerBId === player.id),
+      )
+      const points = verifiedMatches.reduce((total, match) => {
+        const score = getSetScore(match, player.id)
+        const opponentScore = getSetScore(match, getOpponentId(match, player.id))
+        const won = score > opponentScore
+        const closeWin = won && Math.abs(score - opponentScore) === 1
+        if (won) return total + (closeWin ? tournament.pointAllocation.closeWin : tournament.pointAllocation.win)
+        return total + tournament.pointAllocation.loss
+      }, 0)
+
+      return {
+        ...player,
+        played: verifiedMatches.length,
+        points,
+        buchholz: calculateBuchholz(player.id, tournament),
+      }
+    })
+    .sort(sortByStanding)
+}
+
+export function calculateBuchholz(playerId, tournament) {
+  const opponents = tournament.matches
+    .filter(
+      (match) =>
+        deriveMatchStatus(match) === 'verified'
+        && (match.playerAId === playerId || match.playerBId === playerId),
+    )
+    .map((match) => getOpponentId(match, playerId))
+
+  return opponents.reduce((sum, opponentId) => {
+    const opponentMatches = tournament.matches.filter(
+      (match) =>
+        deriveMatchStatus(match) === 'verified'
+        && (match.playerAId === opponentId || match.playerBId === opponentId),
+    )
+    return sum + opponentMatches.length
+  }, 0)
+}
+
+export function canGenerateNextRound(tournament) {
+  const currentMatches = getCurrentRoundMatches(tournament)
+  return currentMatches.length > 0 && currentMatches.every((match) => deriveMatchStatus(match) === 'verified')
+}
+
+export function generateNextSwissRound(tournament) {
+  if (!canGenerateNextRound(tournament)) return tournament
+
+  const standings = calculateStandings(tournament)
+  const pairedIds = new Set()
+  const newRound = tournament.currentRound + 1
+  const pairings = []
+
+  standings.forEach((player) => {
+    if (pairedIds.has(player.id)) return
+    const opponent = standings.find(
+      (candidate) =>
+        candidate.id !== player.id
+        && !pairedIds.has(candidate.id)
+        && !havePlayed(player.id, candidate.id, tournament),
+    ) || standings.find((candidate) => candidate.id !== player.id && !pairedIds.has(candidate.id))
+
+    if (!opponent) return
+    pairedIds.add(player.id)
+    pairedIds.add(opponent.id)
+    pairings.push([player.id, opponent.id])
+  })
+
+  const matches = pairings.map(([playerAId, playerBId], index) => ({
+    id: `r${newRound}-m${index + 1}`,
+    table: index + 1,
+    round: newRound,
+    status: 'scheduled',
+    playerAId,
+    playerBId,
+    setResults: [],
+    targetWins: Math.floor(tournament.maxSetsPerMatch / 2) + 1,
+    confirmations: {
+      [playerAId]: false,
+      [playerBId]: false,
+    },
+    refereeRequested: false,
+  }))
+
+  return {
+    ...tournament,
+    currentRound: newRound,
+    matches: [...tournament.matches, ...matches],
+  }
+}
+
+export function getCurrentRoundMatches(tournament) {
+  return tournament.matches.filter((match) => match.round === tournament.currentRound)
+}
+
+export function createRegistrationTournament(config) {
+  return {
+    id: `novuss-${Date.now()}`,
+    name: config.name,
+    venue: 'Setup desk',
+    status: 'registration',
+    currentRound: 0,
+    totalRounds: 7,
+    maxSetsPerMatch: Number(config.maxSetsPerMatch),
+    pointAllocation: {
+      win: Number(config.win),
+      draw: Number(config.draw),
+      closeWin: Number(config.closeWin),
+      loss: Number(config.loss),
+    },
+    updatedAt: 'Configured locally',
+    players: [],
+    matches: [],
+  }
+}
+
+function updateMatch(tournament, matchId, updater) {
+  return {
+    ...tournament,
+    matches: tournament.matches.map((match) => (match.id === matchId ? updater(match) : match)),
+  }
+}
+
+function havePlayed(playerAId, playerBId, tournament) {
+  return tournament.matches.some(
+    (match) =>
+      (match.playerAId === playerAId && match.playerBId === playerBId)
+      || (match.playerAId === playerBId && match.playerBId === playerAId),
+  )
+}
+
+function sortByStanding(a, b) {
+  if (b.points !== a.points) return b.points - a.points
+  if (b.buchholz !== a.buchholz) return b.buchholz - a.buchholz
+  return a.name.localeCompare(b.name)
+}
