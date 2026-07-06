@@ -38,8 +38,9 @@ export function deriveMatchStatus(match) {
   return match.status || 'scheduled'
 }
 
-export function appendSetResult(tournament, matchId, winnerId) {
+export function appendSetResult(tournament, matchId, winnerId, actorPlayerId) {
   return updateMatch(tournament, matchId, (match) => {
+    if (actorPlayerId && actorPlayerId !== match.playerAId) return match
     if (deriveMatchStatus(match) === 'disputed' || getMatchWinnerId(match)) return match
 
     const nextSetResults = [
@@ -51,7 +52,31 @@ export function appendSetResult(tournament, matchId, winnerId) {
 
     return {
       ...nextMatch,
+      confirmations: resetConfirmations(match),
       status: winnerReachedTarget ? 'awaiting_confirmation' : 'in_progress',
+    }
+  })
+}
+
+export function removeSetResult(tournament, matchId, winnerId, actorPlayerId) {
+  return updateMatch(tournament, matchId, (match) => {
+    if (actorPlayerId && actorPlayerId !== match.playerAId) return match
+    if (deriveMatchStatus(match) === 'disputed') return match
+
+    const resultIndex = match.setResults.map((set) => set.winnerId).lastIndexOf(winnerId)
+    if (resultIndex === -1) return match
+
+    const nextSetResults = match.setResults.filter((_, index) => index !== resultIndex)
+    const nextMatch = {
+      ...match,
+      setResults: nextSetResults,
+      confirmations: resetConfirmations(match),
+      status: nextSetResults.length > 0 ? 'in_progress' : 'scheduled',
+    }
+
+    return {
+      ...nextMatch,
+      status: deriveMatchStatus(nextMatch),
     }
   })
 }
@@ -253,6 +278,13 @@ function updateMatch(tournament, matchId, updater) {
   return {
     ...tournament,
     matches: tournament.matches.map((match) => (match.id === matchId ? updater(match) : match)),
+  }
+}
+
+function resetConfirmations(match) {
+  return {
+    [match.playerAId]: false,
+    [match.playerBId]: false,
   }
 }
 
