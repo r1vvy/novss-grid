@@ -91,7 +91,6 @@ export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, on
                 <span className="truncate font-medium">{player.name}</span>
                 <span className="text-right text-nvssGreen">{player.points} p.</span>
                 <span />
-                <span className="truncate text-xs text-nvssMuted">{player.club}</span>
                 <span className="text-xs text-nvssMuted">Buholcs {player.buchholz}</span>
               </div>
             ))}
