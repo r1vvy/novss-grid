@@ -54,7 +54,7 @@ export default function App() {
 
   return (
     <AppShell
-      title={screen === 'home' ? 'Tournament Entry' : 'Live Novuss Tournament Control'}
+      title={screen === 'home' ? 'Turnīra izvēlne' : 'Novusa turnīra vadība'}
       showBack={screen !== 'home'}
       onBack={() => setScreen('home')}
     >
@@ -109,16 +109,16 @@ function HomeScreen({ hasPlayerSession, onOrganizer, onPlayer }) {
       <div className="grid w-full gap-4 md:grid-cols-2">
         <RoleCard
           icon={ShieldCheck}
-          title="Organizer"
-          description="Open the control desk, review alerts, and manage the live round."
-          actionLabel="Organizer Login"
+          title="Organizators"
+          description="Atver vadības paneli, pārskati brīdinājumus un pārvaldi aktīvo kārtu."
+          actionLabel="Organizatora pieslēgšanās"
           onClick={onOrganizer}
         />
         <RoleCard
           icon={UserRound}
-          title="Player"
-          description={hasPlayerSession ? 'Resume your player session or enter a registration code.' : 'Check in with your registration code and open your match screen.'}
-          actionLabel={hasPlayerSession ? 'Open Player View' : 'Enter Player Code'}
+          title="Spēlētājs"
+          description={hasPlayerSession ? 'Atjauno savu sesiju vai ievadi reģistrācijas kodu.' : 'Reģistrējies ar savu kodu un atver spēles ekrānu.'}
+          actionLabel={hasPlayerSession ? 'Atvērt spēlētāja skatu' : 'Ievadīt spēlētāja kodu'}
           onClick={onPlayer}
         />
       </div>
@@ -159,12 +159,12 @@ function OrganizerLogin({ onSubmit }) {
         className="w-full rounded-md border border-nvssBorder bg-nvssSurface p-5"
       >
         <div className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nvssGreen">Mocked Access</p>
-          <h2 className="mt-2 text-2xl font-semibold">Organizer Login</h2>
-          <p className="mt-2 text-sm text-nvssMuted">This is a placeholder gate for the organizer interface. Any credentials will work.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nvssGreen">Testa piekļuve</p>
+          <h2 className="mt-2 text-2xl font-semibold">Organizatora pieslēgšanās</h2>
+          <p className="mt-2 text-sm text-nvssMuted">Šī ir pagaidu piekļuve organizatora saskarnei. Derēs jebkuri dati.</p>
         </div>
         <label className="block text-sm font-medium text-nvssMuted">
-          Email
+          E-pasts
           <input
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -173,17 +173,17 @@ function OrganizerLogin({ onSubmit }) {
           />
         </label>
         <label className="mt-4 block text-sm font-medium text-nvssMuted">
-          Password
+          Parole
           <input
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             className="mt-1 min-h-[48px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
-            placeholder="mock-password"
+            placeholder="testa-parole"
           />
         </label>
         <button type="submit" className="mt-5 min-h-[52px] w-full rounded-md bg-nvssGreenAction px-4 font-semibold text-white">
-          Continue to Organizer
+          Turpināt uz organizatora skatu
         </button>
       </form>
     </main>

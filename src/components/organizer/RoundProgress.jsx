@@ -10,9 +10,9 @@ export function RoundProgress({ tournament, canGenerate, onGenerate }) {
         <div>
           <div className="flex items-center gap-2 text-sm font-semibold">
             <Clock size={18} className="text-nvssGreen" />
-            Swiss Round Lifecycle
+            Šveices kārtu cikls
           </div>
-          <p className="mt-2 text-sm text-nvssMuted">Next round generation unlocks when every current-round match is verified.</p>
+          <p className="mt-2 text-sm text-nvssMuted">Nākamo kārtu var ģenerēt tikai tad, kad visas pašreizējās kārtas spēles ir apstiprinātas.</p>
         </div>
         <button
           type="button"
@@ -21,7 +21,7 @@ export function RoundProgress({ tournament, canGenerate, onGenerate }) {
           className="flex min-h-[48px] items-center justify-center gap-2 rounded bg-nvssGreenAction px-4 font-semibold text-white disabled:cursor-not-allowed disabled:bg-nvssSlateAction disabled:text-nvssMuted"
         >
           <CheckCircle2 size={18} />
-          Generate Next Round
+          Ģenerēt nākamo kārtu
         </button>
       </div>
       <div className="mt-4 h-3 overflow-hidden rounded bg-nvssBg">

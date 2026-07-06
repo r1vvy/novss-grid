@@ -17,7 +17,7 @@ export function AppShell({ title, showBack = false, onBack, children }) {
               className="flex min-h-[44px] items-center gap-1 rounded border border-nvssBorder px-3 text-sm text-nvssMuted"
             >
               <ChevronLeft size={18} />
-              Home
+              Sākums
             </button>
           ) : null}
         </div>

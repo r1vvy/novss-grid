@@ -3,12 +3,12 @@ import { AlertTriangle, CheckCircle2, Clock } from 'lucide-react'
 import { deriveMatchStatus, getMatchPlayers, getSetScore } from '../../utils/tournament'
 
 const statusLabels = {
-  scheduled: 'Scheduled',
-  in_progress: 'In progress',
-  disputed: 'Disputed',
-  completed: 'Completed',
-  awaiting_confirmation: 'Awaiting confirmation',
-  verified: 'Verified',
+  scheduled: 'Ieplānots',
+  in_progress: 'Notiek',
+  disputed: 'Strīds',
+  completed: 'Pabeigts',
+  awaiting_confirmation: 'Gaida apstiprinājumu',
+  verified: 'Apstiprināts',
 }
 
 export function MatchCard({ tournament, match, onClearAlert }) {
@@ -27,7 +27,7 @@ export function MatchCard({ tournament, match, onClearAlert }) {
     <article className={`rounded-md border bg-nvssSurface p-3 ${cardState}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs uppercase text-nvssMuted">Table</p>
+          <p className="text-xs uppercase text-nvssMuted">Galds</p>
           <div className="text-3xl font-black leading-none">{match.table}</div>
         </div>
         <StatusBadge status={status} />
@@ -37,10 +37,10 @@ export function MatchCard({ tournament, match, onClearAlert }) {
         <PlayerLine name={playerB?.name || 'TBD'} club={playerB?.club} score={scoreB} />
       </div>
       <div className="mt-3 flex items-center justify-between gap-3 border-t border-nvssBorder pt-3 text-xs text-nvssMuted">
-        <span className="truncate">Sets: {match.setResults.slice(-4).map((set) => set.score).join(' · ') || 'No sets logged'}</span>
+        <span className="truncate">Seti: {match.setResults.slice(-4).map((set) => set.score).join(' · ') || 'Seti vēl nav ievadīti'}</span>
         {isDisputed && (
           <button type="button" onClick={() => onClearAlert(match.id)} className="shrink-0 rounded border border-nvssAlert px-2 py-1 font-semibold text-nvssAlert hover:bg-nvssAlert hover:text-white">
-            Clear alert
+            Noņemt brīdinājumu
           </button>
         )}
       </div>
@@ -53,7 +53,7 @@ function PlayerLine({ name, club, score }) {
     <>
       <div className="min-w-0">
         <p className="truncate font-semibold">{name}</p>
-        <p className="truncate text-xs text-nvssMuted">{club || 'Awaiting player'}</p>
+        <p className="truncate text-xs text-nvssMuted">{club || 'Gaida spēlētāju'}</p>
       </div>
       <div className="text-2xl font-black">{score}</div>
     </>
