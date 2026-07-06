@@ -11,7 +11,7 @@ export function ScoreStepper({ disabled, onPlayerWon, onOpponentWon }) {
         className="flex min-h-[64px] items-center justify-center gap-2 rounded bg-nvssGreenAction px-4 text-xl font-black text-white disabled:cursor-not-allowed disabled:bg-nvssSlateAction disabled:text-nvssMuted"
       >
         <Plus size={24} />
-        I won the set
+        Es uzvarēju setu
       </button>
       <button
         type="button"
@@ -19,7 +19,7 @@ export function ScoreStepper({ disabled, onPlayerWon, onOpponentWon }) {
         onClick={onOpponentWon}
         className="min-h-[58px] rounded bg-nvssSlateAction px-4 text-lg font-black text-white disabled:cursor-not-allowed disabled:text-nvssMuted"
       >
-        Opponent won
+        Pretinieks uzvarēja setu
       </button>
     </div>
   )

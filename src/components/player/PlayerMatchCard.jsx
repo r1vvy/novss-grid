@@ -18,30 +18,30 @@ export function PlayerMatchCard({ tournament, match, player, onScoreSet, onConfi
     <section className="rounded-md border border-white/15 bg-black p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm uppercase text-nvssMuted">Table</p>
+          <p className="text-sm uppercase text-nvssMuted">Galds</p>
           <p className="text-6xl font-black leading-none text-white">{match.table}</p>
         </div>
         <div className="rounded border border-white/20 px-3 py-2 text-right">
-          <p className="text-xs text-nvssMuted">Status</p>
-          <p className="font-bold text-white">{status.replaceAll('_', ' ')}</p>
+          <p className="text-xs text-nvssMuted">Statuss</p>
+          <p className="font-bold text-white">{translateStatus(status)}</p>
         </div>
       </div>
 
       <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-        <PlayerName name={player.name} label="You" />
+        <PlayerName name={player.name} label="Tu" />
         <div className="text-center text-5xl font-black text-white">{playerScore} : {opponentScore}</div>
-        <PlayerName name={opponent?.name || 'Opponent'} label="Opponent" alignRight />
+        <PlayerName name={opponent?.name || 'Pretinieks'} label="Pretinieks" alignRight />
       </div>
 
       <div className="mt-5 rounded border border-white/15 p-3">
-        <p className="mb-2 text-sm font-semibold text-nvssMuted">Set History</p>
+        <p className="mb-2 text-sm font-semibold text-nvssMuted">Setu vēsture</p>
         <div className="flex flex-wrap gap-2">
           {match.setResults.map((set, index) => (
             <span key={`${set.winnerId}-${index}`} className={`rounded px-2 py-1 text-sm font-semibold ${set.winnerId === player.id ? 'bg-nvssGreenAction text-white' : 'bg-nvssSlateAction text-white'}`}>
-              {index + 1}: {set.winnerId === player.id ? 'You' : 'Opp'} {set.score}
+              {index + 1}: {set.winnerId === player.id ? 'Tu' : 'Pret.'} {set.score}
             </span>
           ))}
-          {match.setResults.length === 0 && <span className="text-sm text-nvssMuted">No sets logged yet.</span>}
+          {match.setResults.length === 0 && <span className="text-sm text-nvssMuted">Seti vēl nav ievadīti.</span>}
         </div>
       </div>
 
@@ -59,25 +59,38 @@ export function PlayerMatchCard({ tournament, match, player, onScoreSet, onConfi
           className="mt-3 flex min-h-[56px] w-full items-center justify-center gap-2 rounded bg-nvssBlue px-4 text-lg font-black text-white disabled:bg-nvssSlateAction disabled:text-nvssMuted"
         >
           <BadgeCheck size={22} />
-          {playerConfirmed ? 'Waiting for opponent' : 'Confirm Final Score'}
+          {playerConfirmed ? 'Gaida pretinieka apstiprinājumu' : 'Apstiprināt gala rezultātu'}
         </button>
       )}
 
       {status === 'verified' && (
         <div className="mt-3 rounded border border-nvssGreen bg-nvssGreen/10 p-3 text-center font-semibold text-nvssGreen">
-          Final score verified
+          Gala rezultāts apstiprināts
         </div>
       )}
 
       {status === 'disputed' && (
         <div className="mt-3 rounded border border-nvssAlert bg-nvssAlert/10 p-3 text-center font-semibold text-nvssAlert">
-          Referee requested. Scoring is locked.
+          Izsaukts tiesnesis. Rezultāta ievade ir bloķēta.
         </div>
       )}
 
       <RefereeButton disabled={status === 'disputed' || status === 'verified'} onClick={() => onCallReferee(match.id)} />
     </section>
   )
+}
+
+function translateStatus(status) {
+  const labels = {
+    scheduled: 'Ieplānots',
+    in_progress: 'Notiek',
+    disputed: 'Strīds',
+    completed: 'Pabeigts',
+    awaiting_confirmation: 'Gaida apstiprinājumu',
+    verified: 'Apstiprināts',
+  }
+
+  return labels[status] || status
 }
 
 function PlayerName({ name, label, alignRight = false }) {
