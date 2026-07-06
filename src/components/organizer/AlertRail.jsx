@@ -7,7 +7,7 @@ export function AlertRail({ tournament, alerts, onClearAlert }) {
     <section className="rounded-md border border-nvssBorder bg-nvssSurface p-4">
       <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
         <AlertTriangle size={18} className="text-nvssAlert" />
-        Tiesneša brīdinājumi
+        Izsauc tiesnesi!
       </div>
       <div className="space-y-3">
         {alerts.map((match) => {

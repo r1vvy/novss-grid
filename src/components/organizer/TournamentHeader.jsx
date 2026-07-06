@@ -30,7 +30,7 @@ export function TournamentHeader({ tournament, matches, alerts, onOpenSettings }
           <StatPill icon={Clock} label="Kārta" value={`${tournament.currentRound}/${tournament.totalRounds}`} />
           <StatPill icon={Users} label="Galdi" value={matches.length} />
           <StatPill icon={CheckCircle2} label="Apstiprināti" value={verified} />
-          <StatPill icon={AlertTriangle} label="Brīdinājumi" value={alerts.length} />
+          <StatPill icon={AlertTriangle} label="Tiesneša izsaukumi" value={alerts.length} />
           </div>
         </div>
       </div>
