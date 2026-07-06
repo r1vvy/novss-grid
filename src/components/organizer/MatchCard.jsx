@@ -33,8 +33,8 @@ export function MatchCard({ tournament, match, onClearAlert }) {
         <StatusBadge status={status} />
       </div>
       <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
-        <PlayerLine name={playerA?.name || 'TBD'} club={playerA?.club} score={scoreA} />
-        <PlayerLine name={playerB?.name || 'TBD'} club={playerB?.club} score={scoreB} />
+        <PlayerLine name={playerA?.name || 'TBD'} club={playerA?.representation} score={scoreA} />
+        <PlayerLine name={playerB?.name || 'TBD'} club={playerB?.representation} score={scoreB} />
       </div>
       <div className="mt-3 flex items-center justify-between gap-3 border-t border-nvssBorder pt-3 text-xs text-nvssMuted">
         <span className="truncate">Seti: {match.setResults.slice(-4).map((set) => set.score).join(' · ') || 'Seti vēl nav ievadīti'}</span>
@@ -48,12 +48,12 @@ export function MatchCard({ tournament, match, onClearAlert }) {
   )
 }
 
-function PlayerLine({ name, club, score }) {
+function PlayerLine({ name, club: represents, score }) {
   return (
     <>
       <div className="min-w-0">
         <p className="truncate font-semibold">{name}</p>
-        <p className="truncate text-xs text-nvssMuted">{club || 'Gaida spēlētāju'}</p>
+        <p className="truncate text-xs text-nvssMuted">{represents || 'Gaida spēlētāju'}</p>
       </div>
       <div className="text-2xl font-black">{score}</div>
     </>

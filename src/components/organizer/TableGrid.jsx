@@ -11,7 +11,7 @@ const statusLabels = {
   verified: 'Apstiprināts',
 }
 
-export function TableGrid({ tournament, matches, onClearAlert, headerContent = null }) {
+export function TableGrid({ tournament, matches, onClearAlert, headerContent = null, titleActions = null }) {
   if (matches.length === 0) {
     return (
       <section className="rounded-md border border-dashed border-nvssBorder bg-nvssSurface p-6 text-sm text-nvssMuted">
@@ -25,7 +25,12 @@ export function TableGrid({ tournament, matches, onClearAlert, headerContent = n
       <div className="border-b border-nvssBorder px-4 py-3">
         <h3 className="text-sm font-semibold text-white">Aktīvā kārta</h3>
       </div>
-      {headerContent ? <div className="border-b border-nvssBorder">{headerContent}</div> : null}
+      {headerContent || titleActions ? (
+        <div className="border-b border-nvssBorder">
+          {headerContent}
+          {titleActions ? <div className="px-4 py-3">{titleActions}</div> : null}
+        </div>
+      ) : null}
       <div className="w-full overflow-x-auto">
         <table className="w-full min-w-full table-fixed text-left text-sm">
           <colgroup>
@@ -62,11 +67,11 @@ export function TableGrid({ tournament, matches, onClearAlert, headerContent = n
                   </td>
                   <td className="px-4 py-3">
                     <p className="truncate font-semibold text-white">{playerA?.name || 'TBD'}</p>
-                    <p className="truncate text-xs text-nvssMuted">{playerA?.club || 'Gaida spēlētāju'}</p>
+                    <p className="truncate text-xs text-nvssMuted">{playerA?.representation || 'Gaida spēlētāju'}</p>
                   </td>
                   <td className="px-4 py-3">
                     <p className="truncate font-semibold text-white">{playerB?.name || 'TBD'}</p>
-                    <p className="truncate text-xs text-nvssMuted">{playerB?.club || 'Gaida spēlētāju'}</p>
+                    <p className="truncate text-xs text-nvssMuted">{playerB?.representation || 'Gaida spēlētāju'}</p>
                   </td>
                   <td className="px-4 py-3">
                     <div className="font-mono text-base font-bold text-white">

@@ -60,7 +60,7 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreSet, onConfir
         </button>
         <div className="min-w-0 text-right">
           <p className="truncate font-semibold">{player.name}</p>
-          <p className="truncate text-sm text-nvssMuted">{player.club}</p>
+          <p className="truncate text-sm text-nvssMuted">{player.representation}</p>
         </div>
       </div>
       <div className="mb-4 rounded-md border border-nvssBorder bg-nvssSurface p-3">
