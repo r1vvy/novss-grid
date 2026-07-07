@@ -60,7 +60,9 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
         </button>
         <div className="min-w-0 text-right">
           <p className="truncate font-semibold">{player.name}</p>
-          <p className="truncate text-sm text-nvssMuted">{player.representation}</p>
+          <p className="truncate text-sm text-nvssMuted">
+            {[player.representation, player.rating ? `Reitings ${player.rating}` : null, formatGender(player.gender)].filter(Boolean).join(' · ')}
+          </p>
         </div>
       </div>
       <div className="mb-4 rounded-md border border-nvssBorder bg-nvssSurface p-3">
@@ -87,4 +89,10 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
       )}
     </main>
   )
+}
+
+function formatGender(gender) {
+  if (gender === 'female') return 'Sieviete'
+  if (gender === 'male') return 'Vīrietis'
+  return null
 }

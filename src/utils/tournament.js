@@ -146,6 +146,8 @@ export function updatePlayer(tournament, playerId, updates) {
       return {
         ...player,
         ...updates,
+        rating: updates.rating === '' || updates.rating == null ? null : Number(updates.rating),
+        gender: updates.gender || '',
         registrationCode: updates.registrationCode ? updates.registrationCode.trim().toUpperCase() : player.registrationCode,
       }
     }),

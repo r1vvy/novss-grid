@@ -4,6 +4,8 @@ import { Eye, EyeOff, KeyRound, PencilLine, Save, Search, SquarePen, Users } fro
 const emptyDraft = {
   name: '',
   representation: '',
+  rating: '',
+  gender: '',
   registrationCode: '',
   status: 'checked_in',
 }
@@ -30,6 +32,8 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
     setDraft({
       name: player.name,
       representation: player.representation || '',
+      rating: player.rating ?? '',
+      gender: player.gender || '',
       registrationCode: player.registrationCode,
       status: player.status,
     })
@@ -60,7 +64,7 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
           <div>
             <p className="text-sm text-nvssMuted">{tournament.venue} · {tournament.updatedAt}</p>
             <h2 className="mt-1 text-2xl font-semibold">Reģistrētie spēlētāji</h2>
-            <p className="mt-1 text-sm text-nvssMuted">Pārskati un rediģē spēlētāju vārdus, pārstāvniecību, statusu un pieslēgšanās kodus.</p>
+            <p className="mt-1 text-sm text-nvssMuted">Pārskati un rediģē spēlētāju vārdus, pārstāvniecību, reitingu, dzimumu, statusu un pieslēgšanās kodus.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
@@ -107,6 +111,8 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
               <tr>
                 <th className="px-4 py-3 font-semibold">Spēlētājs</th>
                 <th className="px-4 py-3 font-semibold">Pārstāvniecība</th>
+                <th className="px-4 py-3 font-semibold">Reitings</th>
+                <th className="px-4 py-3 font-semibold">Dzimums</th>
                 <th className="px-4 py-3 font-semibold">Statuss</th>
                 <th className="px-4 py-3 font-semibold">Pieslēgšanās kods</th>
                 <th className="px-4 py-3 text-right font-semibold">Darbības</th>
@@ -142,6 +148,34 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
                         />
                       ) : (
                         <span className="text-white">{player.representation || '-'}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          min="0"
+                          value={draft.rating}
+                          onChange={(event) => updateDraft('rating', event.target.value)}
+                          className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
+                        />
+                      ) : (
+                        <span className="text-white">{player.rating ?? '-'}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {isEditing ? (
+                        <select
+                          value={draft.gender}
+                          onChange={(event) => updateDraft('gender', event.target.value)}
+                          className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
+                        >
+                          <option value="">Nav norādīts</option>
+                          <option value="female">Sieviete</option>
+                          <option value="male">Vīrietis</option>
+                        </select>
+                      ) : (
+                        <span className="text-white">{formatGender(player.gender)}</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -233,4 +267,10 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
       </section>
     </main>
   )
+}
+
+function formatGender(gender) {
+  if (gender === 'female') return 'Sieviete'
+  if (gender === 'male') return 'Vīrietis'
+  return '-'
 }
