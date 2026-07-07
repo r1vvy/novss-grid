@@ -19,6 +19,7 @@ export function OrganizerDashboard({
   onMarkInvestigating,
   onResetInvestigation,
   onForceOverride,
+  onOverrideSets,
   onSwapTables,
   onGenerateRound,
   onOpenPlayers,
@@ -27,8 +28,7 @@ export function OrganizerDashboard({
   const [sortBy, setSortBy] = useState('table')
   const [viewMode, setViewMode] = useState('table')
   const [overrideMatch, setOverrideMatch] = useState(null)
-  const [overrideWinnerId, setOverrideWinnerId] = useState('')
-  const [overrideLoserSets, setOverrideLoserSets] = useState(0)
+  const [overrideSetResults, setOverrideSetResults] = useState([])
   const [overrideReason, setOverrideReason] = useState('referee_decision')
   const [overrideNote, setOverrideNote] = useState('')
   const [setup, setSetup] = useState({
@@ -54,16 +54,14 @@ export function OrganizerDashboard({
 
   function openOverride(match) {
     setOverrideMatch(match)
-    setOverrideWinnerId(match.playerAId)
-    setOverrideLoserSets(Math.max(0, Math.min(match.targetWins - 1, 0)))
+    setOverrideSetResults(match.setResults)
     setOverrideReason(match.overrideMeta?.reason || defaultReasonForStatus(deriveMatchStatus(match)))
     setOverrideNote(match.overrideMeta?.note || '')
   }
 
   function closeOverride() {
     setOverrideMatch(null)
-    setOverrideWinnerId('')
-    setOverrideLoserSets(0)
+    setOverrideSetResults([])
     setOverrideReason('referee_decision')
     setOverrideNote('')
   }
@@ -228,17 +226,15 @@ export function OrganizerDashboard({
         <OverrideModal
           tournament={tournament}
           match={overrideMatch}
-          winnerId={overrideWinnerId}
-          loserSets={overrideLoserSets}
-          onWinnerChange={setOverrideWinnerId}
-          onLoserSetsChange={setOverrideLoserSets}
+          draftSetResults={overrideSetResults}
+          onDraftSetResultsChange={setOverrideSetResults}
           reason={overrideReason}
           note={overrideNote}
           onReasonChange={setOverrideReason}
           onNoteChange={setOverrideNote}
           onClose={closeOverride}
           onSubmit={() => {
-            onForceOverride(overrideMatch.id, overrideWinnerId, overrideLoserSets, {
+            onOverrideSets(overrideMatch.id, overrideSetResults, {
               reason: overrideReason,
               note: overrideNote,
               editedBy: 'Organizators',
@@ -304,20 +300,22 @@ function compareMatches(a, b, sortBy) {
 function OverrideModal({
   tournament,
   match,
-  winnerId,
-  loserSets,
+  draftSetResults,
+  onDraftSetResultsChange,
   reason,
   note,
-  onWinnerChange,
-  onLoserSetsChange,
   onReasonChange,
   onNoteChange,
   onClose,
   onSubmit,
 }) {
   const winnerOptions = tournament.players.filter((player) => [match.playerAId, match.playerBId].includes(player.id))
-  const selectedWinner = winnerOptions.find((player) => player.id === winnerId)
-  const selectedLoser = winnerOptions.find((player) => player.id !== winnerId)
+  const draftScore = winnerOptions.map((player) => ({
+    ...player,
+    wins: draftSetResults.filter((set) => set.winnerId === player.id).length,
+  }))
+  const selectedWinner = draftScore.find((player) => player.wins >= match.targetWins)
+  const selectedLoser = draftScore.find((player) => player.id !== selectedWinner?.id)
   const currentWinner = winnerOptions.find((player) => match.setResults.filter((set) => set.winnerId === player.id).length >= match.targetWins)
   const status = deriveMatchStatus(match)
   const currentScore = winnerOptions.map((player) => ({
@@ -325,10 +323,26 @@ function OverrideModal({
     wins: match.setResults.filter((set) => set.winnerId === player.id).length,
     confirmed: Boolean(match.confirmations?.[player.id]),
   }))
-  const targetWinnerSets = match.targetWins
-  const nextWinnerSets = winnerId ? targetWinnerSets : 0
-  const nextLoserSets = Math.max(0, Math.min(Number(loserSets) || 0, targetWinnerSets - 1))
+  const isDraftValid = draftScore.filter((player) => player.wins >= match.targetWins).length === 1
   const title = getOverrideTitle(status)
+  const currentStandings = calculateStandings(tournament)
+  const draftTournament = isDraftValid
+    ? {
+        ...tournament,
+        matches: tournament.matches.map((entry) => (
+          entry.id === match.id
+            ? {
+                ...entry,
+                setResults: draftSetResults,
+                confirmations: { [entry.playerAId]: true, [entry.playerBId]: true },
+                refereeRequested: false,
+                status: 'verified',
+              }
+            : entry
+        )),
+      }
+    : tournament
+  const draftStandings = calculateStandings(draftTournament)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6">
@@ -399,29 +413,64 @@ function OverrideModal({
 
           <section className="rounded-md border border-nvssBorder bg-nvssBg p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Lēmuma ievade</p>
-            <label className="mt-4 block text-sm font-medium text-nvssMuted">
-              Uzvarētājs
-              <select
-                value={winnerId}
-                onChange={(event) => onWinnerChange(event.target.value)}
-                className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssSurface px-3 text-white"
-              >
-                {winnerOptions.map((player) => (
-                  <option key={player.id} value={player.id}>{player.name}</option>
-                ))}
-              </select>
-            </label>
-            <label className="mt-4 block text-sm font-medium text-nvssMuted">
-              Zaudētāja seti
-              <input
-                type="number"
-                min="0"
-                max={Math.max(0, match.targetWins - 1)}
-                value={loserSets}
-                onChange={(event) => onLoserSetsChange(Number(event.target.value))}
-                className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssSurface px-3 text-white"
-              />
-            </label>
+            <div className="mt-4 rounded-md border border-nvssBorder bg-nvssSurface p-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-white">Setu labošana</p>
+                <div className="flex flex-wrap gap-2">
+                  {winnerOptions.map((player) => (
+                    <button
+                      key={player.id}
+                      type="button"
+                      onClick={() => onDraftSetResultsChange([
+                        ...draftSetResults,
+                        { winnerId: player.id, score: player.id === match.playerAId ? '11-8' : '8-11' },
+                      ])}
+                      className="min-h-[36px] rounded border border-nvssGreen bg-nvssGreen/10 px-3 text-xs font-semibold text-nvssGreen hover:bg-nvssGreen/20"
+                    >
+                      + Sets {player.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {draftSetResults.length > 0 ? (
+                <ol className="mt-3 space-y-2">
+                  {draftSetResults.map((set, index) => (
+                    <li key={`${index}-${set.winnerId}`} className="grid grid-cols-[72px_1fr_auto] items-center gap-2 rounded border border-nvssBorder bg-nvssBg px-3 py-2">
+                      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Sets {index + 1}</span>
+                      <select
+                        value={set.winnerId}
+                        onChange={(event) => onDraftSetResultsChange(draftSetResults.map((entry, entryIndex) => (
+                          entryIndex === index
+                            ? {
+                                ...entry,
+                                winnerId: event.target.value,
+                                score: event.target.value === match.playerAId ? '11-8' : '8-11',
+                              }
+                            : entry
+                        )))}
+                        className="min-h-[40px] rounded border border-nvssBorder bg-nvssSurface px-3 text-sm text-white"
+                      >
+                        {winnerOptions.map((player) => (
+                          <option key={player.id} value={player.id}>{player.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => onDraftSetResultsChange(draftSetResults.filter((_, entryIndex) => entryIndex !== index))}
+                        className="min-h-[40px] rounded border border-nvssBorder px-3 text-sm font-semibold text-nvssMuted hover:text-white"
+                      >
+                        Dzēst
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="mt-3 text-sm text-nvssMuted">Pievieno setus, lai izveidotu koriģēto spēles gaitu.</p>
+              )}
+              <p className={`mt-3 text-xs font-medium ${isDraftValid ? 'text-emerald-200' : 'text-amber-200'}`}>
+                {isDraftValid ? 'Melnraksts ir derīgs: ir tieši viens uzvarētājs, kas sasniedz nepieciešamos setus.' : `Saglabāšana būs pieejama tikai tad, kad viens spēlētājs sasniegs ${match.targetWins} uzvarētus setus.`}
+              </p>
+            </div>
             <label className="mt-4 block text-sm font-medium text-nvssMuted">
               Labojuma iemesls
               <select
@@ -466,11 +515,29 @@ function OverrideModal({
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Pēc saglabāšanas</p>
                   <p className="mt-1 text-white">
                     {selectedWinner && selectedLoser
-                      ? `${selectedWinner.name} uzvarēs ar ${nextWinnerSets}:${nextLoserSets}`
+                      ? `${selectedWinner.name} uzvarēs ar ${selectedWinner.wins}:${selectedLoser?.wins || 0}`
                       : 'Izvēlies uzvarētāju'}
                   </p>
                   <p className="mt-1 text-xs text-nvssMuted">Strīda statuss tiks noņemts un spēle tiks atzīmēta kā apstiprināta.</p>
                 </div>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-md border border-dashed border-nvssBlue/50 bg-nvssSurface p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssBlue">Ietekme uz kopvērtējumu</p>
+              <div className="mt-3 space-y-2">
+                {winnerOptions.map((player) => {
+                  const currentStanding = currentStandings.find((entry) => entry.id === player.id)
+                  const draftStanding = draftStandings.find((entry) => entry.id === player.id)
+                  return (
+                    <div key={player.id} className="flex items-center justify-between gap-3 rounded border border-nvssBorder bg-nvssBg px-3 py-2 text-sm">
+                        <span className="font-medium text-white">{player.name}</span>
+                        <span className="text-nvssMuted">
+                          {`${currentStanding?.points ?? 0} p. -> ${draftStanding?.points ?? currentStanding?.points ?? 0} p.`}
+                        </span>
+                      </div>
+                  )
+                })}
               </div>
             </div>
           </section>
@@ -479,7 +546,7 @@ function OverrideModal({
           <button type="button" onClick={onClose} className="min-h-[44px] rounded border border-nvssBorder px-4 font-semibold text-nvssMuted hover:text-white">
             Atcelt
           </button>
-          <button type="button" onClick={onSubmit} className="min-h-[44px] rounded bg-nvssGreenAction px-4 font-semibold text-white">
+          <button type="button" disabled={!isDraftValid} onClick={onSubmit} className="min-h-[44px] rounded bg-nvssGreenAction px-4 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
             Saglabāt rezultātu
           </button>
         </div>

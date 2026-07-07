@@ -164,8 +164,6 @@ export function forceOverrideResult(tournament, matchId, winnerId, loserSets = 0
   return updateMatch(tournament, matchId, (match) => {
     if (![match.playerAId, match.playerBId].includes(winnerId)) return match
 
-    const previousWinnerId = getMatchWinnerId(match)
-    const previousStatus = deriveMatchStatus(match)
     const winnerSets = match.targetWins
     const opponentId = getOpponentId(match, winnerId)
     const boundedLoserSets = Math.max(0, Math.min(Number(loserSets) || 0, winnerSets - 1))
@@ -184,28 +182,21 @@ export function forceOverrideResult(tournament, matchId, winnerId, loserSets = 0
       }
     }
 
-    return {
-      ...match,
-      setResults,
-      confirmations: {
-        [match.playerAId]: true,
-        [match.playerBId]: true,
-      },
-      refereeRequested: false,
-      status: 'verified',
-      overrideMeta: {
-        editedBy: metadata.editedBy || 'Organizators',
-        reason: metadata.reason || 'other',
-        note: metadata.note?.trim() || '',
-        previousWinnerId,
-        previousStatus,
-        previousScore: {
-          [match.playerAId]: getSetScore(match, match.playerAId),
-          [match.playerBId]: getSetScore(match, match.playerBId),
-        },
-        editedAt: metadata.editedAt || 'Tikko',
-      },
-    }
+    return buildOverriddenMatch(match, setResults, metadata)
+  })
+}
+
+export function overrideMatchSetResults(tournament, matchId, setResults, metadata = {}) {
+  return updateMatch(tournament, matchId, (match) => {
+    const normalized = normalizeSetResults(match, setResults)
+    const winnerId = getSyntheticSetWins(normalized, match.playerAId) >= match.targetWins
+      ? match.playerAId
+      : getSyntheticSetWins(normalized, match.playerBId) >= match.targetWins
+        ? match.playerBId
+        : null
+
+    if (!winnerId) return match
+    return buildOverriddenMatch(match, normalized, metadata)
   })
 }
 
@@ -403,6 +394,45 @@ function resetConfirmations(match) {
 
 function getSyntheticSetWins(setResults, playerId) {
   return setResults.filter((set) => set.winnerId === playerId).length
+}
+
+function buildOverriddenMatch(match, setResults, metadata) {
+  const previousWinnerId = getMatchWinnerId(match)
+  const previousStatus = deriveMatchStatus(match)
+
+  return {
+    ...match,
+    setResults,
+    confirmations: {
+      [match.playerAId]: true,
+      [match.playerBId]: true,
+    },
+    refereeRequested: false,
+    status: 'verified',
+    overrideMeta: {
+      editedBy: metadata.editedBy || 'Organizators',
+      reason: metadata.reason || 'other',
+      note: metadata.note?.trim() || '',
+      previousWinnerId,
+      previousStatus,
+      previousScore: {
+        [match.playerAId]: getSetScore(match, match.playerAId),
+        [match.playerBId]: getSetScore(match, match.playerBId),
+      },
+      editedAt: metadata.editedAt || 'Tikko',
+    },
+  }
+}
+
+function normalizeSetResults(match, setResults) {
+  return setResults
+    .filter((set) => [match.playerAId, match.playerBId].includes(set.winnerId))
+    .map((set, index) => ({
+      winnerId: set.winnerId,
+      score: set.score || (set.winnerId === match.playerAId
+        ? index % 2 === 0 ? '11-8' : '11-7'
+        : index % 2 === 0 ? '8-11' : '9-11'),
+    }))
 }
 
 function havePlayed(playerAId, playerBId, tournament) {
