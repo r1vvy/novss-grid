@@ -71,14 +71,13 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
           </button>
         ) : null}
       </div>
-      <div className="mt-3 flex items-center justify-between gap-3 border-t border-nvssBorder pt-3 text-xs text-nvssMuted">
-        <span className="truncate">Seti: {match.setResults.slice(-4).map((set) => set.score).join(' · ') || 'Seti vēl nav ievadīti'}</span>
-        {isDisputed && (
+      {isDisputed ? (
+        <div className="mt-3 flex items-center justify-end border-t border-nvssBorder pt-3 text-xs text-nvssMuted">
           <button type="button" onClick={() => onClearAlert(match.id)} className="shrink-0 rounded border border-nvssAlert px-2 py-1 font-semibold text-nvssAlert hover:bg-nvssAlert hover:text-white">
             Noņemt brīdinājumu
           </button>
-        )}
-      </div>
+        </div>
+      ) : null}
     </article>
   )
 }

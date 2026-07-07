@@ -62,8 +62,8 @@ export const initialTournament = {
 function wins(winnerId, winnerSets, loserId, loserSets) {
   const rows = []
   for (let i = 0; i < Math.max(winnerSets, loserSets); i += 1) {
-    if (i < winnerSets) rows.push({ winnerId, score: i % 2 === 0 ? '11-8' : '11-7' })
-    if (i < loserSets) rows.push({ winnerId: loserId, score: '9-11' })
+    if (i < winnerSets) rows.push({ winnerId })
+    if (i < loserSets) rows.push({ winnerId: loserId })
   }
   return rows.slice(0, winnerSets + loserSets)
 }

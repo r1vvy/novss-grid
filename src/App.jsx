@@ -14,7 +14,6 @@ import {
   forceOverrideResult,
   getPlayerById,
   markMatchInvestigating,
-  overrideMatchSetResults,
   resetMatchInvestigation,
   removeSetResult,
   requestReferee,
@@ -101,7 +100,6 @@ export default function App() {
             onMarkInvestigating={(matchId) => setTournament((current) => markMatchInvestigating(current, matchId))}
             onResetInvestigation={(matchId) => setTournament((current) => resetMatchInvestigation(current, matchId))}
             onForceOverride={(matchId, winnerId, loserSets, metadata) => setTournament((current) => forceOverrideResult(current, matchId, winnerId, loserSets, metadata))}
-            onOverrideSets={(matchId, setResults, metadata) => setTournament((current) => overrideMatchSetResults(current, matchId, setResults, metadata))}
             onSwapTables={(sourceMatchId, targetMatchId) => setTournament((current) => swapMatchTables(current, sourceMatchId, targetMatchId))}
             onGenerateRound={(nextTournament) => setTournament(nextTournament)}
             onOpenPlayers={() => setOrganizerView('players')}

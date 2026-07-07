@@ -32,7 +32,7 @@ export function getOverrideAuditLabel(match) {
 
   const labels = {
     referee_decision: 'Tiesneša lēmums',
-    score_entry_error: 'Nepareizi ievadīts sets',
+    score_entry_error: 'Nepareizi ievadīts rezultāts',
     accidental_tap: 'Nejaušs pieskāriens',
     duplicate_entry: 'Dubulta ievade',
     manual_finish: 'Organizatora pabeigts',
@@ -61,7 +61,7 @@ export function appendSetResult(tournament, matchId, winnerId, actorPlayerId) {
 
     const nextSetResults = [
       ...match.setResults,
-      { winnerId, score: winnerId === match.playerAId ? '11-8' : '8-11' },
+      { winnerId },
     ]
     const nextMatch = { ...match, setResults: nextSetResults, status: 'in_progress' }
     const winnerReachedTarget = hasReachedTargetWins(nextMatch, winnerId)
@@ -173,30 +173,11 @@ export function forceOverrideResult(tournament, matchId, winnerId, loserSets = 0
       const winnerStillNeedsSets = getSyntheticSetWins(setResults, winnerId) < winnerSets
       const loserStillNeedsSets = getSyntheticSetWins(setResults, opponentId) < boundedLoserSets
 
-      if (winnerStillNeedsSets) {
-        setResults.push({ winnerId, score: index % 2 === 0 ? '11-7' : '11-8' })
-      }
-
-      if (loserStillNeedsSets) {
-        setResults.push({ winnerId: opponentId, score: '9-11' })
-      }
+      if (winnerStillNeedsSets) setResults.push({ winnerId })
+      if (loserStillNeedsSets) setResults.push({ winnerId: opponentId })
     }
 
     return buildOverriddenMatch(match, setResults, metadata)
-  })
-}
-
-export function overrideMatchSetResults(tournament, matchId, setResults, metadata = {}) {
-  return updateMatch(tournament, matchId, (match) => {
-    const normalized = normalizeSetResults(match, setResults)
-    const winnerId = getSyntheticSetWins(normalized, match.playerAId) >= match.targetWins
-      ? match.playerAId
-      : getSyntheticSetWins(normalized, match.playerBId) >= match.targetWins
-        ? match.playerBId
-        : null
-
-    if (!winnerId) return match
-    return buildOverriddenMatch(match, normalized, metadata)
   })
 }
 
@@ -422,17 +403,6 @@ function buildOverriddenMatch(match, setResults, metadata) {
       editedAt: metadata.editedAt || 'Tikko',
     },
   }
-}
-
-function normalizeSetResults(match, setResults) {
-  return setResults
-    .filter((set) => [match.playerAId, match.playerBId].includes(set.winnerId))
-    .map((set, index) => ({
-      winnerId: set.winnerId,
-      score: set.score || (set.winnerId === match.playerAId
-        ? index % 2 === 0 ? '11-8' : '11-7'
-        : index % 2 === 0 ? '8-11' : '9-11'),
-    }))
 }
 
 function havePlayed(playerAId, playerBId, tournament) {
