@@ -110,7 +110,11 @@ export function requestReferee(tournament, matchId) {
 
 export function clearRefereeRequest(tournament, matchId) {
   return updateMatch(tournament, matchId, (match) => {
-    const restored = { ...match, refereeRequested: false }
+    const restored = {
+      ...match,
+      refereeRequested: false,
+      status: match.setResults.length > 0 ? 'in_progress' : 'scheduled',
+    }
     return {
       ...restored,
       status: deriveMatchStatus(restored),

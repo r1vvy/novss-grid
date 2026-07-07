@@ -19,6 +19,7 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
   const scoreB = getSetScore(match, match.playerBId)
   const isDisputed = status === 'disputed'
   const isInvestigating = status === 'investigating'
+  const canEditResult = status !== 'scheduled'
   const cardState = isDisputed
     ? 'border-nvssAlert ring-2 ring-nvssAlert/50'
     : isInvestigating
@@ -40,18 +41,18 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
         <PlayerLine name={playerA?.name || 'TBD'} club={playerA?.representation} score={scoreA} />
         <PlayerLine name={playerB?.name || 'TBD'} club={playerB?.representation} score={scoreB} />
       </div>
-      {(isDisputed || isInvestigating) ? (
-        <div className="mt-3 grid gap-2 border-t border-nvssBorder pt-3 sm:grid-cols-2">
-          {isDisputed ? (
-            <button
-              type="button"
-              onClick={() => onMarkInvestigating(match.id)}
-              className="flex min-h-[40px] items-center justify-center gap-2 rounded border border-amber-400/70 bg-amber-400/10 px-3 text-sm font-semibold text-amber-200 hover:bg-amber-400/20"
-            >
-              <Search size={15} />
-              Marķēt kā izmeklē
-            </button>
-          ) : null}
+      <div className="mt-3 grid gap-2 border-t border-nvssBorder pt-3 sm:grid-cols-2">
+        {isDisputed ? (
+          <button
+            type="button"
+            onClick={() => onMarkInvestigating(match.id)}
+            className="flex min-h-[40px] items-center justify-center gap-2 rounded border border-amber-400/70 bg-amber-400/10 px-3 text-sm font-semibold text-amber-200 hover:bg-amber-400/20"
+          >
+            <Search size={15} />
+            Marķēt kā izmeklē
+          </button>
+        ) : null}
+        {canEditResult ? (
           <button
             type="button"
             onClick={() => onOpenOverride(match)}
@@ -60,8 +61,8 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
             <Pencil size={15} />
             Rediģēt rezultātu
           </button>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
       <div className="mt-3 flex items-center justify-between gap-3 border-t border-nvssBorder pt-3 text-xs text-nvssMuted">
         <span className="truncate">Seti: {match.setResults.slice(-4).map((set) => set.score).join(' · ') || 'Seti vēl nav ievadīti'}</span>
         {isDisputed && (

@@ -16,6 +16,7 @@ export function TableGrid({
   tournament,
   matches,
   viewMode,
+  canReassignTables = true,
   onClearAlert,
   onMarkInvestigating,
   onResetInvestigation,
@@ -44,7 +45,15 @@ export function TableGrid({
         </div>
       ) : null}
       {viewMode === 'compact' ? (
-        <CompactTableMap matches={matches} onSwapTables={onSwapTables} />
+        <CompactTableMap
+          matches={matches}
+          canReassignTables={canReassignTables}
+          onClearAlert={onClearAlert}
+          onMarkInvestigating={onMarkInvestigating}
+          onResetInvestigation={onResetInvestigation}
+          onOpenOverride={onOpenOverride}
+          onSwapTables={onSwapTables}
+        />
       ) : (
         <div className="w-full overflow-x-auto">
           <table className="w-full min-w-[1100px] table-fixed text-left text-sm">
@@ -76,7 +85,7 @@ export function TableGrid({
                   onMarkInvestigating={onMarkInvestigating}
                   onResetInvestigation={onResetInvestigation}
                   onOpenOverride={onOpenOverride}
-                  dragProps={buildDragProps(match.id, onSwapTables)}
+                  dragProps={buildDragProps(match.id, onSwapTables, canReassignTables)}
                 />
               ))}
             </tbody>
@@ -87,7 +96,7 @@ export function TableGrid({
   )
 }
 
-function CompactTableMap({ matches, onSwapTables }) {
+function CompactTableMap({ matches, canReassignTables, onClearAlert, onMarkInvestigating, onResetInvestigation, onOpenOverride, onSwapTables }) {
   return (
     <div className="p-3">
       <div className="mb-3 flex items-center justify-between gap-3 rounded-md border border-nvssBorder bg-nvssBg px-3 py-2 text-xs text-nvssMuted">
@@ -97,13 +106,16 @@ function CompactTableMap({ matches, onSwapTables }) {
       <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12">
         {matches.map((match) => {
           const status = deriveMatchStatus(match)
+          const isDisputed = status === 'disputed'
+          const isInvestigating = status === 'investigating'
+          const canEditResult = status !== 'scheduled'
+
           return (
-            <button
+            <div
               key={match.id}
-              type="button"
               className={`group aspect-square overflow-hidden rounded-md border p-2 text-left transition ${compactClasses[status]}`}
-              title={`Table ${match.table}`}
-              {...buildDragProps(match.id, onSwapTables)}
+              title={canReassignTables ? `Table ${match.table}` : `Table ${match.table} - sort by table to reassign`}
+              {...buildDragProps(match.id, onSwapTables, canReassignTables)}
             >
               <div className="flex h-full min-h-0 flex-col">
                 <div className="flex items-start justify-between gap-2">
@@ -113,8 +125,46 @@ function CompactTableMap({ matches, onSwapTables }) {
                 <div className="mt-2 min-h-0 overflow-hidden text-[10px] font-semibold uppercase leading-tight tracking-[0.12em] break-words [overflow-wrap:anywhere]">
                   {statusLabels[status]}
                 </div>
+                <div className="mt-auto flex flex-wrap gap-1 pt-2">
+                  {canEditResult ? (
+                    <CompactActionButton
+                      title="Rediģēt rezultātu"
+                      className="border-nvssGreen bg-nvssGreen/10 text-nvssGreen hover:bg-nvssGreen/20"
+                      onClick={() => onOpenOverride(match)}
+                    >
+                      <Pencil size={12} />
+                    </CompactActionButton>
+                  ) : null}
+                  {isDisputed ? (
+                    <CompactActionButton
+                      title="Marķēt kā izmeklē"
+                      className="border-amber-400/70 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20"
+                      onClick={() => onMarkInvestigating(match.id)}
+                    >
+                      <Search size={12} />
+                    </CompactActionButton>
+                  ) : null}
+                  {isInvestigating ? (
+                    <CompactActionButton
+                      title="Atsākt spēli"
+                      className="border-nvssBlue bg-nvssBlue/10 text-nvssBlue hover:bg-nvssBlue/20"
+                      onClick={() => onResetInvestigation(match.id)}
+                    >
+                      <RotateCcw size={12} />
+                    </CompactActionButton>
+                  ) : null}
+                  {isDisputed ? (
+                    <CompactActionButton
+                      title="Noņemt brīdinājumu"
+                      className="border-nvssAlert text-nvssAlert hover:bg-nvssAlert hover:text-white"
+                      onClick={() => onClearAlert(match.id)}
+                    >
+                      <X size={12} />
+                    </CompactActionButton>
+                  ) : null}
+                </div>
               </div>
-            </button>
+            </div>
           )
         })}
       </div>
@@ -122,7 +172,32 @@ function CompactTableMap({ matches, onSwapTables }) {
   )
 }
 
-function buildDragProps(matchId, onSwapTables) {
+function CompactActionButton({ title, className, onClick, children }) {
+  return (
+    <button
+      type="button"
+      title={title}
+      aria-label={title}
+      onClick={(event) => {
+        event.stopPropagation()
+        onClick()
+      }}
+      onDragStart={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+      }}
+      className={`inline-flex size-6 items-center justify-center rounded border ${className}`}
+    >
+      {children}
+    </button>
+  )
+}
+
+function buildDragProps(matchId, onSwapTables, canReassignTables = true) {
+  if (!canReassignTables) {
+    return {}
+  }
+
   return {
     draggable: true,
     onDragStart: (event) => {
@@ -211,6 +286,7 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
   const scoreB = getSetScore(match, match.playerBId)
   const isDisputed = status === 'disputed'
   const isInvestigating = status === 'investigating'
+  const canEditResult = status !== 'scheduled'
   const rowState = isDisputed
     ? 'bg-nvssAlert/10'
     : isInvestigating
@@ -221,7 +297,7 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
     <tr className={`border-t border-nvssBorder align-top ${rowState}`} {...dragProps}>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <Grip size={14} className="text-nvssMuted" />
+          <Grip size={14} className={dragProps.draggable ? 'text-nvssMuted' : 'text-nvssMuted/40'} />
           <span className="text-lg font-black text-white">{match.table}</span>
         </div>
       </td>
@@ -246,6 +322,17 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
       </td>
       <td className="px-4 py-3">
         <div className="flex flex-wrap gap-2">
+          {canEditResult ? (
+            <button
+              type="button"
+              onClick={() => onOpenOverride(match)}
+              title="Rediģēt rezultātu"
+              aria-label="Rediģēt rezultātu"
+              className="inline-flex size-9 items-center justify-center rounded border border-nvssGreen bg-nvssGreen/10 text-nvssGreen hover:bg-nvssGreen/20"
+            >
+              <Pencil size={15} />
+            </button>
+          ) : null}
           {isDisputed ? (
             <button
               type="button"
@@ -266,17 +353,6 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
               className="inline-flex size-9 items-center justify-center rounded border border-nvssBlue bg-nvssBlue/10 text-nvssBlue hover:bg-nvssBlue/20"
             >
               <RotateCcw size={15} />
-            </button>
-          ) : null}
-          {(isDisputed || isInvestigating) ? (
-            <button
-              type="button"
-              onClick={() => onOpenOverride(match)}
-              title="Rediģēt rezultātu"
-              aria-label="Rediģēt rezultātu"
-              className="inline-flex size-9 items-center justify-center rounded border border-nvssGreen bg-nvssGreen/10 text-nvssGreen hover:bg-nvssGreen/20"
-            >
-              <Pencil size={15} />
             </button>
           ) : null}
           {isDisputed ? (

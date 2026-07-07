@@ -77,6 +77,7 @@ export function OrganizerDashboard({
           tournament={tournament}
           matches={sortedMatches}
           viewMode={viewMode}
+          canReassignTables={sortBy === 'table'}
           onClearAlert={onClearAlert}
           onMarkInvestigating={onMarkInvestigating}
           onResetInvestigation={onResetInvestigation}
@@ -141,7 +142,7 @@ export function OrganizerDashboard({
       </section>
 
       <aside className="space-y-4">
-        <AlertRail tournament={tournament} alerts={alerts} onClearAlert={onClearAlert} />
+        <AlertRail tournament={tournament} alerts={alerts} onMarkInvestigating={onMarkInvestigating} />
         <section className="rounded-md border border-nvssBorder bg-nvssSurface p-4">
           <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
             <Activity size={18} className="text-nvssGreen" />
