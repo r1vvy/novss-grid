@@ -97,7 +97,7 @@ export function OrganizerDashboard({
                     className={`flex min-h-[36px] items-center gap-2 rounded px-3 text-sm font-semibold ${viewMode === 'table' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
                   >
                     <Rows3 size={15} />
-                    Table
+                    Tabula
                   </button>
                   <button
                     type="button"
@@ -105,7 +105,7 @@ export function OrganizerDashboard({
                     className={`flex min-h-[36px] items-center gap-2 rounded px-3 text-sm font-semibold ${viewMode === 'compact' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
                   >
                     <LayoutGrid size={15} />
-                    Compact
+                    Kompakts
                   </button>
                 </div>
               </div>
