@@ -1,6 +1,6 @@
 import React from 'react'
 import { AlertTriangle, CheckCircle2, Clock, Grip, Pencil, RotateCcw, Search, X } from 'lucide-react'
-import { deriveMatchStatus, getMatchPlayers, getSetScore } from '../../utils/tournament'
+import { deriveMatchStatus, getMatchPlayers, getOverrideAuditLabel, getSetScore } from '../../utils/tournament'
 
 const statusLabels = {
   scheduled: 'Ieplānots',
@@ -110,6 +110,7 @@ function CompactTableMap({ matches, canReassignTables, onClearAlert, onMarkInves
           const isInvestigating = status === 'investigating'
           const canEditResult = status !== 'scheduled'
           const editLabel = getEditLabel(status)
+          const overrideLabel = getOverrideAuditLabel(match)
 
           return (
             <div
@@ -126,6 +127,11 @@ function CompactTableMap({ matches, canReassignTables, onClearAlert, onMarkInves
                 <div className="mt-2 min-h-0 overflow-hidden text-[10px] font-semibold uppercase leading-tight tracking-[0.12em] break-words [overflow-wrap:anywhere]">
                   {statusLabels[status]}
                 </div>
+                {overrideLabel ? (
+                  <div className="mt-2 rounded border border-nvssBlue/40 bg-nvssBlue/10 px-1.5 py-1 text-[9px] font-semibold uppercase tracking-[0.1em] text-nvssBlue">
+                    Labots
+                  </div>
+                ) : null}
                 <div className="mt-auto flex flex-wrap gap-1 pt-2">
                   {canEditResult ? (
                     <CompactActionButton
@@ -289,6 +295,7 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
   const isInvestigating = status === 'investigating'
   const canEditResult = status !== 'scheduled'
   const editLabel = getEditLabel(status)
+  const overrideLabel = getOverrideAuditLabel(match)
   const rowState = isDisputed
     ? 'bg-nvssAlert/10'
     : isInvestigating
@@ -321,6 +328,11 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
           <StatusIcon status={status} />
           {statusLabels[status]}
         </span>
+        {overrideLabel ? (
+          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-nvssBlue/10 px-2 py-1 text-[11px] font-semibold text-nvssBlue">
+            Labots organizatora pusē
+          </div>
+        ) : null}
       </td>
       <td className="px-4 py-3">
         <div className="flex flex-wrap gap-2">

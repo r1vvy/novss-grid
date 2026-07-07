@@ -27,6 +27,21 @@ export function getMatchWinnerId(match) {
   return null
 }
 
+export function getOverrideAuditLabel(match) {
+  if (!match.overrideMeta?.reason) return ''
+
+  const labels = {
+    referee_decision: 'Tiesneša lēmums',
+    score_entry_error: 'Nepareizi ievadīts sets',
+    accidental_tap: 'Nejaušs pieskāriens',
+    duplicate_entry: 'Dubulta ievade',
+    manual_finish: 'Organizatora pabeigts',
+    other: 'Cits iemesls',
+  }
+
+  return labels[match.overrideMeta.reason] || 'Organizatora labojums'
+}
+
 export function deriveMatchStatus(match) {
   if (match.refereeRequested || match.status === 'disputed') return 'disputed'
   if (match.status === 'investigating') return 'investigating'
@@ -145,10 +160,12 @@ export function resetMatchInvestigation(tournament, matchId) {
   })
 }
 
-export function forceOverrideResult(tournament, matchId, winnerId, loserSets = 0) {
+export function forceOverrideResult(tournament, matchId, winnerId, loserSets = 0, metadata = {}) {
   return updateMatch(tournament, matchId, (match) => {
     if (![match.playerAId, match.playerBId].includes(winnerId)) return match
 
+    const previousWinnerId = getMatchWinnerId(match)
+    const previousStatus = deriveMatchStatus(match)
     const winnerSets = match.targetWins
     const opponentId = getOpponentId(match, winnerId)
     const boundedLoserSets = Math.max(0, Math.min(Number(loserSets) || 0, winnerSets - 1))
@@ -176,6 +193,18 @@ export function forceOverrideResult(tournament, matchId, winnerId, loserSets = 0
       },
       refereeRequested: false,
       status: 'verified',
+      overrideMeta: {
+        editedBy: metadata.editedBy || 'Organizators',
+        reason: metadata.reason || 'other',
+        note: metadata.note?.trim() || '',
+        previousWinnerId,
+        previousStatus,
+        previousScore: {
+          [match.playerAId]: getSetScore(match, match.playerAId),
+          [match.playerBId]: getSetScore(match, match.playerBId),
+        },
+        editedAt: metadata.editedAt || 'Tikko',
+      },
     }
   })
 }

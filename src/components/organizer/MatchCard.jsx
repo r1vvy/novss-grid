@@ -1,6 +1,6 @@
 import React from 'react'
 import { AlertTriangle, CheckCircle2, Clock, Pencil, Search } from 'lucide-react'
-import { deriveMatchStatus, getMatchPlayers, getSetScore } from '../../utils/tournament'
+import { deriveMatchStatus, getMatchPlayers, getOverrideAuditLabel, getSetScore } from '../../utils/tournament'
 
 const statusLabels = {
   scheduled: 'Ieplānots',
@@ -21,6 +21,7 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
   const isInvestigating = status === 'investigating'
   const canEditResult = status !== 'scheduled'
   const editLabel = getEditLabel(status)
+  const overrideLabel = getOverrideAuditLabel(match)
   const cardState = isDisputed
     ? 'border-nvssAlert ring-2 ring-nvssAlert/50'
     : isInvestigating
@@ -42,6 +43,12 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
         <PlayerLine name={playerA?.name || 'TBD'} club={playerA?.representation} score={scoreA} />
         <PlayerLine name={playerB?.name || 'TBD'} club={playerB?.representation} score={scoreB} />
       </div>
+      {overrideLabel ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="rounded-full bg-nvssBlue/15 px-2 py-1 text-[11px] font-semibold text-nvssBlue">Labots organizatora pusē</span>
+          <span className="text-xs text-nvssMuted">{overrideLabel}</span>
+        </div>
+      ) : null}
       <div className="mt-3 grid gap-2 border-t border-nvssBorder pt-3 sm:grid-cols-2">
         {isDisputed ? (
           <button

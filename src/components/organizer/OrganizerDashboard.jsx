@@ -29,6 +29,8 @@ export function OrganizerDashboard({
   const [overrideMatch, setOverrideMatch] = useState(null)
   const [overrideWinnerId, setOverrideWinnerId] = useState('')
   const [overrideLoserSets, setOverrideLoserSets] = useState(0)
+  const [overrideReason, setOverrideReason] = useState('referee_decision')
+  const [overrideNote, setOverrideNote] = useState('')
   const [setup, setSetup] = useState({
     name: tournament.name,
     maxSetsPerMatch: tournament.maxSetsPerMatch,
@@ -54,12 +56,16 @@ export function OrganizerDashboard({
     setOverrideMatch(match)
     setOverrideWinnerId(match.playerAId)
     setOverrideLoserSets(Math.max(0, Math.min(match.targetWins - 1, 0)))
+    setOverrideReason(match.overrideMeta?.reason || defaultReasonForStatus(deriveMatchStatus(match)))
+    setOverrideNote(match.overrideMeta?.note || '')
   }
 
   function closeOverride() {
     setOverrideMatch(null)
     setOverrideWinnerId('')
     setOverrideLoserSets(0)
+    setOverrideReason('referee_decision')
+    setOverrideNote('')
   }
 
   return (
@@ -226,9 +232,18 @@ export function OrganizerDashboard({
           loserSets={overrideLoserSets}
           onWinnerChange={setOverrideWinnerId}
           onLoserSetsChange={setOverrideLoserSets}
+          reason={overrideReason}
+          note={overrideNote}
+          onReasonChange={setOverrideReason}
+          onNoteChange={setOverrideNote}
           onClose={closeOverride}
           onSubmit={() => {
-            onForceOverride(overrideMatch.id, overrideWinnerId, overrideLoserSets)
+            onForceOverride(overrideMatch.id, overrideWinnerId, overrideLoserSets, {
+              reason: overrideReason,
+              note: overrideNote,
+              editedBy: 'Organizators',
+              editedAt: 'Tikko',
+            })
             closeOverride()
           }}
         />
@@ -291,8 +306,12 @@ function OverrideModal({
   match,
   winnerId,
   loserSets,
+  reason,
+  note,
   onWinnerChange,
   onLoserSetsChange,
+  onReasonChange,
+  onNoteChange,
   onClose,
   onSubmit,
 }) {
@@ -403,6 +422,31 @@ function OverrideModal({
                 className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssSurface px-3 text-white"
               />
             </label>
+            <label className="mt-4 block text-sm font-medium text-nvssMuted">
+              Labojuma iemesls
+              <select
+                value={reason}
+                onChange={(event) => onReasonChange(event.target.value)}
+                className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssSurface px-3 text-white"
+              >
+                <option value="referee_decision">Tiesneša lēmums</option>
+                <option value="score_entry_error">Nepareizi ievadīts sets</option>
+                <option value="accidental_tap">Nejaušs pieskāriens</option>
+                <option value="duplicate_entry">Dubulta ievade</option>
+                <option value="manual_finish">Organizators pabeidz spēli</option>
+                <option value="other">Cits iemesls</option>
+              </select>
+            </label>
+            <label className="mt-4 block text-sm font-medium text-nvssMuted">
+              Piezīme
+              <textarea
+                value={note}
+                onChange={(event) => onNoteChange(event.target.value)}
+                rows={3}
+                className="mt-1 w-full rounded border border-nvssBorder bg-nvssSurface px-3 py-2 text-white"
+                placeholder="Piem., spēlētāji vienojās par nepareizi ievadītu 5. setu"
+              />
+            </label>
 
             <div className="mt-4 rounded-md border border-dashed border-nvssGreen/60 bg-nvssSurface p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssGreen">Pirms / pēc</p>
@@ -414,6 +458,9 @@ function OverrideModal({
                       ? `${currentWinner.name} vada ar ${currentScore.find((player) => player.id === currentWinner.id)?.wins}:${currentScore.find((player) => player.id !== currentWinner.id)?.wins}`
                       : 'Uzvarētājs vēl nav noteikts'}
                   </p>
+                  {match.overrideMeta?.reason ? (
+                    <p className="mt-1 text-xs text-nvssMuted">Iepriekšējais organizatora iemesls: {match.overrideMeta.note || match.overrideMeta.reason}</p>
+                  ) : null}
                 </div>
                 <div className="rounded border border-nvssBorder bg-nvssBg px-3 py-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Pēc saglabāšanas</p>
@@ -447,6 +494,12 @@ function getOverrideTitle(status) {
   if (status === 'in_progress') return 'Pabeigt rezultātu manuāli'
   if (status === 'awaiting_confirmation') return 'Labot neapstiprinātu rezultātu'
   return 'Koriģēt gala rezultātu'
+}
+
+function defaultReasonForStatus(status) {
+  if (status === 'disputed' || status === 'investigating') return 'referee_decision'
+  if (status === 'in_progress') return 'manual_finish'
+  return 'score_entry_error'
 }
 
 function StatusBadge({ status }) {

@@ -99,7 +99,7 @@ export default function App() {
             onClearAlert={(matchId) => setTournament((current) => clearRefereeRequest(current, matchId))}
             onMarkInvestigating={(matchId) => setTournament((current) => markMatchInvestigating(current, matchId))}
             onResetInvestigation={(matchId) => setTournament((current) => resetMatchInvestigation(current, matchId))}
-            onForceOverride={(matchId, winnerId, loserSets) => setTournament((current) => forceOverrideResult(current, matchId, winnerId, loserSets))}
+            onForceOverride={(matchId, winnerId, loserSets, metadata) => setTournament((current) => forceOverrideResult(current, matchId, winnerId, loserSets, metadata))}
             onSwapTables={(sourceMatchId, targetMatchId) => setTournament((current) => swapMatchTables(current, sourceMatchId, targetMatchId))}
             onGenerateRound={(nextTournament) => setTournament(nextTournament)}
             onOpenPlayers={() => setOrganizerView('players')}
