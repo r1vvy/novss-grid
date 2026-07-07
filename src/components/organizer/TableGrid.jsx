@@ -12,6 +12,16 @@ const statusLabels = {
   verified: 'Apstiprināts',
 }
 
+const compactStatusLabels = {
+  scheduled: 'Iepl.',
+  in_progress: 'Notiek',
+  disputed: 'Strīds',
+  investigating: 'Izmeklē',
+  completed: 'Pab.',
+  awaiting_confirmation: 'Gaida',
+  verified: 'Apst.',
+}
+
 export function TableGrid({
   tournament,
   matches,
@@ -46,6 +56,7 @@ export function TableGrid({
       ) : null}
       {viewMode === 'compact' ? (
         <CompactTableMap
+          tournament={tournament}
           matches={matches}
           canReassignTables={canReassignTables}
           onClearAlert={onClearAlert}
@@ -96,14 +107,10 @@ export function TableGrid({
   )
 }
 
-function CompactTableMap({ matches, canReassignTables, onClearAlert, onMarkInvestigating, onResetInvestigation, onOpenOverride, onSwapTables }) {
+function CompactTableMap({ tournament, matches, canReassignTables, onClearAlert, onMarkInvestigating, onResetInvestigation, onOpenOverride, onSwapTables }) {
   return (
     <div className="p-3">
-      <div className="mb-3 flex items-center justify-between gap-3 rounded-md border border-nvssBorder bg-nvssBg px-3 py-2 text-xs text-nvssMuted">
-        <span>Compact/Grid-only skats</span>
-        <span>Velc vienu kvadrātu virs otra, lai samainītu galdus.</span>
-      </div>
-      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
         {matches.map((match) => {
           const status = deriveMatchStatus(match)
           const isDisputed = status === 'disputed'
@@ -115,24 +122,36 @@ function CompactTableMap({ matches, canReassignTables, onClearAlert, onMarkInves
           return (
             <div
               key={match.id}
-              className={`group aspect-square overflow-hidden rounded-md border p-2 text-left transition ${compactClasses[status]}`}
+              className={`group min-h-[7.5rem] overflow-hidden rounded-xl border p-3 text-left transition ${compactClasses[status]}`}
               title={canReassignTables ? `Table ${match.table}` : `Table ${match.table} - sort by table to reassign`}
               {...buildDragProps(match.id, onSwapTables, canReassignTables)}
             >
               <div className="flex h-full min-h-0 flex-col">
-                <div className="flex items-start justify-between gap-2">
-                  <span className="shrink-0 text-lg font-black leading-none">{match.table}</span>
-                  <Grip size={12} className="shrink-0 opacity-50 group-hover:opacity-100" />
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-baseline gap-2">
+                    <span className="shrink-0 text-[1.9rem] font-black leading-none text-white">{match.table}</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45">Galds</span>
+                  </div>
+                  <Grip size={12} className="shrink-0 opacity-35 group-hover:opacity-100" />
                 </div>
-                <div className="mt-2 min-h-0 overflow-hidden text-[10px] font-semibold uppercase leading-tight tracking-[0.12em] break-words [overflow-wrap:anywhere]">
-                  {statusLabels[status]}
+
+                <div className="mt-3">
+                  <span
+                    title={statusLabels[status]}
+                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${compactBadgeClasses[status]}`}
+                  >
+                    <StatusIcon status={status} />
+                    <span>{compactStatusLabels[status]}</span>
+                  </span>
                 </div>
+
                 {overrideLabel ? (
-                  <div className="mt-2 rounded border border-nvssBlue/40 bg-nvssBlue/10 px-1.5 py-1 text-[9px] font-semibold uppercase tracking-[0.1em] text-nvssBlue">
+                  <div className="mt-3 inline-flex items-center self-start rounded-full border border-nvssBlue/40 bg-nvssBlue/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-nvssBlue">
                     Labots
                   </div>
                 ) : null}
-                <div className="mt-auto flex flex-wrap gap-1 pt-2">
+
+                <div className="mt-auto flex flex-wrap gap-1.5 pt-3">
                   {canEditResult ? (
                     <CompactActionButton
                       title={editLabel}
@@ -224,13 +243,23 @@ function buildDragProps(matchId, onSwapTables, canReassignTables = true) {
 }
 
 const compactClasses = {
-  scheduled: 'border-nvssBorder bg-nvssBg text-white',
-  in_progress: 'border-nvssGreen bg-nvssGreen/15 text-white',
-  disputed: 'border-nvssAlert bg-nvssAlert/20 text-white',
-  investigating: 'border-amber-400 bg-amber-400/20 text-white',
+  scheduled: 'border-nvssBorder bg-nvssBg text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]',
+  in_progress: 'border-nvssGreen/70 bg-gradient-to-b from-nvssGreen/18 to-nvssGreen/10 text-white',
+  disputed: 'border-nvssAlert/80 bg-gradient-to-b from-nvssAlert/22 to-nvssAlert/12 text-white',
+  investigating: 'border-amber-400/80 bg-gradient-to-b from-amber-400/22 to-amber-400/10 text-white',
   completed: 'border-nvssBorder bg-slate-500/10 text-slate-200',
-  awaiting_confirmation: 'border-nvssBlue bg-nvssBlue/20 text-white',
-  verified: 'border-emerald-300/40 bg-emerald-500/10 text-emerald-100',
+  awaiting_confirmation: 'border-nvssBlue/75 bg-gradient-to-b from-nvssBlue/22 to-nvssBlue/12 text-white',
+  verified: 'border-emerald-300/45 bg-gradient-to-b from-emerald-500/16 to-emerald-500/08 text-emerald-100',
+}
+
+const compactBadgeClasses = {
+  scheduled: 'border-white/10 bg-white/5 text-white/70',
+  in_progress: 'border-nvssGreen/40 bg-nvssGreen/10 text-emerald-100',
+  disputed: 'border-nvssAlert/40 bg-nvssAlert/10 text-red-100',
+  investigating: 'border-amber-300/40 bg-amber-300/10 text-amber-100',
+  completed: 'border-white/10 bg-white/5 text-slate-200',
+  awaiting_confirmation: 'border-nvssBlue/40 bg-nvssBlue/10 text-blue-100',
+  verified: 'border-emerald-300/35 bg-emerald-400/10 text-emerald-100',
 }
 
 export function CompactLegend() {
@@ -271,7 +300,7 @@ export function MatchSummaryRow({ tournament, match }) {
     <div className="rounded-md border border-nvssBorder bg-nvssBg px-3 py-2">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.12em] text-nvssMuted">Galds {match.table}</p>
+          <p className="text-xs uppercase tracking-[0.12em] text-nvssMuted">{match.table} Galds </p>
           <p className="text-sm font-semibold text-white">{playerA?.name || 'TBD'} pret {playerB?.name || 'TBD'}</p>
         </div>
         <div className="text-right">
