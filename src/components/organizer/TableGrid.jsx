@@ -365,53 +365,60 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
       </td>
       <td className="px-4 py-3">
         <div className="flex flex-wrap gap-2">
-          {canEditResult ? (
-            <button
-              type="button"
-              onClick={() => onOpenOverride(match)}
-              title={editLabel}
-              aria-label={editLabel}
-              className="inline-flex size-9 items-center justify-center rounded border border-nvssGreen bg-nvssGreen/10 text-nvssGreen hover:bg-nvssGreen/20"
-            >
-              <Pencil size={15} />
-            </button>
-          ) : null}
-          {isDisputed ? (
-            <button
-              type="button"
-              onClick={() => onMarkInvestigating(match.id)}
-              title="Marķēt kā izmeklē"
-              aria-label="Marķēt kā izmeklē"
-              className="inline-flex size-9 items-center justify-center rounded border border-amber-400/70 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20"
-            >
-              <Search size={15} />
-            </button>
-          ) : null}
-          {isInvestigating ? (
-            <button
-              type="button"
-              onClick={() => onResetInvestigation(match.id)}
-              title="Atsākt spēli"
-              aria-label="Atsākt spēli"
-              className="inline-flex size-9 items-center justify-center rounded border border-nvssBlue bg-nvssBlue/10 text-nvssBlue hover:bg-nvssBlue/20"
-            >
-              <RotateCcw size={15} />
-            </button>
-          ) : null}
-          {isDisputed ? (
-            <button
-              type="button"
-              onClick={() => onClearAlert(match.id)}
-              title="Noņemt brīdinājumu"
-              aria-label="Noņemt brīdinājumu"
-              className="inline-flex size-9 items-center justify-center rounded border border-nvssAlert text-nvssAlert hover:bg-nvssAlert hover:text-white"
-            >
-              <X size={15} />
-            </button>
-          ) : null}
+          <TableActionButton
+            title={editLabel}
+            enabled={canEditResult}
+            onClick={() => onOpenOverride(match)}
+            activeClassName="border-nvssGreen bg-nvssGreen/10 text-nvssGreen hover:bg-nvssGreen/20"
+          >
+            <Pencil size={15} />
+          </TableActionButton>
+          <TableActionButton
+            title="Marķēt kā izmeklē"
+            enabled={isDisputed}
+            onClick={() => onMarkInvestigating(match.id)}
+            activeClassName="border-amber-400/70 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20"
+          >
+            <Search size={15} />
+          </TableActionButton>
+          <TableActionButton
+            title="Atsākt spēli"
+            enabled={isInvestigating}
+            onClick={() => onResetInvestigation(match.id)}
+            activeClassName="border-nvssBlue bg-nvssBlue/10 text-nvssBlue hover:bg-nvssBlue/20"
+          >
+            <RotateCcw size={15} />
+          </TableActionButton>
+          <TableActionButton
+            title="Noņemt brīdinājumu"
+            enabled={isDisputed}
+            onClick={() => onClearAlert(match.id)}
+            activeClassName="border-nvssAlert text-nvssAlert hover:bg-nvssAlert hover:text-white"
+          >
+            <X size={15} />
+          </TableActionButton>
         </div>
       </td>
     </tr>
+  )
+}
+
+function TableActionButton({ title, enabled, onClick, activeClassName, children }) {
+  return (
+    <button
+      type="button"
+      onClick={enabled ? onClick : undefined}
+      title={title}
+      aria-label={title}
+      disabled={!enabled}
+      className={`inline-flex size-9 items-center justify-center rounded border transition ${
+        enabled
+          ? activeClassName
+          : 'cursor-not-allowed border-nvssBorder bg-nvssBg text-nvssMuted/45 opacity-70'
+      }`}
+    >
+      {children}
+    </button>
   )
 }
 
