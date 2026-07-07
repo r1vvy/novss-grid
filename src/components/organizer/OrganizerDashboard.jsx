@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
-import { Activity, AlertTriangle, CheckCircle2, Clock, Trophy, Users } from 'lucide-react'
+import { Activity, AlertTriangle, CheckCircle2, Clock, LayoutGrid, Rows3, Trophy, Users } from 'lucide-react'
 import { AlertRail } from './AlertRail'
-import { TableGrid } from './TableGrid'
+import { CompactLegend, TableGrid } from './TableGrid'
 import { RoundProgress } from './RoundProgress'
 import { TournamentHeader } from './TournamentHeader'
 import {
@@ -12,9 +12,23 @@ import {
   getCurrentRoundMatches,
 } from '../../utils/tournament'
 
-export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, onGenerateRound, onOpenPlayers }) {
+export function OrganizerDashboard({
+  tournament,
+  onSetupSubmit,
+  onClearAlert,
+  onMarkInvestigating,
+  onResetInvestigation,
+  onForceOverride,
+  onSwapTables,
+  onGenerateRound,
+  onOpenPlayers,
+}) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [sortBy, setSortBy] = useState('table')
+  const [viewMode, setViewMode] = useState('table')
+  const [overrideMatch, setOverrideMatch] = useState(null)
+  const [overrideWinnerId, setOverrideWinnerId] = useState('')
+  const [overrideLoserSets, setOverrideLoserSets] = useState(0)
   const [setup, setSetup] = useState({
     name: tournament.name,
     maxSetsPerMatch: tournament.maxSetsPerMatch,
@@ -36,6 +50,18 @@ export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, on
     setSetup((current) => ({ ...current, [field]: value }))
   }
 
+  function openOverride(match) {
+    setOverrideMatch(match)
+    setOverrideWinnerId(match.playerAId)
+    setOverrideLoserSets(Math.max(0, Math.min(match.targetWins - 1, 0)))
+  }
+
+  function closeOverride() {
+    setOverrideMatch(null)
+    setOverrideWinnerId('')
+    setOverrideLoserSets(0)
+  }
+
   return (
     <main className="mx-auto grid max-w-[1800px] gap-4 px-3 py-4 lg:grid-cols-[1fr_320px]">
       <section className="min-w-0 space-y-4">
@@ -50,9 +76,35 @@ export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, on
         <TableGrid
           tournament={tournament}
           matches={sortedMatches}
+          viewMode={viewMode}
           onClearAlert={onClearAlert}
+          onMarkInvestigating={onMarkInvestigating}
+          onResetInvestigation={onResetInvestigation}
+          onOpenOverride={openOverride}
+          onSwapTables={onSwapTables}
           titleActions={(
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:mr-auto">
+                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Skats</span>
+                <div className="grid grid-cols-2 rounded-md border border-nvssBorder bg-nvssBg p-1">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('table')}
+                    className={`flex min-h-[36px] items-center gap-2 rounded px-3 text-sm font-semibold ${viewMode === 'table' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
+                  >
+                    <Rows3 size={15} />
+                    Table
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('compact')}
+                    className={`flex min-h-[36px] items-center gap-2 rounded px-3 text-sm font-semibold ${viewMode === 'compact' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
+                  >
+                    <LayoutGrid size={15} />
+                    Compact
+                  </button>
+                </div>
+              </div>
               <span className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Kārtot pēc</span>
               <div className="grid grid-cols-2 rounded-md border border-nvssBorder bg-nvssBg p-1">
                 <button
@@ -73,12 +125,17 @@ export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, on
             </div>
           )}
           headerContent={(
-            <RoundProgress
-              tournament={tournament}
-              canGenerate={canGenerate}
-              onGenerate={() => onGenerateRound(generateNextSwissRound(tournament))}
-              embedded
-            />
+            <>
+              <RoundProgress
+                tournament={tournament}
+                canGenerate={canGenerate}
+                onGenerate={() => onGenerateRound(generateNextSwissRound(tournament))}
+                embedded
+              />
+              <div className="border-t border-nvssBorder px-4 py-3">
+                <CompactLegend />
+              </div>
+            </>
           )}
         />
       </section>
@@ -160,6 +217,21 @@ export function OrganizerDashboard({ tournament, onSetupSubmit, onClearAlert, on
           </div>
         </div>
       ) : null}
+      {overrideMatch ? (
+        <OverrideModal
+          tournament={tournament}
+          match={overrideMatch}
+          winnerId={overrideWinnerId}
+          loserSets={overrideLoserSets}
+          onWinnerChange={setOverrideWinnerId}
+          onLoserSetsChange={setOverrideLoserSets}
+          onClose={closeOverride}
+          onSubmit={() => {
+            onForceOverride(overrideMatch.id, overrideWinnerId, overrideLoserSets)
+            closeOverride()
+          }}
+        />
+      ) : null}
     </main>
   )
 }
@@ -180,11 +252,12 @@ function compareMatches(a, b, sortBy) {
   if (sortBy === 'status') {
     const statusOrder = {
       disputed: 0,
-      in_progress: 1,
-      awaiting_confirmation: 2,
-      scheduled: 3,
-      completed: 4,
-      verified: 5,
+      investigating: 1,
+      in_progress: 2,
+      awaiting_confirmation: 3,
+      scheduled: 4,
+      completed: 5,
+      verified: 6,
     }
 
     const statusDiff = (statusOrder[deriveMatchStatus(a)] ?? 99) - (statusOrder[deriveMatchStatus(b)] ?? 99)
@@ -192,4 +265,65 @@ function compareMatches(a, b, sortBy) {
   }
 
   return a.table - b.table
+}
+
+function OverrideModal({
+  tournament,
+  match,
+  winnerId,
+  loserSets,
+  onWinnerChange,
+  onLoserSetsChange,
+  onClose,
+  onSubmit,
+}) {
+  const winnerOptions = tournament.players.filter((player) => [match.playerAId, match.playerBId].includes(player.id))
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6">
+      <div className="w-full max-w-md rounded-md border border-nvssBorder bg-nvssSurface p-4 shadow-2xl">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-nvssGreen">Rezultāta rediģēšana</p>
+            <h3 className="mt-1 text-xl font-semibold">Rediģēt rezultātu</h3>
+          </div>
+          <button type="button" onClick={onClose} className="min-h-[36px] rounded border border-nvssBorder px-3 text-sm text-nvssMuted hover:text-white">
+            Aizvērt
+          </button>
+        </div>
+        <p className="mt-3 text-sm text-nvssMuted">Galds {match.table}. Organizators var pielāgot gala rezultātu un uzreiz noņemt strīda stāvokli.</p>
+        <label className="mt-4 block text-sm font-medium text-nvssMuted">
+          Uzvarētājs
+          <select
+            value={winnerId}
+            onChange={(event) => onWinnerChange(event.target.value)}
+            className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
+          >
+            {winnerOptions.map((player) => (
+              <option key={player.id} value={player.id}>{player.name}</option>
+            ))}
+          </select>
+        </label>
+        <label className="mt-4 block text-sm font-medium text-nvssMuted">
+          Zaudētāja seti
+          <input
+            type="number"
+            min="0"
+            max={Math.max(0, match.targetWins - 1)}
+            value={loserSets}
+            onChange={(event) => onLoserSetsChange(Number(event.target.value))}
+            className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
+          />
+        </label>
+        <div className="mt-5 flex justify-end gap-2">
+          <button type="button" onClick={onClose} className="min-h-[44px] rounded border border-nvssBorder px-4 font-semibold text-nvssMuted hover:text-white">
+            Atcelt
+          </button>
+          <button type="button" onClick={onSubmit} className="min-h-[44px] rounded bg-nvssGreenAction px-4 font-semibold text-white">
+            Saglabāt rezultātu
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }

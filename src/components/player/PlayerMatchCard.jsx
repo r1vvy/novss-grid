@@ -34,7 +34,12 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
       <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <PlayerName name={player.name} label="Tu" />
         <div className="text-center text-5xl font-black text-white">{playerScore} : {opponentScore}</div>
-        <PlayerName name={opponent?.name || 'Pretinieks'} label="Pretinieks" alignRight />
+        <PlayerName
+          name={opponent?.name || 'Pretinieks'}
+          label="Pretinieks"
+          metadata={formatPlayerMeta(opponent)}
+          alignRight
+        />
       </div>
 
       <ScoreStepper
@@ -98,11 +103,21 @@ function translateStatus(status) {
   return labels[status] || status
 }
 
-function PlayerName({ name, label, alignRight = false }) {
+function PlayerName({ name, label, metadata, alignRight = false }) {
   return (
     <div className={alignRight ? 'min-w-0 text-right' : 'min-w-0'}>
       <p className="text-xs uppercase text-nvssMuted">{label}</p>
       <p className="truncate text-lg font-black text-white">{name}</p>
+      {metadata ? <p className="truncate text-sm text-nvssMuted">{metadata}</p> : null}
     </div>
   )
+}
+
+function formatPlayerMeta(player) {
+  if (!player) return null
+
+  return [
+    player.representation || null,
+    player.rating ? `Reitings ${player.rating}` : null,
+  ].filter(Boolean).join(' · ')
 }

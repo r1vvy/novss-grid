@@ -11,9 +11,13 @@ import {
   clearRefereeRequest,
   confirmFinalScore,
   createRegistrationTournament,
+  forceOverrideResult,
   getPlayerById,
+  markMatchInvestigating,
+  resetMatchInvestigation,
   removeSetResult,
   requestReferee,
+  swapMatchTables,
   updatePlayer,
 } from './utils/tournament'
 
@@ -93,6 +97,10 @@ export default function App() {
             tournament={tournament}
             onSetupSubmit={handleSetupSubmit}
             onClearAlert={(matchId) => setTournament((current) => clearRefereeRequest(current, matchId))}
+            onMarkInvestigating={(matchId) => setTournament((current) => markMatchInvestigating(current, matchId))}
+            onResetInvestigation={(matchId) => setTournament((current) => resetMatchInvestigation(current, matchId))}
+            onForceOverride={(matchId, winnerId, loserSets) => setTournament((current) => forceOverrideResult(current, matchId, winnerId, loserSets))}
+            onSwapTables={(sourceMatchId, targetMatchId) => setTournament((current) => swapMatchTables(current, sourceMatchId, targetMatchId))}
             onGenerateRound={(nextTournament) => setTournament(nextTournament)}
             onOpenPlayers={() => setOrganizerView('players')}
           />

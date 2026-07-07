@@ -29,6 +29,7 @@ export function getMatchWinnerId(match) {
 
 export function deriveMatchStatus(match) {
   if (match.refereeRequested || match.status === 'disputed') return 'disputed'
+  if (match.status === 'investigating') return 'investigating'
   if (match.status === 'verified') return 'verified'
   if (getMatchWinnerId(match)) {
     const confirmed = Object.values(match.confirmations || {}).filter(Boolean).length
@@ -115,6 +116,83 @@ export function clearRefereeRequest(tournament, matchId) {
       status: deriveMatchStatus(restored),
     }
   })
+}
+
+export function markMatchInvestigating(tournament, matchId) {
+  return updateMatch(tournament, matchId, (match) => ({
+    ...match,
+    refereeRequested: false,
+    status: 'investigating',
+  }))
+}
+
+export function resetMatchInvestigation(tournament, matchId) {
+  return updateMatch(tournament, matchId, (match) => {
+    const restored = {
+      ...match,
+      refereeRequested: false,
+      status: match.setResults.length > 0 ? 'in_progress' : 'scheduled',
+    }
+
+    return {
+      ...restored,
+      status: deriveMatchStatus(restored),
+    }
+  })
+}
+
+export function forceOverrideResult(tournament, matchId, winnerId, loserSets = 0) {
+  return updateMatch(tournament, matchId, (match) => {
+    if (![match.playerAId, match.playerBId].includes(winnerId)) return match
+
+    const winnerSets = match.targetWins
+    const opponentId = getOpponentId(match, winnerId)
+    const boundedLoserSets = Math.max(0, Math.min(Number(loserSets) || 0, winnerSets - 1))
+    const setResults = []
+
+    for (let index = 0; index < winnerSets + boundedLoserSets; index += 1) {
+      const winnerStillNeedsSets = getSyntheticSetWins(setResults, winnerId) < winnerSets
+      const loserStillNeedsSets = getSyntheticSetWins(setResults, opponentId) < boundedLoserSets
+
+      if (winnerStillNeedsSets) {
+        setResults.push({ winnerId, score: index % 2 === 0 ? '11-7' : '11-8' })
+      }
+
+      if (loserStillNeedsSets) {
+        setResults.push({ winnerId: opponentId, score: '9-11' })
+      }
+    }
+
+    return {
+      ...match,
+      setResults,
+      confirmations: {
+        [match.playerAId]: true,
+        [match.playerBId]: true,
+      },
+      refereeRequested: false,
+      status: 'verified',
+    }
+  })
+}
+
+export function swapMatchTables(tournament, sourceMatchId, targetMatchId) {
+  if (sourceMatchId === targetMatchId) return tournament
+
+  const sourceMatch = tournament.matches.find((match) => match.id === sourceMatchId)
+  const targetMatch = tournament.matches.find((match) => match.id === targetMatchId)
+
+  if (!sourceMatch || !targetMatch) return tournament
+  if (sourceMatch.round !== tournament.currentRound || targetMatch.round !== tournament.currentRound) return tournament
+
+  return {
+    ...tournament,
+    matches: tournament.matches.map((match) => {
+      if (match.id === sourceMatchId) return { ...match, table: targetMatch.table }
+      if (match.id === targetMatchId) return { ...match, table: sourceMatch.table }
+      return match
+    }),
+  }
 }
 
 export function checkInPlayerByCode(tournament, registrationCode) {
@@ -288,6 +366,10 @@ function resetConfirmations(match) {
     [match.playerAId]: false,
     [match.playerBId]: false,
   }
+}
+
+function getSyntheticSetWins(setResults, playerId) {
+  return setResults.filter((set) => set.winnerId === playerId).length
 }
 
 function havePlayed(playerAId, playerBId, tournament) {
