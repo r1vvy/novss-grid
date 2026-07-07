@@ -247,10 +247,10 @@ export function OrganizerDashboard({
   )
 }
 
-export function StatPill({ icon: Icon, label, value }) {
+export function StatPill({ icon: Icon, label, value, color }) {
   return (
     <div className="flex items-center gap-2 rounded border border-nvssBorder bg-nvssBg px-3 py-2">
-      <Icon size={17} className="text-nvssGreen" />
+      <Icon size={17} className={color} />
       <span className="text-xs text-nvssMuted">{label}</span>
       <span className="ml-auto font-semibold">{value}</span>
     </div>

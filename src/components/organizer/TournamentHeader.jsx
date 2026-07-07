@@ -34,11 +34,10 @@ export function TournamentHeader({ tournament, matches, alerts, onOpenSettings, 
               Iestatījumi
             </button>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-          <StatPill icon={Clock} label="Kārta" value={`${tournament.currentRound}/${tournament.totalRounds}`} />
-          <StatPill icon={Users} label="Galdi" value={matches.length} />
-          <StatPill icon={CheckCircle2} label="Apstiprināti" value={verified} />
-          <StatPill icon={AlertTriangle} label="Tiesneša izsaukumi" value={alerts.length} />
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          <StatPill icon={Clock} label="Kārta" value={`${tournament.currentRound}/${tournament.totalRounds}`} color={"text-nvssGreen"} />
+          <StatPill icon={Users} label="Galdi" value={matches.length} color={"text-nvssGreen"} />
+          <StatPill icon={CheckCircle2} label="Apstiprināti" value={verified} color={"text-nvssGreen"} />
           </div>
         </div>
       </div>
