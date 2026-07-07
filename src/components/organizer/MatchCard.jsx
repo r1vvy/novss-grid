@@ -20,6 +20,7 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
   const isDisputed = status === 'disputed'
   const isInvestigating = status === 'investigating'
   const canEditResult = status !== 'scheduled'
+  const editLabel = getEditLabel(status)
   const cardState = isDisputed
     ? 'border-nvssAlert ring-2 ring-nvssAlert/50'
     : isInvestigating
@@ -59,7 +60,7 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
             className="flex min-h-[40px] items-center justify-center gap-2 rounded border border-nvssGreen bg-nvssGreen/10 px-3 text-sm font-semibold text-nvssGreen hover:bg-nvssGreen/20"
           >
             <Pencil size={15} />
-            Rediģēt rezultātu
+            {editLabel}
           </button>
         ) : null}
       </div>
@@ -73,6 +74,14 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
       </div>
     </article>
   )
+}
+
+function getEditLabel(status) {
+  if (status === 'disputed') return 'Atrisināt strīdu'
+  if (status === 'investigating') return 'Ievadīt lēmumu'
+  if (status === 'in_progress') return 'Pabeigt manuāli'
+  if (status === 'awaiting_confirmation') return 'Labot rezultātu'
+  return 'Koriģēt rezultātu'
 }
 
 function PlayerLine({ name, club: represents, score }) {

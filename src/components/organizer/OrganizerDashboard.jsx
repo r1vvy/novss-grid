@@ -248,6 +248,24 @@ export function StatPill({ icon: Icon, label, value }) {
 }
 
 export const organizerIcons = { Users, Clock, AlertTriangle, CheckCircle2 }
+const modalStatusClasses = {
+  scheduled: 'text-nvssMuted border-nvssBorder',
+  in_progress: 'text-nvssGreen border-nvssGreen',
+  disputed: 'text-nvssAlert border-nvssAlert',
+  investigating: 'text-amber-200 border-amber-400',
+  completed: 'text-slate-300 border-nvssBorder',
+  awaiting_confirmation: 'text-nvssBlue border-nvssBlue',
+  verified: 'text-nvssGreen border-nvssBorder',
+}
+const modalStatusLabels = {
+  scheduled: 'Ieplānots',
+  in_progress: 'Notiek',
+  disputed: 'Strīds',
+  investigating: 'Izmeklē',
+  completed: 'Pabeigts',
+  awaiting_confirmation: 'Gaida apstiprinājumu',
+  verified: 'Apstiprināts',
+}
 
 function compareMatches(a, b, sortBy) {
   if (sortBy === 'status') {
@@ -279,43 +297,137 @@ function OverrideModal({
   onSubmit,
 }) {
   const winnerOptions = tournament.players.filter((player) => [match.playerAId, match.playerBId].includes(player.id))
+  const selectedWinner = winnerOptions.find((player) => player.id === winnerId)
+  const selectedLoser = winnerOptions.find((player) => player.id !== winnerId)
+  const currentWinner = winnerOptions.find((player) => match.setResults.filter((set) => set.winnerId === player.id).length >= match.targetWins)
+  const status = deriveMatchStatus(match)
+  const currentScore = winnerOptions.map((player) => ({
+    ...player,
+    wins: match.setResults.filter((set) => set.winnerId === player.id).length,
+    confirmed: Boolean(match.confirmations?.[player.id]),
+  }))
+  const targetWinnerSets = match.targetWins
+  const nextWinnerSets = winnerId ? targetWinnerSets : 0
+  const nextLoserSets = Math.max(0, Math.min(Number(loserSets) || 0, targetWinnerSets - 1))
+  const title = getOverrideTitle(status)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6">
-      <div className="w-full max-w-md rounded-md border border-nvssBorder bg-nvssSurface p-4 shadow-2xl">
+      <div className="w-full max-w-2xl rounded-md border border-nvssBorder bg-nvssSurface p-4 shadow-2xl">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-nvssGreen">Rezultāta rediģēšana</p>
-            <h3 className="mt-1 text-xl font-semibold">Rediģēt rezultātu</h3>
+            <h3 className="mt-1 text-xl font-semibold">{title}</h3>
           </div>
           <button type="button" onClick={onClose} className="min-h-[36px] rounded border border-nvssBorder px-3 text-sm text-nvssMuted hover:text-white">
             Aizvērt
           </button>
         </div>
-        <p className="mt-3 text-sm text-nvssMuted">Galds {match.table}. Organizators var pielāgot gala rezultātu un uzreiz noņemt strīda stāvokli.</p>
-        <label className="mt-4 block text-sm font-medium text-nvssMuted">
-          Uzvarētājs
-          <select
-            value={winnerId}
-            onChange={(event) => onWinnerChange(event.target.value)}
-            className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
-          >
-            {winnerOptions.map((player) => (
-              <option key={player.id} value={player.id}>{player.name}</option>
-            ))}
-          </select>
-        </label>
-        <label className="mt-4 block text-sm font-medium text-nvssMuted">
-          Zaudētāja seti
-          <input
-            type="number"
-            min="0"
-            max={Math.max(0, match.targetWins - 1)}
-            value={loserSets}
-            onChange={(event) => onLoserSetsChange(Number(event.target.value))}
-            className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
-          />
-        </label>
+        <p className="mt-3 text-sm text-nvssMuted">
+          Galds {match.table}. Pirms saglabāšanas organizators redz pašreizējo rezultāta stāvokli, apstiprinājumus un paredzamo gala iznākumu.
+        </p>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <section className="rounded-md border border-nvssBorder bg-nvssBg p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Spēle</p>
+                <p className="mt-1 text-base font-semibold text-white">
+                  {winnerOptions[0]?.name} pret {winnerOptions[1]?.name}
+                </p>
+              </div>
+              <StatusBadge status={status} />
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {currentScore.map((player) => (
+                <div key={player.id} className="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-md border border-nvssBorder bg-nvssSurface px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-white">{player.name}</p>
+                    <p className="truncate text-xs text-nvssMuted">{player.representation || 'Bez kluba'}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-mono text-lg font-bold text-white">{player.wins}</p>
+                    <p className="text-[11px] uppercase tracking-[0.12em] text-nvssMuted">seti</p>
+                  </div>
+                  <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${player.confirmed ? 'bg-emerald-500/15 text-emerald-200' : 'bg-slate-500/15 text-slate-300'}`}>
+                    {player.confirmed ? 'Apstiprināja' : 'Nav apstiprināts'}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 rounded-md border border-nvssBorder bg-nvssSurface p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Setu gaita</p>
+              {match.setResults.length > 0 ? (
+                <ol className="mt-3 space-y-2">
+                  {match.setResults.map((set, index) => {
+                    const setWinner = winnerOptions.find((player) => player.id === set.winnerId)
+                    return (
+                      <li key={`${set.winnerId}-${index}`} className="flex items-center justify-between gap-3 rounded border border-nvssBorder bg-nvssBg px-3 py-2 text-sm">
+                        <span className="text-nvssMuted">Sets {index + 1}</span>
+                        <span className="truncate font-medium text-white">{setWinner?.name || 'Nezināms spēlētājs'}</span>
+                        <span className="font-mono text-white">{set.score}</span>
+                      </li>
+                    )
+                  })}
+                </ol>
+              ) : (
+                <p className="mt-3 text-sm text-nvssMuted">Seti vēl nav ievadīti.</p>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-md border border-nvssBorder bg-nvssBg p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Lēmuma ievade</p>
+            <label className="mt-4 block text-sm font-medium text-nvssMuted">
+              Uzvarētājs
+              <select
+                value={winnerId}
+                onChange={(event) => onWinnerChange(event.target.value)}
+                className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssSurface px-3 text-white"
+              >
+                {winnerOptions.map((player) => (
+                  <option key={player.id} value={player.id}>{player.name}</option>
+                ))}
+              </select>
+            </label>
+            <label className="mt-4 block text-sm font-medium text-nvssMuted">
+              Zaudētāja seti
+              <input
+                type="number"
+                min="0"
+                max={Math.max(0, match.targetWins - 1)}
+                value={loserSets}
+                onChange={(event) => onLoserSetsChange(Number(event.target.value))}
+                className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssSurface px-3 text-white"
+              />
+            </label>
+
+            <div className="mt-4 rounded-md border border-dashed border-nvssGreen/60 bg-nvssSurface p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssGreen">Pirms / pēc</p>
+              <div className="mt-3 space-y-3 text-sm">
+                <div className="rounded border border-nvssBorder bg-nvssBg px-3 py-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Tagad</p>
+                  <p className="mt-1 text-white">
+                    {currentWinner
+                      ? `${currentWinner.name} vada ar ${currentScore.find((player) => player.id === currentWinner.id)?.wins}:${currentScore.find((player) => player.id !== currentWinner.id)?.wins}`
+                      : 'Uzvarētājs vēl nav noteikts'}
+                  </p>
+                </div>
+                <div className="rounded border border-nvssBorder bg-nvssBg px-3 py-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">Pēc saglabāšanas</p>
+                  <p className="mt-1 text-white">
+                    {selectedWinner && selectedLoser
+                      ? `${selectedWinner.name} uzvarēs ar ${nextWinnerSets}:${nextLoserSets}`
+                      : 'Izvēlies uzvarētāju'}
+                  </p>
+                  <p className="mt-1 text-xs text-nvssMuted">Strīda statuss tiks noņemts un spēle tiks atzīmēta kā apstiprināta.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
         <div className="mt-5 flex justify-end gap-2">
           <button type="button" onClick={onClose} className="min-h-[44px] rounded border border-nvssBorder px-4 font-semibold text-nvssMuted hover:text-white">
             Atcelt
@@ -326,5 +438,23 @@ function OverrideModal({
         </div>
       </div>
     </div>
+  )
+}
+
+function getOverrideTitle(status) {
+  if (status === 'disputed') return 'Atrisināt strīdu'
+  if (status === 'investigating') return 'Ievadīt tiesneša lēmumu'
+  if (status === 'in_progress') return 'Pabeigt rezultātu manuāli'
+  if (status === 'awaiting_confirmation') return 'Labot neapstiprinātu rezultātu'
+  return 'Koriģēt gala rezultātu'
+}
+
+function StatusBadge({ status }) {
+  const Icon = status === 'disputed' ? AlertTriangle : status === 'verified' ? CheckCircle2 : Clock
+  return (
+    <span className={`inline-flex items-center gap-1 rounded border px-2 py-1 text-xs font-semibold ${modalStatusClasses[status]}`}>
+      <Icon size={14} className={status === 'in_progress' ? 'animate-pulse' : ''} />
+      {modalStatusLabels[status]}
+    </span>
   )
 }

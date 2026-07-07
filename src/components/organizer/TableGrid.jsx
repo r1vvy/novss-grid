@@ -109,6 +109,7 @@ function CompactTableMap({ matches, canReassignTables, onClearAlert, onMarkInves
           const isDisputed = status === 'disputed'
           const isInvestigating = status === 'investigating'
           const canEditResult = status !== 'scheduled'
+          const editLabel = getEditLabel(status)
 
           return (
             <div
@@ -128,7 +129,7 @@ function CompactTableMap({ matches, canReassignTables, onClearAlert, onMarkInves
                 <div className="mt-auto flex flex-wrap gap-1 pt-2">
                   {canEditResult ? (
                     <CompactActionButton
-                      title="Rediģēt rezultātu"
+                      title={editLabel}
                       className="border-nvssGreen bg-nvssGreen/10 text-nvssGreen hover:bg-nvssGreen/20"
                       onClick={() => onOpenOverride(match)}
                     >
@@ -287,6 +288,7 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
   const isDisputed = status === 'disputed'
   const isInvestigating = status === 'investigating'
   const canEditResult = status !== 'scheduled'
+  const editLabel = getEditLabel(status)
   const rowState = isDisputed
     ? 'bg-nvssAlert/10'
     : isInvestigating
@@ -326,8 +328,8 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
             <button
               type="button"
               onClick={() => onOpenOverride(match)}
-              title="Rediģēt rezultātu"
-              aria-label="Rediģēt rezultātu"
+              title={editLabel}
+              aria-label={editLabel}
               className="inline-flex size-9 items-center justify-center rounded border border-nvssGreen bg-nvssGreen/10 text-nvssGreen hover:bg-nvssGreen/20"
             >
               <Pencil size={15} />
@@ -370,4 +372,12 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
       </td>
     </tr>
   )
+}
+
+function getEditLabel(status) {
+  if (status === 'disputed') return 'Atrisināt strīdu'
+  if (status === 'investigating') return 'Ievadīt lēmumu'
+  if (status === 'in_progress') return 'Pabeigt manuāli'
+  if (status === 'awaiting_confirmation') return 'Labot rezultātu'
+  return 'Koriģēt rezultātu'
 }
