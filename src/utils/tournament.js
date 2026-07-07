@@ -160,24 +160,24 @@ export function resetMatchInvestigation(tournament, matchId) {
   })
 }
 
-export function forceOverrideResult(tournament, matchId, winnerId, loserSets = 0, metadata = {}) {
+export function forceOverrideResult(tournament, matchId, setResults, metadata = {}) {
   return updateMatch(tournament, matchId, (match) => {
-    if (![match.playerAId, match.playerBId].includes(winnerId)) return match
+    const allowedWinnerIds = new Set([match.playerAId, match.playerBId])
+    const nextSetResults = Array.isArray(setResults)
+      ? setResults
+        .filter((set) => allowedWinnerIds.has(set?.winnerId))
+        .slice(0, tournament.maxSetsPerMatch)
+        .map((set) => ({ winnerId: set.winnerId }))
+      : []
 
-    const winnerSets = match.targetWins
-    const opponentId = getOpponentId(match, winnerId)
-    const boundedLoserSets = Math.max(0, Math.min(Number(loserSets) || 0, winnerSets - 1))
-    const setResults = []
+    const draftMatch = { ...match, setResults: nextSetResults }
+    const winnerId = getMatchWinnerId(draftMatch)
+    const isDraw = nextSetResults.length === tournament.maxSetsPerMatch
+      && !winnerId
+      && getSetScore(draftMatch, match.playerAId) === getSetScore(draftMatch, match.playerBId)
+    if (!winnerId && !isDraw) return match
 
-    for (let index = 0; index < winnerSets + boundedLoserSets; index += 1) {
-      const winnerStillNeedsSets = getSyntheticSetWins(setResults, winnerId) < winnerSets
-      const loserStillNeedsSets = getSyntheticSetWins(setResults, opponentId) < boundedLoserSets
-
-      if (winnerStillNeedsSets) setResults.push({ winnerId })
-      if (loserStillNeedsSets) setResults.push({ winnerId: opponentId })
-    }
-
-    return buildOverriddenMatch(match, setResults, metadata)
+    return buildOverriddenMatch(match, nextSetResults, metadata)
   })
 }
 
@@ -248,6 +248,7 @@ export function calculateStandings(tournament) {
       const points = verifiedMatches.reduce((total, match) => {
         const score = getSetScore(match, player.id)
         const opponentScore = getSetScore(match, getOpponentId(match, player.id))
+        if (score === opponentScore) return total + tournament.pointAllocation.draw
         const won = score > opponentScore
         const closeWin = won && Math.abs(score - opponentScore) === 1
         if (won) return total + (closeWin ? tournament.pointAllocation.closeWin : tournament.pointAllocation.win)
@@ -371,10 +372,6 @@ function resetConfirmations(match) {
     [match.playerAId]: false,
     [match.playerBId]: false,
   }
-}
-
-function getSyntheticSetWins(setResults, playerId) {
-  return setResults.filter((set) => set.winnerId === playerId).length
 }
 
 function buildOverriddenMatch(match, setResults, metadata) {
