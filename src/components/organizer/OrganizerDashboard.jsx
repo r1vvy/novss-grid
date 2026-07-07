@@ -483,7 +483,7 @@ function OverrideModal({
               </div>
 
               <div className="rounded-xl border border-nvssBorder bg-nvssBg p-4">
-                <p className="text-sm font-semibold text-white">Kāpēc tiek labots?</p>
+                <p className="text-sm font-semibold text-white">Kāpēc rezultāts tiek labots?</p>
                 <div className="mt-4 grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
                   <label className="block text-sm font-medium text-nvssMuted">
                     Iemesls
@@ -507,7 +507,7 @@ function OverrideModal({
                       onChange={(event) => onNoteChange(event.target.value)}
                       rows={3}
                       className="mt-1 w-full rounded-lg border border-nvssBorder bg-nvssSurface px-3 py-2 text-white"
-                      placeholder="Īss skaidrojums komandai vai vēlākai pārbaudei"
+                      placeholder="Īss skaidrojums auditam"
                     />
                   </label>
                 </div>
