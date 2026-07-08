@@ -4,8 +4,8 @@ import { StatPill } from './OrganizerDashboard'
 import { deriveMatchStatus } from '../../utils/tournament'
 
 export function TournamentHeader({ tournament, matches, alerts, onOpenSettings, onOpenPlayers }) {
-  const active = matches.filter((match) => ['in_progress', 'disputed'].includes(deriveMatchStatus(match))).length
-  const completed = matches.filter((match) => deriveMatchStatus(match) === 'completed').length
+  const active = matches.filter((match) => ['in_progress', 'disputed'].includes(deriveMatchStatus(match, tournament.maxSetsPerMatch))).length
+  const completed = matches.filter((match) => deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'completed').length
 
   return (
     <header className="rounded-md border border-nvssBorder bg-nvssSurface p-4">

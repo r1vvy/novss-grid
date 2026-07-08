@@ -9,6 +9,7 @@ import {
   canGenerateNextRound,
   deriveMatchStatus,
   generateNextSwissRound,
+  getRequiredWins,
   getCurrentRoundMatches,
 } from '../../utils/tournament'
 
@@ -44,7 +45,7 @@ export function OrganizerDashboard({
     [currentMatches, sortBy],
   )
   const standings = useMemo(() => calculateStandings(tournament), [tournament])
-  const alerts = currentMatches.filter((match) => deriveMatchStatus(match) === 'disputed')
+  const alerts = currentMatches.filter((match) => deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'disputed')
   const canGenerate = canGenerateNextRound(tournament)
 
   function updateSetup(field, value) {
@@ -54,7 +55,7 @@ export function OrganizerDashboard({
   function openOverride(match) {
     setOverrideMatch(match)
     setOverrideSetResults(match.setResults.map((set) => ({ winnerId: set.winnerId })))
-    setOverrideReason(match.overrideMeta?.reason || defaultReasonForStatus(deriveMatchStatus(match)))
+    setOverrideReason(match.overrideMeta?.reason || defaultReasonForStatus(deriveMatchStatus(match, tournament.maxSetsPerMatch)))
     setOverrideNote(match.overrideMeta?.note || '')
   }
 
@@ -286,7 +287,7 @@ function compareMatches(a, b, sortBy) {
       completed: 5,
     }
 
-    const statusDiff = (statusOrder[deriveMatchStatus(a)] ?? 99) - (statusOrder[deriveMatchStatus(b)] ?? 99)
+    const statusDiff = (statusOrder[deriveMatchStatus(a, tournament.maxSetsPerMatch)] ?? 99) - (statusOrder[deriveMatchStatus(b, tournament.maxSetsPerMatch)] ?? 99)
     if (statusDiff !== 0) return statusDiff
   }
 
@@ -306,7 +307,7 @@ function OverrideModal({
   onSubmit,
 }) {
   const winnerOptions = tournament.players.filter((player) => [match.playerAId, match.playerBId].includes(player.id))
-  const status = deriveMatchStatus(match)
+  const status = deriveMatchStatus(match, tournament.maxSetsPerMatch)
   const currentScore = winnerOptions.map((player) => ({
     ...player,
     wins: match.setResults.filter((set) => set.winnerId === player.id).length,
@@ -316,12 +317,13 @@ function OverrideModal({
     ...player,
     wins: setResults.filter((set) => set.winnerId === player.id).length,
   }))
-  const draftWinner = draftScore.find((player) => player.wins >= match.targetWins)
+  const requiredWins = getRequiredWins(tournament.maxSetsPerMatch)
+  const draftWinner = draftScore.find((player) => player.wins >= requiredWins)
   const canAddSet = setResults.length < tournament.maxSetsPerMatch
   const isDrawDraft = setResults.length === tournament.maxSetsPerMatch
     && !draftWinner
     && draftScore[0]?.wins === draftScore[1]?.wins
-  const isDraftValid = isDrawDraft || (Boolean(draftWinner) && draftScore.filter((player) => player.wins >= match.targetWins).length === 1)
+  const isDraftValid = isDrawDraft || (Boolean(draftWinner) && draftScore.filter((player) => player.wins >= requiredWins).length === 1)
   const title = getOverrideTitle(status)
   const playerA = winnerOptions[0]
   const playerB = winnerOptions[1]

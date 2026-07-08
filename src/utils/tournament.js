@@ -17,13 +17,19 @@ export function getOpponentId(match, playerId) {
   return match.playerAId === playerId ? match.playerBId : match.playerAId
 }
 
-export function hasReachedTargetWins(match, playerId) {
-  return getSetScore(match, playerId) >= match.targetWins
+export function getRequiredWins(maxSetsPerMatch) {
+  return Math.floor(maxSetsPerMatch / 2) + 1
 }
 
-export function getMatchWinnerId(match) {
-  if (hasReachedTargetWins(match, match.playerAId)) return match.playerAId
-  if (hasReachedTargetWins(match, match.playerBId)) return match.playerBId
+export function hasReachedTargetWins(match, playerId, maxSetsPerMatch = match.maxSetsPerMatch) {
+  if (!Number.isFinite(maxSetsPerMatch)) return false
+
+  return getSetScore(match, playerId) >= getRequiredWins(maxSetsPerMatch)
+}
+
+export function getMatchWinnerId(match, maxSetsPerMatch = match.maxSetsPerMatch) {
+  if (hasReachedTargetWins(match, match.playerAId, maxSetsPerMatch)) return match.playerAId
+  if (hasReachedTargetWins(match, match.playerBId, maxSetsPerMatch)) return match.playerBId
   return null
 }
 
@@ -42,11 +48,11 @@ export function getOverrideAuditLabel(match) {
   return labels[match.overrideMeta.reason] || 'Organizatora labojums'
 }
 
-export function deriveMatchStatus(match) {
+export function deriveMatchStatus(match, maxSetsPerMatch = match.maxSetsPerMatch) {
   if (match.refereeRequested || match.status === 'disputed') return 'disputed'
   if (match.status === 'investigating') return 'investigating'
   if (match.status === 'verified' || match.status === 'completed') return 'completed'
-  if (getMatchWinnerId(match)) {
+  if (getMatchWinnerId(match, maxSetsPerMatch) || isDrawMatch(match, maxSetsPerMatch)) {
     const confirmed = Object.values(match.confirmations || {}).filter(Boolean).length
     return confirmed >= 2 ? 'completed' : 'awaiting_confirmation'
   }
@@ -57,19 +63,24 @@ export function deriveMatchStatus(match) {
 export function appendSetResult(tournament, matchId, winnerId, actorPlayerId) {
   return updateMatch(tournament, matchId, (match) => {
     if (actorPlayerId && actorPlayerId !== match.playerAId) return match
-    if (deriveMatchStatus(match) === 'disputed' || getMatchWinnerId(match)) return match
+    if (
+      deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'disputed'
+      || getMatchWinnerId(match, tournament.maxSetsPerMatch)
+      || isMatchAtSetLimit(match, tournament.maxSetsPerMatch)
+    ) return match
 
     const nextSetResults = [
       ...match.setResults,
       { winnerId },
     ]
     const nextMatch = { ...match, setResults: nextSetResults, status: 'in_progress' }
-    const winnerReachedTarget = hasReachedTargetWins(nextMatch, winnerId)
+    const winnerReachedTarget = hasReachedTargetWins(nextMatch, winnerId, tournament.maxSetsPerMatch)
+    const drawReachedLimit = isDrawMatch(nextMatch, tournament.maxSetsPerMatch)
 
     return {
       ...nextMatch,
       confirmations: resetConfirmations(match),
-      status: winnerReachedTarget ? 'awaiting_confirmation' : 'in_progress',
+      status: winnerReachedTarget || drawReachedLimit ? 'awaiting_confirmation' : 'in_progress',
     }
   })
 }
@@ -77,7 +88,7 @@ export function appendSetResult(tournament, matchId, winnerId, actorPlayerId) {
 export function removeSetResult(tournament, matchId, winnerId, actorPlayerId) {
   return updateMatch(tournament, matchId, (match) => {
     if (actorPlayerId && actorPlayerId !== match.playerAId) return match
-    if (deriveMatchStatus(match) === 'disputed') return match
+    if (deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'disputed') return match
 
     const resultIndex = match.setResults.map((set) => set.winnerId).lastIndexOf(winnerId)
     if (resultIndex === -1) return match
@@ -92,14 +103,17 @@ export function removeSetResult(tournament, matchId, winnerId, actorPlayerId) {
 
     return {
       ...nextMatch,
-      status: deriveMatchStatus(nextMatch),
+      status: deriveMatchStatus(nextMatch, tournament.maxSetsPerMatch),
     }
   })
 }
 
 export function confirmFinalScore(tournament, matchId, playerId) {
   return updateMatch(tournament, matchId, (match) => {
-    if (!getMatchWinnerId(match) || deriveMatchStatus(match) === 'disputed') return match
+    if (
+      (!getMatchWinnerId(match, tournament.maxSetsPerMatch) && !isDrawMatch(match, tournament.maxSetsPerMatch))
+      || deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'disputed'
+    ) return match
 
     const confirmations = { ...match.confirmations, [playerId]: true }
     const fullyConfirmed = match.playerAId in confirmations
@@ -132,7 +146,7 @@ export function clearRefereeRequest(tournament, matchId) {
     }
     return {
       ...restored,
-      status: deriveMatchStatus(restored),
+      status: deriveMatchStatus(restored, tournament.maxSetsPerMatch),
     }
   })
 }
@@ -155,7 +169,7 @@ export function resetMatchInvestigation(tournament, matchId) {
 
     return {
       ...restored,
-      status: deriveMatchStatus(restored),
+      status: deriveMatchStatus(restored, tournament.maxSetsPerMatch),
     }
   })
 }
@@ -171,13 +185,13 @@ export function forceOverrideResult(tournament, matchId, setResults, metadata = 
       : []
 
     const draftMatch = { ...match, setResults: nextSetResults }
-    const winnerId = getMatchWinnerId(draftMatch)
+    const winnerId = getMatchWinnerId(draftMatch, tournament.maxSetsPerMatch)
     const isDraw = nextSetResults.length === tournament.maxSetsPerMatch
       && !winnerId
       && getSetScore(draftMatch, match.playerAId) === getSetScore(draftMatch, match.playerBId)
     if (!winnerId && !isDraw) return match
 
-    return buildOverriddenMatch(match, nextSetResults, metadata)
+    return buildOverriddenMatch(match, nextSetResults, metadata, tournament.maxSetsPerMatch)
   })
 }
 
@@ -320,7 +334,6 @@ export function generateNextSwissRound(tournament) {
     playerAId,
     playerBId,
     setResults: [],
-    targetWins: Math.floor(tournament.maxSetsPerMatch / 2) + 1,
     confirmations: {
       [playerAId]: false,
       [playerBId]: false,
@@ -374,9 +387,20 @@ function resetConfirmations(match) {
   }
 }
 
-function buildOverriddenMatch(match, setResults, metadata) {
-  const previousWinnerId = getMatchWinnerId(match)
-  const previousStatus = deriveMatchStatus(match)
+function isMatchAtSetLimit(match, maxSetsPerMatch) {
+  return match.setResults.length >= maxSetsPerMatch
+}
+
+function isDrawMatch(match, maxSetsPerMatch = match.maxSetsPerMatch) {
+  if (!Number.isFinite(maxSetsPerMatch)) return false
+
+  return isMatchAtSetLimit(match, maxSetsPerMatch)
+    && getSetScore(match, match.playerAId) === getSetScore(match, match.playerBId)
+}
+
+function buildOverriddenMatch(match, setResults, metadata, maxSetsPerMatch = match.maxSetsPerMatch) {
+  const previousWinnerId = getMatchWinnerId(match, maxSetsPerMatch)
+  const previousStatus = deriveMatchStatus(match, maxSetsPerMatch)
 
   return {
     ...match,

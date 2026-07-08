@@ -110,7 +110,7 @@ function CompactTableMap({ tournament, matches, canReassignTables, onClearAlert,
     <div className="p-3">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
         {matches.map((match) => {
-          const status = deriveMatchStatus(match)
+          const status = deriveMatchStatus(match, tournament.maxSetsPerMatch)
           const isDisputed = status === 'disputed'
           const isInvestigating = status === 'investigating'
           const canEditResult = status !== 'scheduled'
@@ -287,7 +287,7 @@ const badgeClasses = {
 
 export function MatchSummaryRow({ tournament, match }) {
   const { playerA, playerB } = getMatchPlayers(match, tournament.players)
-  const status = deriveMatchStatus(match)
+  const status = deriveMatchStatus(match, tournament.maxSetsPerMatch)
   const scoreA = getSetScore(match, match.playerAId)
   const scoreB = getSetScore(match, match.playerBId)
 
@@ -312,7 +312,7 @@ export function MatchSummaryRow({ tournament, match }) {
 
 function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onResetInvestigation, onOpenOverride, dragProps }) {
   const { playerA, playerB } = getMatchPlayers(match, tournament.players)
-  const status = deriveMatchStatus(match)
+  const status = deriveMatchStatus(match, tournament.maxSetsPerMatch)
   const scoreA = getSetScore(match, match.playerAId)
   const scoreB = getSetScore(match, match.playerBId)
   const isDisputed = status === 'disputed'

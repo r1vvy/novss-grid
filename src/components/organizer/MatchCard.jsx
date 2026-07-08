@@ -13,7 +13,7 @@ const statusLabels = {
 
 export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating, onOpenOverride, dragProps = {} }) {
   const { playerA, playerB } = getMatchPlayers(match, tournament.players)
-  const status = deriveMatchStatus(match)
+  const status = deriveMatchStatus(match, tournament.maxSetsPerMatch)
   const scoreA = getSetScore(match, match.playerAId)
   const scoreB = getSetScore(match, match.playerBId)
   const isDisputed = status === 'disputed'

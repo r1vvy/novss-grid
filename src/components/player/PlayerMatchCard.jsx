@@ -12,7 +12,7 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
   const opponentScore = getSetScore(match, opponentId)
   const playerAScore = getSetScore(match, match.playerAId)
   const playerBScore = getSetScore(match, match.playerBId)
-  const status = deriveMatchStatus(match)
+  const status = deriveMatchStatus(match, tournament.maxSetsPerMatch)
   const isScoreKeeper = player.id === match.playerAId
   const scoreLocked = status === 'disputed'
   const targetReached = Boolean(status === 'awaiting_confirmation' || status === 'completed')
