@@ -7,7 +7,6 @@ const statusLabels = {
   in_progress: 'Notiek',
   disputed: 'Strīds',
   investigating: 'Izmeklē',
-  completed: 'Pabeigts',
   awaiting_confirmation: 'Gaida apstiprinājumu',
   verified: 'Apstiprināts',
 }
@@ -17,7 +16,6 @@ const compactStatusLabels = {
   in_progress: 'Notiek',
   disputed: 'Strīds',
   investigating: 'Izmeklē',
-  completed: 'Pab.',
   awaiting_confirmation: 'Gaida',
   verified: 'Apst.',
 }
@@ -247,7 +245,6 @@ const compactClasses = {
   in_progress: 'border-nvssGreen/70 bg-gradient-to-b from-nvssGreen/18 to-nvssGreen/10 text-white',
   disputed: 'border-nvssAlert/80 bg-gradient-to-b from-nvssAlert/22 to-nvssAlert/12 text-white',
   investigating: 'border-amber-400/80 bg-gradient-to-b from-amber-400/22 to-amber-400/10 text-white',
-  completed: 'border-nvssBorder bg-slate-500/10 text-slate-200',
   awaiting_confirmation: 'border-nvssBlue/75 bg-gradient-to-b from-nvssBlue/22 to-nvssBlue/12 text-white',
   verified: 'border-emerald-300/45 bg-gradient-to-b from-emerald-500/16 to-emerald-500/08 text-emerald-100',
 }
@@ -257,7 +254,6 @@ const compactBadgeClasses = {
   in_progress: 'border-nvssGreen/40 bg-nvssGreen/10 text-emerald-100',
   disputed: 'border-nvssAlert/40 bg-nvssAlert/10 text-red-100',
   investigating: 'border-amber-300/40 bg-amber-300/10 text-amber-100',
-  completed: 'border-white/10 bg-white/5 text-slate-200',
   awaiting_confirmation: 'border-nvssBlue/40 bg-nvssBlue/10 text-blue-100',
   verified: 'border-emerald-300/35 bg-emerald-400/10 text-emerald-100',
 }
@@ -285,7 +281,6 @@ const badgeClasses = {
   in_progress: 'text-nvssGreen border-nvssGreen',
   disputed: 'text-nvssAlert border-nvssAlert',
   investigating: 'text-amber-200 border-amber-400',
-  completed: 'text-slate-300 border-nvssBorder',
   awaiting_confirmation: 'text-nvssBlue border-nvssBlue',
   verified: 'text-nvssGreen border-nvssBorder',
 }

@@ -95,7 +95,6 @@ function translateStatus(status) {
     scheduled: 'Ieplānots',
     in_progress: 'Notiek',
     disputed: 'Strīds',
-    completed: 'Pabeigts',
     awaiting_confirmation: 'Gaida apstiprinājumu',
     verified: 'Apstiprināts',
   }

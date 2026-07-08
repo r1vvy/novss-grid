@@ -263,7 +263,6 @@ const modalStatusClasses = {
   in_progress: 'text-nvssGreen border-nvssGreen',
   disputed: 'text-nvssAlert border-nvssAlert',
   investigating: 'text-amber-200 border-amber-400',
-  completed: 'text-slate-300 border-nvssBorder',
   awaiting_confirmation: 'text-nvssBlue border-nvssBlue',
   verified: 'text-nvssGreen border-nvssBorder',
 }
@@ -272,7 +271,6 @@ const modalStatusLabels = {
   in_progress: 'Notiek',
   disputed: 'Strīds',
   investigating: 'Izmeklē',
-  completed: 'Pabeigts',
   awaiting_confirmation: 'Gaida apstiprinājumu',
   verified: 'Apstiprināts',
 }
@@ -285,8 +283,7 @@ function compareMatches(a, b, sortBy) {
       in_progress: 2,
       awaiting_confirmation: 3,
       scheduled: 4,
-      completed: 5,
-      verified: 6,
+      verified: 5,
     }
 
     const statusDiff = (statusOrder[deriveMatchStatus(a)] ?? 99) - (statusOrder[deriveMatchStatus(b)] ?? 99)

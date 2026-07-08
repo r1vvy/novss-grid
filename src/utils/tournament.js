@@ -45,7 +45,7 @@ export function getOverrideAuditLabel(match) {
 export function deriveMatchStatus(match) {
   if (match.refereeRequested || match.status === 'disputed') return 'disputed'
   if (match.status === 'investigating') return 'investigating'
-  if (match.status === 'verified') return 'verified'
+  if (match.status === 'verified' || match.status === 'completed') return 'verified'
   if (getMatchWinnerId(match)) {
     const confirmed = Object.values(match.confirmations || {}).filter(Boolean).length
     return confirmed >= 2 ? 'verified' : 'awaiting_confirmation'

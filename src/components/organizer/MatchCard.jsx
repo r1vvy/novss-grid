@@ -7,7 +7,6 @@ const statusLabels = {
   in_progress: 'Notiek',
   disputed: 'Strīds',
   investigating: 'Izmeklē',
-  completed: 'Pabeigts',
   awaiting_confirmation: 'Gaida apstiprinājumu',
   verified: 'Apstiprināts',
 }
@@ -108,7 +107,6 @@ function StatusBadge({ status }) {
     in_progress: 'text-nvssGreen border-nvssGreen',
     disputed: 'text-nvssAlert border-nvssAlert',
     investigating: 'text-amber-200 border-amber-400',
-    completed: 'text-slate-300 border-nvssBorder',
     awaiting_confirmation: 'text-nvssBlue border-nvssBlue',
     verified: 'text-nvssGreen border-nvssBorder',
   }
