@@ -44,7 +44,7 @@ export function TableGrid({
   return (
     <section className="w-full overflow-hidden rounded-md border border-nvssBorder bg-nvssSurface">
       <div className="border-b border-nvssBorder px-4 py-3">
-        <h3 className="text-sm font-semibold text-white">Aktīvā kārta</h3>
+        <h3 className="text-sm font-semibold text-nvssText">Aktīvā kārta</h3>
       </div>
       {headerContent || titleActions ? (
         <div className="border-b border-nvssBorder">
@@ -127,8 +127,8 @@ function CompactTableMap({ tournament, matches, canReassignTables, onClearAlert,
               <div className="flex h-full min-h-0 flex-col">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-baseline gap-2">
-                    <span className="shrink-0 text-[1.9rem] font-black leading-none text-white">{match.table}</span>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45">Galds</span>
+                    <span className="shrink-0 text-[1.9rem] font-black leading-none text-nvssText">{match.table}</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-nvssMuted">Galds</span>
                   </div>
                   <Grip size={12} className="shrink-0 opacity-35 group-hover:opacity-100" />
                 </div>
@@ -162,7 +162,7 @@ function CompactTableMap({ tournament, matches, canReassignTables, onClearAlert,
                   {isDisputed ? (
                     <CompactActionButton
                       title="Marķēt kā izmeklē"
-                      className="border-amber-400/70 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20"
+                      className="border-amber-500/70 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20"
                       onClick={() => onMarkInvestigating(match.id)}
                     >
                       <Search size={12} />
@@ -180,7 +180,7 @@ function CompactTableMap({ tournament, matches, canReassignTables, onClearAlert,
                   {isDisputed ? (
                     <CompactActionButton
                       title="Noņemt brīdinājumu"
-                      className="border-nvssAlert text-nvssAlert hover:bg-nvssAlert hover:text-white"
+                      className="border-nvssAlert text-nvssAlert hover:bg-nvssAlert hover:text-nvssSurface"
                       onClick={() => onClearAlert(match.id)}
                     >
                       <X size={12} />
@@ -241,21 +241,21 @@ function buildDragProps(matchId, onSwapTables, canReassignTables = true) {
 }
 
 const compactClasses = {
-  scheduled: 'border-nvssBorder bg-nvssBg text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]',
-  in_progress: 'border-nvssGreen/70 bg-gradient-to-b from-nvssGreen/18 to-nvssGreen/10 text-white',
-  disputed: 'border-nvssAlert/80 bg-gradient-to-b from-nvssAlert/22 to-nvssAlert/12 text-white',
-  investigating: 'border-amber-400/80 bg-gradient-to-b from-amber-400/22 to-amber-400/10 text-white',
-  awaiting_confirmation: 'border-nvssBlue/75 bg-gradient-to-b from-nvssBlue/22 to-nvssBlue/12 text-white',
-  completed: 'border-emerald-300/45 bg-gradient-to-b from-emerald-500/16 to-emerald-500/08 text-emerald-100',
+  scheduled: 'border-nvssBorder bg-nvssBg text-nvssText shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]',
+  in_progress: 'border-nvssGreen/70 bg-gradient-to-b from-nvssGreen/12 to-nvssGreen/6 text-nvssText',
+  disputed: 'border-nvssAlert/80 bg-gradient-to-b from-nvssAlert/16 to-nvssAlert/8 text-nvssText',
+  investigating: 'border-amber-500/70 bg-gradient-to-b from-amber-500/18 to-amber-500/8 text-nvssText',
+  awaiting_confirmation: 'border-nvssBlue/75 bg-gradient-to-b from-nvssBlue/12 to-nvssBlue/6 text-nvssText',
+  completed: 'border-nvssBorder bg-gradient-to-b from-nvssBg to-nvssSurface text-nvssText',
 }
 
 const compactBadgeClasses = {
-  scheduled: 'border-white/10 bg-white/5 text-white/70',
-  in_progress: 'border-nvssGreen/40 bg-nvssGreen/10 text-emerald-100',
-  disputed: 'border-nvssAlert/40 bg-nvssAlert/10 text-red-100',
-  investigating: 'border-amber-300/40 bg-amber-300/10 text-amber-100',
-  awaiting_confirmation: 'border-nvssBlue/40 bg-nvssBlue/10 text-blue-100',
-  completed: 'border-emerald-300/35 bg-emerald-400/10 text-emerald-100',
+  scheduled: 'border-nvssBorder bg-nvssSurface text-nvssMuted',
+  in_progress: 'border-nvssGreen/40 bg-nvssGreen/10 text-nvssGreen',
+  disputed: 'border-nvssAlert/40 bg-nvssAlert/10 text-nvssAlert',
+  investigating: 'border-amber-500/40 bg-amber-500/10 text-amber-700',
+  awaiting_confirmation: 'border-nvssBlue/30 bg-nvssBlue/10 text-nvssBlue',
+  completed: 'border-nvssBorder bg-nvssSurface text-nvssText',
 }
 
 export function CompactLegend() {
@@ -280,7 +280,7 @@ const badgeClasses = {
   scheduled: 'text-nvssMuted border-nvssBorder',
   in_progress: 'text-nvssGreen border-nvssGreen',
   disputed: 'text-nvssAlert border-nvssAlert',
-  investigating: 'text-amber-200 border-amber-400',
+  investigating: 'text-amber-700 border-amber-500',
   awaiting_confirmation: 'text-nvssBlue border-nvssBlue',
   completed: 'text-nvssGreen border-nvssBorder',
 }
@@ -296,10 +296,10 @@ export function MatchSummaryRow({ tournament, match }) {
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.12em] text-nvssMuted">{match.table} Galds </p>
-          <p className="text-sm font-semibold text-white">{playerA?.name || 'TBD'} pret {playerB?.name || 'TBD'}</p>
+          <p className="text-sm font-semibold text-nvssText">{playerA?.name || 'TBD'} pret {playerB?.name || 'TBD'}</p>
         </div>
         <div className="text-right">
-          <p className="font-mono text-sm font-bold text-white">{scoreA} : {scoreB}</p>
+          <p className="font-mono text-sm font-bold text-nvssText">{scoreA} : {scoreB}</p>
           <span className={`inline-flex items-center gap-1 rounded border px-2 py-1 text-[11px] font-semibold ${badgeClasses[status]}`}>
             <StatusIcon status={status} />
             {statusLabels[status]}
@@ -331,19 +331,19 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
           <Grip size={14} className={dragProps.draggable ? 'text-nvssMuted' : 'text-nvssMuted/40'} />
-          <span className="text-lg font-black text-white">{match.table}</span>
+          <span className="text-lg font-black text-nvssText">{match.table}</span>
         </div>
       </td>
       <td className="px-4 py-3">
-        <p className="truncate font-semibold text-white">{playerA?.name || 'TBD'}</p>
+        <p className="truncate font-semibold text-nvssText">{playerA?.name || 'TBD'}</p>
         <p className="truncate text-xs text-nvssMuted">{playerA?.representation || 'Gaida spēlētāju'}</p>
       </td>
       <td className="px-4 py-3">
-        <p className="truncate font-semibold text-white">{playerB?.name || 'TBD'}</p>
+        <p className="truncate font-semibold text-nvssText">{playerB?.name || 'TBD'}</p>
         <p className="truncate text-xs text-nvssMuted">{playerB?.representation || 'Gaida spēlētāju'}</p>
       </td>
       <td className="px-4 py-3">
-        <div className="font-mono text-base font-bold text-white">
+        <div className="font-mono text-base font-bold text-nvssText">
           {scoreA} : {scoreB}
         </div>
       </td>
@@ -372,7 +372,7 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
             title="Marķēt kā izmeklē"
             enabled={isDisputed}
             onClick={() => onMarkInvestigating(match.id)}
-            activeClassName="border-amber-400/70 bg-amber-400/10 text-amber-200 hover:bg-amber-400/20"
+            activeClassName="border-amber-500/70 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20"
           >
             <Search size={15} />
           </TableActionButton>
@@ -388,7 +388,7 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
             title="Noņemt brīdinājumu"
             enabled={isDisputed}
             onClick={() => onClearAlert(match.id)}
-            activeClassName="border-nvssAlert text-nvssAlert hover:bg-nvssAlert hover:text-white"
+            activeClassName="border-nvssAlert text-nvssAlert hover:bg-nvssAlert hover:text-nvssSurface"
           >
             <X size={15} />
           </TableActionButton>

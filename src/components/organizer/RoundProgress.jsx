@@ -17,7 +17,7 @@ export function RoundProgress({ tournament, canGenerate, onGenerate, embedded = 
           type="button"
           disabled={!canGenerate}
           onClick={onGenerate}
-          className="flex min-h-[48px] items-center justify-center gap-2 rounded bg-nvssGreenAction px-4 font-semibold text-white disabled:cursor-not-allowed disabled:bg-nvssSlateAction disabled:text-nvssMuted"
+          className="flex min-h-[48px] items-center justify-center gap-2 rounded bg-nvssGreenAction px-4 font-semibold text-nvssSurface disabled:cursor-not-allowed disabled:bg-nvssSlateAction disabled:text-nvssMuted"
         >
           <CheckCircle2 size={18} />
           Ģenerēt nākamo kārtu

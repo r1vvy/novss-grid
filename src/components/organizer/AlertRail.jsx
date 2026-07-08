@@ -16,7 +16,7 @@ export function AlertRail({ tournament, alerts, onMarkInvestigating }) {
             <div key={match.id} className="rounded border border-nvssAlert bg-nvssAlert/10 p-3">
               <p className="font-semibold text-nvssAlert">Galds {match.table}</p>
               <p className="mt-1 text-sm">{playerA?.name} pret {playerB?.name}</p>
-              <button type="button" onClick={() => onMarkInvestigating(match.id)} className="mt-3 inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded bg-amber-500/90 px-3 text-sm font-semibold text-white">
+              <button type="button" onClick={() => onMarkInvestigating(match.id)} className="mt-3 inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded bg-amber-500/90 px-3 text-sm font-semibold text-nvssSurface">
                 <Search size={15} />
                 Marķēt kā izmeklē
               </button>

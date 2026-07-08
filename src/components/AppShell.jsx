@@ -3,7 +3,7 @@ import { ChevronLeft } from 'lucide-react'
 
 export function AppShell({ title, showBack = false, onBack, children }) {
   return (
-    <div className="min-h-screen bg-nvssBg text-white">
+    <div className="min-h-screen bg-nvssBg text-nvssText">
       <div className="border-b border-nvssBorder bg-nvssSurface/80 px-3 py-3 backdrop-blur sm:px-5">
         <div className="mx-auto flex max-w-[1800px] items-center justify-between gap-3">
           <div className="min-w-0">
@@ -14,7 +14,7 @@ export function AppShell({ title, showBack = false, onBack, children }) {
             <button
               type="button"
               onClick={onBack}
-              className="flex min-h-[44px] items-center gap-1 rounded border border-nvssBorder px-3 text-sm text-nvssMuted"
+              className="flex min-h-[44px] items-center gap-1 rounded border border-nvssBorder bg-nvssBg px-3 text-sm text-nvssMuted hover:text-nvssText"
             >
               <ChevronLeft size={18} />
               Sākums

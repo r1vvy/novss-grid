@@ -13,14 +13,14 @@ export function TournamentHeader({ tournament, matches, alerts, onOpenSettings, 
         <div>
           <p className="text-sm text-nvssMuted">{tournament.venue} · {tournament.updatedAt}</p>
           <h2 className="mt-1 text-2xl font-semibold">{tournament.name}</h2>
-          <p className="mt-1 text-sm text-nvssMuted">Statuss: <span className="font-semibold text-white">{tournament.status}</span></p>
+          <p className="mt-1 text-sm text-nvssMuted">Statuss: <span className="font-semibold text-nvssText">{tournament.status}</span></p>
         </div>
         <div className="flex flex-col gap-3 xl:min-w-[620px]">
           <div className="flex flex-wrap justify-start gap-2 xl:justify-end">
             <button
               type="button"
               onClick={onOpenPlayers}
-              className="flex min-h-[40px] items-center gap-2 rounded border border-nvssBorder bg-nvssBg px-3 text-sm font-semibold text-nvssMuted hover:text-white"
+              className="flex min-h-[40px] items-center gap-2 rounded border border-nvssBorder bg-nvssBg px-3 text-sm font-semibold text-nvssMuted hover:text-nvssText"
             >
               <SquarePen size={16} />
               Spēlētāji
@@ -28,7 +28,7 @@ export function TournamentHeader({ tournament, matches, alerts, onOpenSettings, 
             <button
               type="button"
               onClick={onOpenSettings}
-              className="flex min-h-[40px] items-center gap-2 rounded border border-nvssBorder bg-nvssBg px-3 text-sm font-semibold text-nvssMuted hover:text-white"
+              className="flex min-h-[40px] items-center gap-2 rounded border border-nvssBorder bg-nvssBg px-3 text-sm font-semibold text-nvssMuted hover:text-nvssText"
             >
               <Settings size={16} />
               Iestatījumi

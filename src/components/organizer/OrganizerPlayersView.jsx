@@ -70,11 +70,11 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
             <button
               type="button"
               onClick={onBack}
-              className="min-h-[40px] rounded border border-nvssBorder bg-nvssBg px-3 text-sm font-semibold text-nvssMuted hover:text-white"
+              className="min-h-[40px] rounded border border-nvssBorder bg-nvssBg px-3 text-sm font-semibold text-nvssMuted hover:text-nvssText"
             >
               Atpakaļ uz turnīru
             </button>
-            <div className="inline-flex min-h-[40px] items-center gap-2 rounded border border-nvssBorder bg-nvssBg px-3 text-sm font-semibold text-white">
+            <div className="inline-flex min-h-[40px] items-center gap-2 rounded border border-nvssBorder bg-nvssBg px-3 text-sm font-semibold text-nvssText">
               <Users size={16} className="text-nvssGreen" />
               {registeredPlayersCount} / {tournament.players.length}
             </div>
@@ -92,7 +92,7 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
               value={playerSearch}
               onChange={(event) => setPlayerSearch(event.target.value)}
               placeholder="Anna Kalnina"
-              className="min-h-[46px] w-full rounded border border-nvssBorder bg-nvssBg pl-10 pr-3 text-white"
+              className="min-h-[46px] w-full rounded border border-nvssBorder bg-nvssBg pl-10 pr-3 text-nvssText"
             />
           </div>
         </label>
@@ -100,7 +100,7 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
 
       <section className="overflow-hidden rounded-md border border-nvssBorder bg-nvssSurface">
         <div className="border-b border-nvssBorder px-4 py-3">
-          <div className="flex items-center gap-2 text-sm font-semibold text-white">
+          <div className="flex items-center gap-2 text-sm font-semibold text-nvssText">
             <SquarePen size={16} className="text-nvssGreen" />
             Spēlētāju saraksts
           </div>
@@ -130,11 +130,11 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
                         <input
                           value={draft.name}
                           onChange={(event) => updateDraft('name', event.target.value)}
-                          className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
+                          className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-nvssText"
                         />
                       ) : (
                         <div>
-                          <div className="font-semibold text-white">{player.name}</div>
+                          <div className="font-semibold text-nvssText">{player.name}</div>
                           <div className="text-xs text-nvssMuted">{player.id}</div>
                         </div>
                       )}
@@ -144,10 +144,10 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
                         <input
                           value={draft.representation}
                           onChange={(event) => updateDraft('representation', event.target.value)}
-                          className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
+                          className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-nvssText"
                         />
                       ) : (
-                        <span className="text-white">{player.representation || '-'}</span>
+                        <span className="text-nvssText">{player.representation || '-'}</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -157,10 +157,10 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
                           min="0"
                           value={draft.rating}
                           onChange={(event) => updateDraft('rating', event.target.value)}
-                          className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
+                          className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-nvssText"
                         />
                       ) : (
-                        <span className="text-white">{player.rating ?? '-'}</span>
+                        <span className="text-nvssText">{player.rating ?? '-'}</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -168,14 +168,14 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
                         <select
                           value={draft.gender}
                           onChange={(event) => updateDraft('gender', event.target.value)}
-                          className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
+                          className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-nvssText"
                         >
                           <option value="">Nav norādīts</option>
                           <option value="female">Sieviete</option>
                           <option value="male">Vīrietis</option>
                         </select>
                       ) : (
-                        <span className="text-white">{formatGender(player.gender)}</span>
+                        <span className="text-nvssText">{formatGender(player.gender)}</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -183,7 +183,7 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
                         <select
                           value={draft.status}
                           onChange={(event) => updateDraft('status', event.target.value)}
-                          className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
+                          className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-nvssText"
                         >
                           <option value="checked_in">Reģistrēts</option>
                           <option value="absent">Nav ieradies</option>
@@ -201,7 +201,7 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
                           <input
                             value={draft.registrationCode}
                             onChange={(event) => updateDraft('registrationCode', event.target.value)}
-                            className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg pl-10 pr-3 text-white"
+                            className="min-h-[42px] w-full rounded border border-nvssBorder bg-nvssBg pl-10 pr-3 text-nvssText"
                           />
                         </div>
                       ) : (
@@ -212,7 +212,7 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
                           <button
                             type="button"
                             onClick={() => toggleCodeVisibility(player.id)}
-                            className="inline-flex size-9 items-center justify-center rounded border border-nvssBorder bg-nvssBg text-nvssMuted hover:text-white"
+                            className="inline-flex size-9 items-center justify-center rounded border border-nvssBorder bg-nvssBg text-nvssMuted hover:text-nvssText"
                             aria-label={isCodeVisible ? 'Paslēpt kodu' : 'Parādīt kodu'}
                             title={isCodeVisible ? 'Paslēpt kodu' : 'Parādīt kodu'}
                           >
@@ -228,14 +228,14 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
                             <button
                               type="button"
                               onClick={cancelEditing}
-                              className="min-h-[40px] rounded border border-nvssBorder px-3 text-sm font-semibold text-nvssMuted hover:text-white"
+                              className="min-h-[40px] rounded border border-nvssBorder px-3 text-sm font-semibold text-nvssMuted hover:text-nvssText"
                             >
                               Atcelt
                             </button>
                             <button
                               type="button"
                               onClick={() => savePlayer(player.id)}
-                              className="inline-flex min-h-[40px] items-center gap-2 rounded bg-nvssGreenAction px-3 text-sm font-semibold text-white"
+                              className="inline-flex min-h-[40px] items-center gap-2 rounded bg-nvssGreenAction px-3 text-sm font-semibold text-nvssSurface hover:bg-nvssAlert"
                             >
                               <Save size={16} />
                               Saglabāt
@@ -245,7 +245,7 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
                           <button
                             type="button"
                             onClick={() => startEditing(player)}
-                            className="inline-flex min-h-[40px] items-center gap-2 rounded border border-nvssBorder bg-nvssBg px-3 text-sm font-semibold text-nvssMuted hover:text-white"
+                            className="inline-flex min-h-[40px] items-center gap-2 rounded border border-nvssBorder bg-nvssBg px-3 text-sm font-semibold text-nvssMuted hover:text-nvssText"
                           >
                             <PencilLine size={16} />
                             Rediģēt

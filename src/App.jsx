@@ -159,7 +159,7 @@ function HomeScreen({ hasPlayerSession, onOrganizer, onPlayer }) {
 
 function RoleCard({ icon: Icon, title, description, actionLabel, onClick }) {
   return (
-    <section className="rounded-md border border-nvssBorder bg-nvssSurface p-6">
+    <section className="rounded-md border border-nvssBorder bg-nvssSurface p-6 shadow-[0_20px_60px_rgba(28,25,23,0.06)]">
       <div className="flex size-14 items-center justify-center rounded-md bg-nvssBg text-nvssGreen">
         <Icon size={28} />
       </div>
@@ -168,7 +168,7 @@ function RoleCard({ icon: Icon, title, description, actionLabel, onClick }) {
       <button
         type="button"
         onClick={onClick}
-        className="mt-8 min-h-[52px] rounded-md bg-nvssGreenAction px-5 font-semibold text-white"
+        className="mt-8 min-h-[52px] rounded-md bg-nvssGreenAction px-5 font-semibold text-nvssSurface hover:bg-nvssAlert"
       >
         {actionLabel}
       </button>
@@ -187,7 +187,7 @@ function OrganizerLogin({ onSubmit }) {
           event.preventDefault()
           onSubmit({ email, password })
         }}
-        className="w-full rounded-md border border-nvssBorder bg-nvssSurface p-5"
+        className="w-full rounded-md border border-nvssBorder bg-nvssSurface p-5 shadow-[0_20px_60px_rgba(28,25,23,0.08)]"
       >
         <div className="mb-5">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nvssGreen">Testa piekļuve</p>
@@ -199,7 +199,7 @@ function OrganizerLogin({ onSubmit }) {
           <input
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="mt-1 min-h-[48px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
+            className="mt-1 min-h-[48px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-nvssText"
             placeholder="organizer@nvssgrid.local"
           />
         </label>
@@ -209,11 +209,11 @@ function OrganizerLogin({ onSubmit }) {
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="mt-1 min-h-[48px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white"
+            className="mt-1 min-h-[48px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-nvssText"
             placeholder="testa-parole"
           />
         </label>
-        <button type="submit" className="mt-5 min-h-[52px] w-full rounded-md bg-nvssGreenAction px-4 font-semibold text-white">
+        <button type="submit" className="mt-5 min-h-[52px] w-full rounded-md bg-nvssGreenAction px-4 font-semibold text-nvssSurface hover:bg-nvssAlert">
           Turpināt uz organizatora skatu
         </button>
       </form>

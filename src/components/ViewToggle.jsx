@@ -8,7 +8,7 @@ export function ViewToggle({ view, onViewChange }) {
         type="button"
         onClick={() => onViewChange('organizer')}
         className={`flex min-h-[44px] items-center justify-center gap-2 rounded px-4 text-sm font-semibold ${
-          view === 'organizer' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted hover:text-white'
+          view === 'organizer' ? 'bg-nvssGreenAction text-nvssSurface' : 'text-nvssMuted hover:text-nvssText'
         }`}
       >
         <Grid3X3 size={18} />
@@ -18,7 +18,7 @@ export function ViewToggle({ view, onViewChange }) {
         type="button"
         onClick={() => onViewChange('player')}
         className={`flex min-h-[44px] items-center justify-center gap-2 rounded px-4 text-sm font-semibold ${
-          view === 'player' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted hover:text-white'
+          view === 'player' ? 'bg-nvssGreenAction text-nvssSurface' : 'text-nvssMuted hover:text-nvssText'
         }`}
       >
         <User size={18} />

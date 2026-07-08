@@ -95,7 +95,7 @@ export function OrganizerDashboard({
                   <button
                     type="button"
                     onClick={() => setViewMode('table')}
-                    className={`flex min-h-[36px] items-center gap-2 rounded px-3 text-sm font-semibold ${viewMode === 'table' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
+                    className={`flex min-h-[36px] items-center gap-2 rounded px-3 text-sm font-semibold ${viewMode === 'table' ? 'bg-nvssGreenAction text-nvssSurface' : 'text-nvssMuted'}`}
                   >
                     <Rows3 size={15} />
                     Tabula
@@ -103,7 +103,7 @@ export function OrganizerDashboard({
                   <button
                     type="button"
                     onClick={() => setViewMode('compact')}
-                    className={`flex min-h-[36px] items-center gap-2 rounded px-3 text-sm font-semibold ${viewMode === 'compact' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
+                    className={`flex min-h-[36px] items-center gap-2 rounded px-3 text-sm font-semibold ${viewMode === 'compact' ? 'bg-nvssGreenAction text-nvssSurface' : 'text-nvssMuted'}`}
                   >
                     <LayoutGrid size={15} />
                     Kompakts
@@ -115,14 +115,14 @@ export function OrganizerDashboard({
                 <button
                   type="button"
                   onClick={() => setSortBy('table')}
-                  className={`min-h-[36px] rounded px-3 text-sm font-semibold ${sortBy === 'table' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
+                  className={`min-h-[36px] rounded px-3 text-sm font-semibold ${sortBy === 'table' ? 'bg-nvssGreenAction text-nvssSurface' : 'text-nvssMuted'}`}
                 >
                   Galda
                 </button>
                 <button
                   type="button"
                   onClick={() => setSortBy('status')}
-                  className={`min-h-[36px] rounded px-3 text-sm font-semibold ${sortBy === 'status' ? 'bg-nvssGreenAction text-white' : 'text-nvssMuted'}`}
+                  className={`min-h-[36px] rounded px-3 text-sm font-semibold ${sortBy === 'status' ? 'bg-nvssGreenAction text-nvssSurface' : 'text-nvssMuted'}`}
                 >
                   Statusa
                 </button>
@@ -169,14 +169,14 @@ export function OrganizerDashboard({
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 px-4 py-6">
           <div className="max-h-[calc(100vh-48px)] w-full max-w-3xl overflow-y-auto rounded-md border border-nvssBorder bg-nvssSurface p-4 shadow-2xl">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-white">
+              <div className="flex items-center gap-2 text-sm font-semibold text-nvssText">
                 <Trophy size={18} className="text-nvssGreen" />
                 Turnīra iestatījumi
               </div>
               <button
                 type="button"
                 onClick={() => setIsSettingsOpen(false)}
-                className="min-h-[36px] rounded border border-nvssBorder px-3 text-sm text-nvssMuted hover:text-white"
+                className="min-h-[36px] rounded border border-nvssBorder px-3 text-sm text-nvssMuted hover:text-nvssText"
               >
                 Aizvērt
               </button>
@@ -190,7 +190,7 @@ export function OrganizerDashboard({
             >
               <label className="block text-xs font-semibold text-nvssMuted">
                 Turnīra nosaukums
-                <input className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white" value={setup.name} onChange={(e) => updateSetup('name', e.target.value)} />
+                <input className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-nvssText" value={setup.name} onChange={(e) => updateSetup('name', e.target.value)} />
               </label>
               <div className="mt-3 grid grid-cols-2 gap-3">
                 {[
@@ -202,7 +202,7 @@ export function OrganizerDashboard({
                 ].map(([field, label]) => (
                   <label key={field} className="block text-xs font-semibold text-nvssMuted">
                     {label}
-                    <input type="number" min="0" className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-white" value={setup[field]} onChange={(e) => updateSetup(field, e.target.value)} />
+                    <input type="number" min="0" className="mt-1 min-h-[44px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-nvssText" value={setup[field]} onChange={(e) => updateSetup(field, e.target.value)} />
                   </label>
                 ))}
               </div>
@@ -210,11 +210,11 @@ export function OrganizerDashboard({
                 <button
                   type="button"
                   onClick={() => setIsSettingsOpen(false)}
-                  className="min-h-[44px] rounded border border-nvssBorder px-4 font-semibold text-nvssMuted hover:text-white"
+                  className="min-h-[44px] rounded border border-nvssBorder px-4 font-semibold text-nvssMuted hover:text-nvssText"
                 >
                   Atcelt
                 </button>
-                <button type="submit" className="min-h-[44px] rounded bg-nvssGreenAction px-4 font-semibold text-white">
+                <button type="submit" className="min-h-[44px] rounded bg-nvssGreenAction px-4 font-semibold text-nvssSurface hover:bg-nvssAlert">
                   Saglabāt iestatījumus
                 </button>
               </div>
@@ -355,9 +355,9 @@ function OverrideModal({
             <div className="min-w-0">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-nvssGreen">Rezultāta rediģēšana</p>
-                <h3 className="mt-1 text-2xl font-semibold text-white">{title}</h3>
+                <h3 className="mt-1 text-2xl font-semibold text-nvssText">{title}</h3>
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-nvssMuted">
-                  <span className="rounded-full bg-nvssBg px-3 py-1 font-semibold text-white">Galds {match.table}</span>
+                  <span className="rounded-full bg-nvssBg px-3 py-1 font-semibold text-nvssText">Galds {match.table}</span>
                   <StatusBadge status={status} />
                 </div>
               </div>
@@ -367,14 +367,14 @@ function OverrideModal({
               <p className="text-xs uppercase tracking-[0.12em] text-nvssMuted">Pašreizējais rezultāts</p>
               <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-white">{currentScore[0]?.name}</p>
+                  <p className="truncate text-sm font-semibold text-nvssText">{currentScore[0]?.name}</p>
                   <p className="truncate text-xs text-nvssMuted">{currentScore[0]?.confirmed ? 'Apstiprināja' : 'Nav apstiprināts'}</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-mono text-3xl font-black text-white">{currentScoreLine}</p>
+                  <p className="font-mono text-3xl font-black text-nvssText">{currentScoreLine}</p>
                 </div>
                 <div className="min-w-0 sm:text-right">
-                  <p className="truncate text-sm font-semibold text-white">{currentScore[1]?.name}</p>
+                  <p className="truncate text-sm font-semibold text-nvssText">{currentScore[1]?.name}</p>
                   <p className="truncate text-xs text-nvssMuted">{currentScore[1]?.confirmed ? 'Apstiprināja' : 'Nav apstiprināts'}</p>
                 </div>
               </div>
@@ -384,7 +384,7 @@ function OverrideModal({
               type="button"
               onClick={onClose}
               aria-label="Aizvērt"
-              className="inline-flex size-10 self-start items-center justify-center rounded-lg border border-nvssBorder text-nvssMuted hover:text-white lg:justify-self-end"
+              className="inline-flex size-10 self-start items-center justify-center rounded-lg border border-nvssBorder text-nvssMuted hover:text-nvssText lg:justify-self-end"
             >
               <X size={18} />
             </button>
@@ -397,7 +397,7 @@ function OverrideModal({
               <div className="rounded-xl border border-nvssBorder bg-nvssBg p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-white">Jaunais rezultāts</p>
+                    <p className="text-sm font-semibold text-nvssText">Jaunais rezultāts</p>
                   </div>
                   <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isDraftValid ? 'bg-emerald-500/15 text-emerald-200' : 'bg-amber-500/15 text-amber-200'}`}>
                     {isDraftValid ? 'Var saglabāt' : 'Nepilnīgs melnraksts'}
@@ -407,7 +407,7 @@ function OverrideModal({
                 <div className="mt-4 rounded-xl border border-nvssBorder bg-nvssSurface px-4 py-3">
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-sm text-nvssMuted">Rezultāts pēc saglabāšanas</span>
-                    <span className="font-mono text-2xl font-black text-white">{draftScoreLine}</span>
+                    <span className="font-mono text-2xl font-black text-nvssText">{draftScoreLine}</span>
                   </div>
                   <p className="mt-2 text-sm text-nvssMuted">
                     {isDrawDraft
@@ -421,7 +421,7 @@ function OverrideModal({
                 <div className="mt-4 space-y-3">
                   {setResults.map((set, index) => (
                     <div key={`${index}-${set.winnerId}`} className="grid gap-3 rounded-xl border border-nvssBorder bg-nvssSurface p-3 md:grid-cols-[96px_minmax(0,1fr)_120px]">
-                      <div className="flex items-center text-sm font-semibold text-white">
+                      <div className="flex items-center text-sm font-semibold text-nvssText">
                         Sets {index + 1}
                       </div>
                       <label className="block text-sm font-medium text-nvssMuted">
@@ -429,7 +429,7 @@ function OverrideModal({
                         <select
                           value={set.winnerId}
                           onChange={(event) => updateSetWinner(index, event.target.value)}
-                          className="mt-1 min-h-[44px] w-full rounded-lg border border-nvssBorder bg-nvssBg px-3 text-white"
+                          className="mt-1 min-h-[44px] w-full rounded-lg border border-nvssBorder bg-nvssBg px-3 text-nvssText"
                         >
                           {winnerOptions.map((player) => (
                             <option key={player.id} value={player.id}>{player.name}</option>
@@ -440,7 +440,7 @@ function OverrideModal({
                         <button
                           type="button"
                           onClick={() => removeSet(index)}
-                          className="min-h-[44px] w-full rounded-lg border border-nvssBorder px-3 text-sm font-semibold text-nvssMuted hover:text-white"
+                          className="min-h-[44px] w-full rounded-lg border border-nvssBorder px-3 text-sm font-semibold text-nvssMuted hover:text-nvssText"
                         >
                           Noņemt
                         </button>
@@ -454,7 +454,7 @@ function OverrideModal({
                     type="button"
                     onClick={addSet}
                     disabled={!canAddSet}
-                    className={`min-h-[44px] rounded-lg px-4 text-sm font-semibold ${canAddSet ? 'bg-nvssGreenAction text-white' : 'cursor-not-allowed border border-nvssBorder text-nvssMuted'}`}
+                    className={`min-h-[44px] rounded-lg px-4 text-sm font-semibold ${canAddSet ? 'bg-nvssGreenAction text-nvssSurface hover:bg-nvssAlert' : 'cursor-not-allowed border border-nvssBorder text-nvssMuted'}`}
                   >
                     Pievienot setu
                   </button>
@@ -473,14 +473,14 @@ function OverrideModal({
               </div>
 
               <div className="rounded-xl border border-nvssBorder bg-nvssBg p-4">
-                <p className="text-sm font-semibold text-white">Kāpēc rezultāts tiek labots?</p>
+                <p className="text-sm font-semibold text-nvssText">Kāpēc rezultāts tiek labots?</p>
                 <div className="mt-4 grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
                   <label className="block text-sm font-medium text-nvssMuted">
                     Iemesls
                     <select
                       value={reason}
                       onChange={(event) => onReasonChange(event.target.value)}
-                      className="mt-1 min-h-[44px] w-full rounded-lg border border-nvssBorder bg-nvssSurface px-3 text-white"
+                      className="mt-1 min-h-[44px] w-full rounded-lg border border-nvssBorder bg-nvssSurface px-3 text-nvssText"
                     >
                       <option value="referee_decision">Tiesneša lēmums</option>
                       <option value="score_entry_error">Nepareizi ievadīts rezultāts</option>
@@ -493,14 +493,14 @@ function OverrideModal({
                       value={note}
                       onChange={(event) => onNoteChange(event.target.value)}
                       rows={3}
-                      className="mt-1 w-full rounded-lg border border-nvssBorder bg-nvssSurface px-3 py-2 text-white"
+                      className="mt-1 w-full rounded-lg border border-nvssBorder bg-nvssSurface px-3 py-2 text-nvssText"
                       placeholder="Īss skaidrojums auditam"
                     />
                   </label>
                 </div>
                 {match.overrideMeta?.reason ? (
                   <div className="mt-4 rounded-xl border border-nvssBorder bg-nvssSurface px-4 py-3 text-sm">
-                    <p className="font-medium text-white">Iepriekšējais organizatora labojums</p>
+                    <p className="font-medium text-nvssText">Iepriekšējais organizatora labojums</p>
                     <p className="mt-1 text-nvssMuted">{match.overrideMeta.note || 'Nav iepriekšējās piezīmes'}</p>
                   </div>
                 ) : null}
@@ -516,10 +516,10 @@ function OverrideModal({
                 : 'Saglabāšana bloķēta, kamēr nav veikta pareiza ievade.'}
             </div>
             <div className="flex justify-end gap-2">
-              <button type="button" onClick={onClose} className="min-h-[44px] rounded-lg border border-nvssBorder px-4 font-semibold text-nvssMuted hover:text-white">
+              <button type="button" onClick={onClose} className="min-h-[44px] rounded-lg border border-nvssBorder px-4 font-semibold text-nvssMuted hover:text-nvssText">
                 Atcelt
               </button>
-              <button type="button" disabled={!isDraftValid} onClick={onSubmit} className="min-h-[44px] rounded-lg bg-nvssGreenAction px-5 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
+              <button type="button" disabled={!isDraftValid} onClick={onSubmit} className="min-h-[44px] rounded-lg bg-nvssGreenAction px-5 font-semibold text-nvssSurface disabled:cursor-not-allowed disabled:opacity-50 hover:bg-nvssAlert">
                 Saglabāt rezultātu
               </button>
             </div>

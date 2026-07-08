@@ -36,7 +36,7 @@ export function RefereeButton({ disabled, onClick, label = 'Izsaukt tiesnesi', r
         disabled={disabled}
         onClick={handleClick}
         className={`flex min-h-[56px] w-full items-center justify-center gap-2 rounded border px-4 text-lg font-black disabled:cursor-not-allowed disabled:border-nvssBorder disabled:text-nvssMuted ${
-          armed ? 'border-nvssAlert bg-nvssAlert text-white' : 'border-nvssAlert text-nvssAlert'
+          armed ? 'border-nvssAlert bg-nvssAlert text-nvssSurface' : 'border-nvssAlert text-nvssAlert hover:bg-nvssAlert hover:text-nvssSurface'
         }`}
       >
         <ShieldAlert size={22} />

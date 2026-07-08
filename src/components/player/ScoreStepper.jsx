@@ -42,7 +42,7 @@ function ScoreRow({ name, label, score, disabled, addDisabled, onAdd, onRemove }
     <div className="grid grid-cols-[1fr_auto] items-center gap-3 rounded border border-nvssBorder bg-nvssSurface p-3">
       <div className="min-w-0">
         <p className="text-xs uppercase text-nvssMuted">{label}</p>
-        <p className="truncate text-base font-black text-white">{name}</p>
+        <p className="truncate text-base font-black text-nvssText">{name}</p>
       </div>
       <div className="flex items-center gap-2">
         <button
@@ -50,17 +50,17 @@ function ScoreRow({ name, label, score, disabled, addDisabled, onAdd, onRemove }
           aria-label={`Noņemt setu: ${name}`}
           disabled={disabled || score <= 0}
           onClick={onRemove}
-          className="flex size-11 items-center justify-center rounded bg-nvssSlateAction text-white disabled:cursor-not-allowed disabled:text-nvssMuted"
+          className="flex size-11 items-center justify-center rounded bg-nvssSlateAction text-nvssText disabled:cursor-not-allowed disabled:text-nvssMuted"
         >
           <Minus size={20} />
         </button>
-        <span className="min-w-8 text-center text-2xl font-black text-white">{score}</span>
+        <span className="min-w-8 text-center text-2xl font-black text-nvssText">{score}</span>
         <button
           type="button"
           aria-label={`Pievienot setu: ${name}`}
           disabled={disabled || addDisabled}
           onClick={onAdd}
-          className="flex size-11 items-center justify-center rounded bg-nvssGreenAction text-white disabled:cursor-not-allowed disabled:bg-nvssSlateAction disabled:text-nvssMuted"
+          className="flex size-11 items-center justify-center rounded bg-nvssGreenAction text-nvssSurface disabled:cursor-not-allowed disabled:bg-nvssSlateAction disabled:text-nvssMuted"
         >
           <Plus size={20} />
         </button>

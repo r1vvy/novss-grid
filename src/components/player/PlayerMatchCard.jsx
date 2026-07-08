@@ -20,21 +20,21 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
   const playerRequestedReferee = match.refereeRequestedBy === player.id
 
   return (
-    <section className="rounded-md border border-white/15 bg-black p-4">
+    <section className="rounded-md border border-nvssBorder bg-nvssSurface p-4 shadow-[0_20px_60px_rgba(28,25,23,0.08)]">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm uppercase text-nvssMuted">Galds</p>
-          <p className="text-6xl font-black leading-none text-white">{match.table}</p>
+          <p className="text-6xl font-black leading-none text-nvssText">{match.table}</p>
         </div>
-        <div className="rounded border border-white/20 px-3 py-2 text-right">
+        <div className="rounded border border-nvssBorder px-3 py-2 text-right">
           <p className="text-xs text-nvssMuted">Statuss</p>
-          <p className="font-bold text-white">{translateStatus(status)}</p>
+          <p className="font-bold text-nvssText">{translateStatus(status)}</p>
         </div>
       </div>
 
       <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <PlayerName name={player.name} label="Tu" />
-        <div className="text-center text-5xl font-black text-white">{playerScore} : {opponentScore}</div>
+        <div className="text-center text-5xl font-black text-nvssText">{playerScore} : {opponentScore}</div>
         <PlayerName
           name={opponent?.name || 'Pretinieks'}
           label="Pretinieks"
@@ -68,7 +68,7 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
           type="button"
           disabled={playerConfirmed}
           onClick={() => onConfirm(match.id, player.id)}
-          className="mt-3 flex min-h-[56px] w-full items-center justify-center gap-2 rounded bg-nvssBlue px-4 text-lg font-black text-white disabled:bg-nvssSlateAction disabled:text-nvssMuted"
+          className="mt-3 flex min-h-[56px] w-full items-center justify-center gap-2 rounded bg-nvssBlue px-4 text-lg font-black text-nvssSurface disabled:bg-nvssSlateAction disabled:text-nvssMuted"
         >
           <BadgeCheck size={22} />
           {playerConfirmed ? 'Gaida pretinieka apstiprinājumu' : 'Apstiprināt gala rezultātu'}
@@ -115,7 +115,7 @@ function PlayerName({ name, label, representation, rating, alignRight = false })
   return (
     <div className={alignRight ? 'min-w-0 text-right' : 'min-w-0'}>
       <p className="text-xs uppercase text-nvssMuted">{label}</p>
-      <p className="truncate text-lg font-black text-white">{name}</p>
+      <p className="truncate text-lg font-black text-nvssText">{name}</p>
       {representation ? <p className="text-sm leading-snug text-nvssMuted">{representation}</p> : null}
       {rating ? <p className="text-sm leading-snug text-nvssMuted">{`Reitings ${rating}`}</p> : null}
     </div>

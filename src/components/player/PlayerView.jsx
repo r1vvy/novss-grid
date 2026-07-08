@@ -22,10 +22,10 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
             const ok = onCheckIn(code)
             setError(ok ? '' : 'Reģistrācijas kods netika atrasts.')
           }}
-          className="w-full rounded-md border border-nvssBorder bg-black p-5"
+          className="w-full rounded-md border border-nvssBorder bg-nvssSurface p-5 shadow-[0_20px_60px_rgba(28,25,23,0.08)]"
         >
           <div className="mb-5 flex items-center gap-3">
-            <div className="flex size-12 items-center justify-center rounded bg-nvssGreenAction">
+            <div className="flex size-12 items-center justify-center rounded bg-nvssGreenAction text-nvssSurface">
               <User size={24} />
             </div>
             <div>
@@ -37,12 +37,12 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
             value={code}
             maxLength={6}
             onChange={(event) => setCode(event.target.value.toUpperCase())}
-            className="min-h-[60px] w-full rounded border border-white/30 bg-white px-4 text-center text-2xl font-black uppercase tracking-[0.2em] text-black"
+            className="min-h-[60px] w-full rounded border border-nvssBorder bg-nvssBg px-4 text-center text-2xl font-black uppercase tracking-[0.2em] text-nvssText"
             placeholder="ANNA42"
             aria-label="Reģistrācijas kods"
           />
           {error && <p className="mt-3 text-sm font-semibold text-nvssAlert">{error}</p>}
-          <button type="submit" className="mt-4 flex min-h-[56px] w-full items-center justify-center gap-2 rounded bg-nvssGreenAction px-4 text-lg font-black text-white">
+          <button type="submit" className="mt-4 flex min-h-[56px] w-full items-center justify-center gap-2 rounded bg-nvssGreenAction px-4 text-lg font-black text-nvssSurface hover:bg-nvssAlert">
             <BadgeCheck size={22} />
             Reģistrēties
           </button>
@@ -54,7 +54,7 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
   return (
     <main className="mx-auto min-h-[calc(100vh-90px)] max-w-md px-4 py-5">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <button type="button" onClick={onSignOut} className="flex min-h-[44px] items-center gap-1 rounded border border-nvssBorder px-3 text-sm text-nvssMuted">
+        <button type="button" onClick={onSignOut} className="flex min-h-[44px] items-center gap-1 rounded border border-nvssBorder bg-nvssSurface px-3 text-sm text-nvssMuted hover:text-nvssText">
           <ChevronLeft size={18} />
           Mainīt
         </button>
@@ -83,7 +83,7 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
           onCancelReferee={onCancelReferee}
         />
       ) : (
-        <section className="rounded-md border border-nvssBorder bg-black p-5 text-center">
+        <section className="rounded-md border border-nvssBorder bg-nvssSurface p-5 text-center">
           <p className="text-2xl font-black">Nav aktīva galda piešķīruma</p>
           <p className="mt-2 text-sm text-nvssMuted">Jūsu reģistrācija ir derīga, bet šajā kārtā jums nav piešķirts galds.</p>
         </section>

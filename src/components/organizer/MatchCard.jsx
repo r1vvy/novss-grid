@@ -72,7 +72,7 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
       </div>
       {isDisputed ? (
         <div className="mt-3 flex items-center justify-end border-t border-nvssBorder pt-3 text-xs text-nvssMuted">
-          <button type="button" onClick={() => onClearAlert(match.id)} className="shrink-0 rounded border border-nvssAlert px-2 py-1 font-semibold text-nvssAlert hover:bg-nvssAlert hover:text-white">
+          <button type="button" onClick={() => onClearAlert(match.id)} className="shrink-0 rounded border border-nvssAlert px-2 py-1 font-semibold text-nvssAlert hover:bg-nvssAlert hover:text-nvssSurface">
             Noņemt brīdinājumu
           </button>
         </div>
