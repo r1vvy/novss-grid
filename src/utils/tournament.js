@@ -45,10 +45,10 @@ export function getOverrideAuditLabel(match) {
 export function deriveMatchStatus(match) {
   if (match.refereeRequested || match.status === 'disputed') return 'disputed'
   if (match.status === 'investigating') return 'investigating'
-  if (match.status === 'verified' || match.status === 'completed') return 'verified'
+  if (match.status === 'verified' || match.status === 'completed') return 'completed'
   if (getMatchWinnerId(match)) {
     const confirmed = Object.values(match.confirmations || {}).filter(Boolean).length
-    return confirmed >= 2 ? 'verified' : 'awaiting_confirmation'
+    return confirmed >= 2 ? 'completed' : 'awaiting_confirmation'
   }
   if (match.setResults.length > 0) return 'in_progress'
   return match.status || 'scheduled'
@@ -110,7 +110,7 @@ export function confirmFinalScore(tournament, matchId, playerId) {
     return {
       ...match,
       confirmations,
-      status: fullyConfirmed ? 'verified' : 'awaiting_confirmation',
+      status: fullyConfirmed ? 'completed' : 'awaiting_confirmation',
     }
   })
 }
@@ -240,12 +240,12 @@ export function updatePlayer(tournament, playerId, updates) {
 export function calculateStandings(tournament) {
   return tournament.players
     .map((player) => {
-      const verifiedMatches = tournament.matches.filter(
+      const completedMatches = tournament.matches.filter(
         (match) =>
-          deriveMatchStatus(match) === 'verified'
+          deriveMatchStatus(match) === 'completed'
           && (match.playerAId === player.id || match.playerBId === player.id),
       )
-      const points = verifiedMatches.reduce((total, match) => {
+      const points = completedMatches.reduce((total, match) => {
         const score = getSetScore(match, player.id)
         const opponentScore = getSetScore(match, getOpponentId(match, player.id))
         if (score === opponentScore) return total + tournament.pointAllocation.draw
@@ -257,7 +257,7 @@ export function calculateStandings(tournament) {
 
       return {
         ...player,
-        played: verifiedMatches.length,
+        played: completedMatches.length,
         points,
         buchholz: calculateBuchholz(player.id, tournament),
       }
@@ -269,7 +269,7 @@ export function calculateBuchholz(playerId, tournament) {
   const opponents = tournament.matches
     .filter(
       (match) =>
-        deriveMatchStatus(match) === 'verified'
+        deriveMatchStatus(match) === 'completed'
         && (match.playerAId === playerId || match.playerBId === playerId),
     )
     .map((match) => getOpponentId(match, playerId))
@@ -277,7 +277,7 @@ export function calculateBuchholz(playerId, tournament) {
   return opponents.reduce((sum, opponentId) => {
     const opponentMatches = tournament.matches.filter(
       (match) =>
-        deriveMatchStatus(match) === 'verified'
+        deriveMatchStatus(match) === 'completed'
         && (match.playerAId === opponentId || match.playerBId === opponentId),
     )
     return sum + opponentMatches.length
@@ -286,7 +286,7 @@ export function calculateBuchholz(playerId, tournament) {
 
 export function canGenerateNextRound(tournament) {
   const currentMatches = getCurrentRoundMatches(tournament)
-  return currentMatches.length > 0 && currentMatches.every((match) => deriveMatchStatus(match) === 'verified')
+  return currentMatches.length > 0 && currentMatches.every((match) => deriveMatchStatus(match) === 'completed')
 }
 
 export function generateNextSwissRound(tournament) {
@@ -386,7 +386,7 @@ function buildOverriddenMatch(match, setResults, metadata) {
       [match.playerBId]: true,
     },
     refereeRequested: false,
-    status: 'verified',
+    status: 'completed',
     overrideMeta: {
       editedBy: metadata.editedBy || 'Organizators',
       reason: metadata.reason || 'other',

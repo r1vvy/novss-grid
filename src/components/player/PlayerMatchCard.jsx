@@ -15,7 +15,7 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
   const status = deriveMatchStatus(match)
   const isScoreKeeper = player.id === match.playerAId
   const scoreLocked = status === 'disputed'
-  const targetReached = Boolean(status === 'awaiting_confirmation' || status === 'verified')
+  const targetReached = Boolean(status === 'awaiting_confirmation' || status === 'completed')
   const playerConfirmed = Boolean(match.confirmations?.[player.id])
 
   return (
@@ -73,9 +73,9 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
         </button>
       )}
 
-      {status === 'verified' && (
+      {status === 'completed' && (
         <div className="mt-3 rounded border border-nvssGreen bg-nvssGreen/10 p-3 text-center font-semibold text-nvssGreen">
-          Gala rezultāts apstiprināts
+          Mačs pabeigts
         </div>
       )}
 
@@ -96,7 +96,7 @@ function translateStatus(status) {
     in_progress: 'Notiek',
     disputed: 'Strīds',
     awaiting_confirmation: 'Gaida apstiprinājumu',
-    verified: 'Apstiprināts',
+    completed: 'Pabeigts',
   }
 
   return labels[status] || status

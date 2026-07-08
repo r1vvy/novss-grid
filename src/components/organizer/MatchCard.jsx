@@ -8,7 +8,7 @@ const statusLabels = {
   disputed: 'Strīds',
   investigating: 'Izmeklē',
   awaiting_confirmation: 'Gaida apstiprinājumu',
-  verified: 'Apstiprināts',
+  completed: 'Pabeigts',
 }
 
 export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating, onOpenOverride, dragProps = {} }) {
@@ -108,9 +108,9 @@ function StatusBadge({ status }) {
     disputed: 'text-nvssAlert border-nvssAlert',
     investigating: 'text-amber-200 border-amber-400',
     awaiting_confirmation: 'text-nvssBlue border-nvssBlue',
-    verified: 'text-nvssGreen border-nvssBorder',
+    completed: 'text-nvssGreen border-nvssBorder',
   }
-  const Icon = status === 'disputed' ? AlertTriangle : status === 'investigating' ? Search : status === 'verified' ? CheckCircle2 : Clock
+  const Icon = status === 'disputed' ? AlertTriangle : status === 'investigating' ? Search : status === 'completed' ? CheckCircle2 : Clock
   return (
     <span className={`inline-flex items-center gap-1 rounded border px-2 py-1 text-xs font-semibold ${classes[status]}`}>
       <Icon size={14} className={status === 'in_progress' ? 'animate-pulse' : ''} />

@@ -8,7 +8,7 @@ const statusLabels = {
   disputed: 'Strīds',
   investigating: 'Izmeklē',
   awaiting_confirmation: 'Gaida apstiprinājumu',
-  verified: 'Apstiprināts',
+  completed: 'Pabeigts',
 }
 
 const compactStatusLabels = {
@@ -17,7 +17,7 @@ const compactStatusLabels = {
   disputed: 'Strīds',
   investigating: 'Izmeklē',
   awaiting_confirmation: 'Gaida',
-  verified: 'Apst.',
+  completed: 'Pab.',
 }
 
 export function TableGrid({
@@ -246,7 +246,7 @@ const compactClasses = {
   disputed: 'border-nvssAlert/80 bg-gradient-to-b from-nvssAlert/22 to-nvssAlert/12 text-white',
   investigating: 'border-amber-400/80 bg-gradient-to-b from-amber-400/22 to-amber-400/10 text-white',
   awaiting_confirmation: 'border-nvssBlue/75 bg-gradient-to-b from-nvssBlue/22 to-nvssBlue/12 text-white',
-  verified: 'border-emerald-300/45 bg-gradient-to-b from-emerald-500/16 to-emerald-500/08 text-emerald-100',
+  completed: 'border-emerald-300/45 bg-gradient-to-b from-emerald-500/16 to-emerald-500/08 text-emerald-100',
 }
 
 const compactBadgeClasses = {
@@ -255,7 +255,7 @@ const compactBadgeClasses = {
   disputed: 'border-nvssAlert/40 bg-nvssAlert/10 text-red-100',
   investigating: 'border-amber-300/40 bg-amber-300/10 text-amber-100',
   awaiting_confirmation: 'border-nvssBlue/40 bg-nvssBlue/10 text-blue-100',
-  verified: 'border-emerald-300/35 bg-emerald-400/10 text-emerald-100',
+  completed: 'border-emerald-300/35 bg-emerald-400/10 text-emerald-100',
 }
 
 export function CompactLegend() {
@@ -272,7 +272,7 @@ export function CompactLegend() {
 }
 
 function StatusIcon({ status }) {
-  const Icon = status === 'disputed' ? AlertTriangle : status === 'investigating' ? Search : status === 'verified' ? CheckCircle2 : Clock
+  const Icon = status === 'disputed' ? AlertTriangle : status === 'investigating' ? Search : status === 'completed' ? CheckCircle2 : Clock
   return <Icon size={12} className={status === 'in_progress' ? 'animate-pulse' : ''} />
 }
 
@@ -282,7 +282,7 @@ const badgeClasses = {
   disputed: 'text-nvssAlert border-nvssAlert',
   investigating: 'text-amber-200 border-amber-400',
   awaiting_confirmation: 'text-nvssBlue border-nvssBlue',
-  verified: 'text-nvssGreen border-nvssBorder',
+  completed: 'text-nvssGreen border-nvssBorder',
 }
 
 export function MatchSummaryRow({ tournament, match }) {

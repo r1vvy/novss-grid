@@ -264,7 +264,7 @@ const modalStatusClasses = {
   disputed: 'text-nvssAlert border-nvssAlert',
   investigating: 'text-amber-200 border-amber-400',
   awaiting_confirmation: 'text-nvssBlue border-nvssBlue',
-  verified: 'text-nvssGreen border-nvssBorder',
+  completed: 'text-nvssGreen border-nvssBorder',
 }
 const modalStatusLabels = {
   scheduled: 'Ieplānots',
@@ -272,7 +272,7 @@ const modalStatusLabels = {
   disputed: 'Strīds',
   investigating: 'Izmeklē',
   awaiting_confirmation: 'Gaida apstiprinājumu',
-  verified: 'Apstiprināts',
+  completed: 'Pabeigts',
 }
 
 function compareMatches(a, b, sortBy) {
@@ -283,7 +283,7 @@ function compareMatches(a, b, sortBy) {
       in_progress: 2,
       awaiting_confirmation: 3,
       scheduled: 4,
-      verified: 5,
+      completed: 5,
     }
 
     const statusDiff = (statusOrder[deriveMatchStatus(a)] ?? 99) - (statusOrder[deriveMatchStatus(b)] ?? 99)
@@ -543,7 +543,7 @@ function defaultReasonForStatus(status) {
 }
 
 function StatusBadge({ status }) {
-  const Icon = status === 'disputed' ? AlertTriangle : status === 'verified' ? CheckCircle2 : Clock
+  const Icon = status === 'disputed' ? AlertTriangle : status === 'completed' ? CheckCircle2 : Clock
   return (
     <span className={`inline-flex items-center gap-1 rounded border px-2 py-1 text-xs font-semibold ${modalStatusClasses[status]}`}>
       <Icon size={14} className={status === 'in_progress' ? 'animate-pulse' : ''} />
