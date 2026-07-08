@@ -129,19 +129,27 @@ export function confirmFinalScore(tournament, matchId, playerId) {
   })
 }
 
-export function requestReferee(tournament, matchId) {
-  return updateMatch(tournament, matchId, (match) => ({
-    ...match,
-    refereeRequested: true,
-    status: 'disputed',
-  }))
+export function requestReferee(tournament, matchId, playerId) {
+  return updateMatch(tournament, matchId, (match) => {
+    if (deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'disputed') return match
+
+    return {
+      ...match,
+      refereeRequested: true,
+      refereeRequestedBy: playerId || null,
+      status: 'disputed',
+    }
+  })
 }
 
-export function clearRefereeRequest(tournament, matchId) {
+export function clearRefereeRequest(tournament, matchId, playerId) {
   return updateMatch(tournament, matchId, (match) => {
+    if (playerId && match.refereeRequestedBy && match.refereeRequestedBy !== playerId) return match
+
     const restored = {
       ...match,
       refereeRequested: false,
+      refereeRequestedBy: null,
       status: match.setResults.length > 0 ? 'in_progress' : 'scheduled',
     }
     return {
@@ -155,6 +163,7 @@ export function markMatchInvestigating(tournament, matchId) {
   return updateMatch(tournament, matchId, (match) => ({
     ...match,
     refereeRequested: false,
+    refereeRequestedBy: null,
     status: 'investigating',
   }))
 }
@@ -164,6 +173,7 @@ export function resetMatchInvestigation(tournament, matchId) {
     const restored = {
       ...match,
       refereeRequested: false,
+      refereeRequestedBy: null,
       status: match.setResults.length > 0 ? 'in_progress' : 'scheduled',
     }
 
@@ -339,6 +349,7 @@ export function generateNextSwissRound(tournament) {
       [playerBId]: false,
     },
     refereeRequested: false,
+    refereeRequestedBy: null,
   }))
 
   return {
@@ -410,6 +421,7 @@ function buildOverriddenMatch(match, setResults, metadata, maxSetsPerMatch = mat
       [match.playerBId]: true,
     },
     refereeRequested: false,
+    refereeRequestedBy: null,
     status: 'completed',
     overrideMeta: {
       editedBy: metadata.editedBy || 'Organizators',

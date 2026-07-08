@@ -121,7 +121,8 @@ export default function App() {
           onScoreAdd={(matchId, winnerId, actorPlayerId) => setTournament((current) => appendSetResult(current, matchId, winnerId, actorPlayerId))}
           onScoreRemove={(matchId, winnerId, actorPlayerId) => setTournament((current) => removeSetResult(current, matchId, winnerId, actorPlayerId))}
           onConfirm={(matchId, playerId) => setTournament((current) => confirmFinalScore(current, matchId, playerId))}
-          onCallReferee={(matchId) => setTournament((current) => requestReferee(current, matchId))}
+          onCallReferee={(matchId, playerId) => setTournament((current) => requestReferee(current, matchId, playerId))}
+          onCancelReferee={(matchId, playerId) => setTournament((current) => clearRefereeRequest(current, matchId, playerId))}
           onSignOut={() => {
             localStorage.removeItem(SESSION_KEY)
             setSelectedPlayerId(null)

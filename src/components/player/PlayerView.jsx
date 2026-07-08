@@ -3,7 +3,7 @@ import { BadgeCheck, ChevronLeft, MapPin, User } from 'lucide-react'
 import { PlayerMatchCard } from './PlayerMatchCard'
 import { getCurrentRoundMatches } from '../../utils/tournament'
 
-export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreRemove, onConfirm, onCallReferee, onSignOut }) {
+export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreRemove, onConfirm, onCallReferee, onCancelReferee, onSignOut }) {
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const currentMatch = useMemo(() => {
@@ -80,6 +80,7 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
           onScoreRemove={onScoreRemove}
           onConfirm={onConfirm}
           onCallReferee={onCallReferee}
+          onCancelReferee={onCancelReferee}
         />
       ) : (
         <section className="rounded-md border border-nvssBorder bg-black p-5 text-center">

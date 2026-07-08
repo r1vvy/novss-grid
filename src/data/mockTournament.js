@@ -48,13 +48,13 @@ export const initialTournament = {
     { id: 'p32', name: 'Santa Kalve', representation: 'Jelgava', rating: 1462, gender: 'female', registrationCode: 'SANTA2', status: 'checked_in' },
   ],
   matches: [
-    { id: 'r1-m1', table: 1, round: 1, status: 'completed', playerAId: 'p1', playerBId: 'p32', setResults: wins('p1', 4, 'p32', 1), confirmations: { p1: true, p32: true }, refereeRequested: false },
-    { id: 'r1-m2', table: 2, round: 1, status: 'completed', playerAId: 'p2', playerBId: 'p31', setResults: wins('p2', 4, 'p31', 2), confirmations: { p2: true, p31: true }, refereeRequested: false },
-    { id: 'r1-m3', table: 3, round: 1, status: 'completed', playerAId: 'p3', playerBId: 'p30', setResults: wins('p30', 4, 'p3', 2), confirmations: { p3: true, p30: true }, refereeRequested: false },
-    { id: 'r2-m1', table: 1, round: 2, status: 'completed', playerAId: 'p1', playerBId: 'p2', setResults: wins('p1', 4, 'p2', 2), confirmations: { p1: true, p2: true }, refereeRequested: false },
-    { id: 'r2-m2', table: 2, round: 2, status: 'completed', playerAId: 'p3', playerBId: 'p4', setResults: wins('p4', 4, 'p3', 2), confirmations: { p3: true, p4: true }, refereeRequested: false },
-    { id: 'r3-m1', table: 1, round: 3, status: 'completed', playerAId: 'p1', playerBId: 'p4', setResults: wins('p4', 4, 'p1', 2), confirmations: { p1: true, p4: true }, refereeRequested: false },
-    { id: 'r3-m2', table: 2, round: 3, status: 'completed', playerAId: 'p2', playerBId: 'p30', setResults: wins('p2', 4, 'p30', 0), confirmations: { p2: true, p30: true }, refereeRequested: false },
+    { id: 'r1-m1', table: 1, round: 1, status: 'completed', playerAId: 'p1', playerBId: 'p32', setResults: wins('p1', 4, 'p32', 1), confirmations: { p1: true, p32: true }, refereeRequested: false, refereeRequestedBy: null },
+    { id: 'r1-m2', table: 2, round: 1, status: 'completed', playerAId: 'p2', playerBId: 'p31', setResults: wins('p2', 4, 'p31', 2), confirmations: { p2: true, p31: true }, refereeRequested: false, refereeRequestedBy: null },
+    { id: 'r1-m3', table: 3, round: 1, status: 'completed', playerAId: 'p3', playerBId: 'p30', setResults: wins('p30', 4, 'p3', 2), confirmations: { p3: true, p30: true }, refereeRequested: false, refereeRequestedBy: null },
+    { id: 'r2-m1', table: 1, round: 2, status: 'completed', playerAId: 'p1', playerBId: 'p2', setResults: wins('p1', 4, 'p2', 2), confirmations: { p1: true, p2: true }, refereeRequested: false, refereeRequestedBy: null },
+    { id: 'r2-m2', table: 2, round: 2, status: 'completed', playerAId: 'p3', playerBId: 'p4', setResults: wins('p4', 4, 'p3', 2), confirmations: { p3: true, p4: true }, refereeRequested: false, refereeRequestedBy: null },
+    { id: 'r3-m1', table: 1, round: 3, status: 'completed', playerAId: 'p1', playerBId: 'p4', setResults: wins('p4', 4, 'p1', 2), confirmations: { p1: true, p4: true }, refereeRequested: false, refereeRequestedBy: null },
+    { id: 'r3-m2', table: 2, round: 3, status: 'completed', playerAId: 'p2', playerBId: 'p30', setResults: wins('p2', 4, 'p30', 0), confirmations: { p2: true, p30: true }, refereeRequested: false, refereeRequestedBy: null },
     ...roundFourMatches(),
   ],
 }
@@ -101,5 +101,6 @@ function roundFourMatches() {
       [playerBId]: status === 'completed',
     },
     refereeRequested: status === 'disputed',
+    refereeRequestedBy: status === 'disputed' ? playerAId : null,
   }))
 }

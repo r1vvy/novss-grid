@@ -4,7 +4,7 @@ import { RefereeButton } from './RefereeButton'
 import { ScoreStepper } from './ScoreStepper'
 import { deriveMatchStatus, getMatchPlayers, getOpponentId, getSetScore } from '../../utils/tournament'
 
-export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScoreRemove, onConfirm, onCallReferee }) {
+export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScoreRemove, onConfirm, onCallReferee, onCancelReferee }) {
   const opponentId = getOpponentId(match, player.id)
   const { playerA, playerB } = getMatchPlayers(match, tournament.players)
   const opponent = opponentId === match.playerAId ? playerA : playerB
@@ -17,6 +17,7 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
   const scoreLocked = status === 'disputed'
   const targetReached = Boolean(status === 'awaiting_confirmation' || status === 'completed')
   const playerConfirmed = Boolean(match.confirmations?.[player.id])
+  const playerRequestedReferee = match.refereeRequestedBy === player.id
 
   return (
     <section className="rounded-md border border-white/15 bg-black p-4">
@@ -37,7 +38,8 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
         <PlayerName
           name={opponent?.name || 'Pretinieks'}
           label="Pretinieks"
-          metadata={formatPlayerMeta(opponent)}
+          representation={opponent?.representation}
+          rating={opponent?.rating}
           alignRight
         />
       </div>
@@ -81,11 +83,18 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
 
       {status === 'disputed' && (
         <div className="mt-3 rounded border border-nvssAlert bg-nvssAlert/10 p-3 text-center font-semibold text-nvssAlert">
-          Izsaukts tiesnesis. Rezultāta ievade ir bloķēta.
+          {playerRequestedReferee
+            ? 'Tu izsauci tiesnesi. Vari atsaukt izsaukumu, kamēr organizators to vēl nav pārņēmis.'
+            : 'Izsaukts tiesnesis. Rezultāta ievade ir bloķēta.'}
         </div>
       )}
 
-      <RefereeButton disabled={status === 'disputed'} onClick={() => onCallReferee(match.id)} />
+      <RefereeButton
+        disabled={status === 'disputed' && !playerRequestedReferee}
+        onClick={() => (playerRequestedReferee ? onCancelReferee(match.id, player.id) : onCallReferee(match.id, player.id))}
+        label={playerRequestedReferee ? 'Atcelt tiesneša izsaukumu' : 'Izsaukt tiesnesi'}
+        requireConfirm={!playerRequestedReferee}
+      />
     </section>
   )
 }
@@ -102,21 +111,13 @@ function translateStatus(status) {
   return labels[status] || status
 }
 
-function PlayerName({ name, label, metadata, alignRight = false }) {
+function PlayerName({ name, label, representation, rating, alignRight = false }) {
   return (
     <div className={alignRight ? 'min-w-0 text-right' : 'min-w-0'}>
       <p className="text-xs uppercase text-nvssMuted">{label}</p>
       <p className="truncate text-lg font-black text-white">{name}</p>
-      {metadata ? <p className="truncate text-sm text-nvssMuted">{metadata}</p> : null}
+      {representation ? <p className="text-sm leading-snug text-nvssMuted">{representation}</p> : null}
+      {rating ? <p className="text-sm leading-snug text-nvssMuted">{`Reitings ${rating}`}</p> : null}
     </div>
   )
-}
-
-function formatPlayerMeta(player) {
-  if (!player) return null
-
-  return [
-    player.representation || null,
-    player.rating ? `Reitings ${player.rating}` : null,
-  ].filter(Boolean).join(' · ')
 }
