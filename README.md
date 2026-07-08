@@ -18,7 +18,3 @@ The core philosophy of the app is to decentralize match data entry. By shifting 
 
 ---
 *Note: This repository currently contains a fully functional frontend MVP sandbox built with pre-configured mock data, allowing you to simulate a complete tournament lifecycle right in the browser.*
-
-## Implementation Agent Brief
-
-See [IMPLEMENTATION_AGENT.md](agents/IMPLEMENTATION_AGENT.md) for the detailed frontend MVP implementation plan, component architecture, mock data contract, UI requirements, and acceptance criteria.
