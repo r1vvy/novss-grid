@@ -27,6 +27,8 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
       ? 'border-amber-400 ring-2 ring-amber-300/40'
     : status === 'in_progress'
       ? 'border-nvssGreen'
+      : status === 'completed'
+        ? 'border-emerald-700 bg-emerald-50'
       : 'border-nvssBorder'
 
   return (
@@ -108,7 +110,7 @@ function StatusBadge({ status }) {
     disputed: 'text-nvssAlert border-nvssAlert',
     investigating: 'text-amber-200 border-amber-400',
     awaiting_confirmation: 'text-nvssBlue border-nvssBlue',
-    completed: 'text-nvssGreen border-nvssBorder',
+    completed: 'text-emerald-700 border-emerald-700',
   }
   const Icon = status === 'disputed' ? AlertTriangle : status === 'investigating' ? Search : status === 'completed' ? CheckCircle2 : Clock
   return (

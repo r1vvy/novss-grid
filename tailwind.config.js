@@ -11,6 +11,7 @@ export default {
         nvssText: '#1C1917',
         nvssGreen: '#B91C1C',
         nvssGreenAction: '#B91C1C',
+        nvssSuccess: '#15803D',
         nvssBlue: '#1C1917',
         nvssAlert: '#991B1B',
         nvssSlateAction: '#D7CFBA',

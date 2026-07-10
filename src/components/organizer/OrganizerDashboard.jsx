@@ -41,8 +41,8 @@ export function OrganizerDashboard({
   })
   const currentMatches = getCurrentRoundMatches(tournament)
   const sortedMatches = useMemo(
-    () => [...currentMatches].sort((a, b) => compareMatches(a, b, sortBy)),
-    [currentMatches, sortBy],
+    () => [...currentMatches].sort((a, b) => compareMatches(a, b, sortBy, tournament.maxSetsPerMatch)),
+    [currentMatches, sortBy, tournament.maxSetsPerMatch],
   )
   const standings = useMemo(() => calculateStandings(tournament), [tournament])
   const alerts = currentMatches.filter((match) => deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'disputed')
@@ -265,7 +265,7 @@ const modalStatusClasses = {
   disputed: 'text-nvssAlert border-nvssAlert',
   investigating: 'text-amber-200 border-amber-400',
   awaiting_confirmation: 'text-nvssBlue border-nvssBlue',
-  completed: 'text-nvssGreen border-nvssBorder',
+  completed: 'text-emerald-700 border-emerald-700',
 }
 const modalStatusLabels = {
   scheduled: 'Ieplānots',
@@ -276,7 +276,7 @@ const modalStatusLabels = {
   completed: 'Pabeigts',
 }
 
-function compareMatches(a, b, sortBy) {
+function compareMatches(a, b, sortBy, maxSetsPerMatch) {
   if (sortBy === 'status') {
     const statusOrder = {
       disputed: 0,
@@ -287,7 +287,7 @@ function compareMatches(a, b, sortBy) {
       completed: 5,
     }
 
-    const statusDiff = (statusOrder[deriveMatchStatus(a, tournament.maxSetsPerMatch)] ?? 99) - (statusOrder[deriveMatchStatus(b, tournament.maxSetsPerMatch)] ?? 99)
+    const statusDiff = (statusOrder[deriveMatchStatus(a, maxSetsPerMatch)] ?? 99) - (statusOrder[deriveMatchStatus(b, maxSetsPerMatch)] ?? 99)
     if (statusDiff !== 0) return statusDiff
   }
 
@@ -325,8 +325,6 @@ function OverrideModal({
     && draftScore[0]?.wins === draftScore[1]?.wins
   const isDraftValid = isDrawDraft || (Boolean(draftWinner) && draftScore.filter((player) => player.wins >= requiredWins).length === 1)
   const title = getOverrideTitle(status)
-  const playerA = winnerOptions[0]
-  const playerB = winnerOptions[1]
   const currentScoreLine = `${currentScore[0]?.wins ?? 0}:${currentScore[1]?.wins ?? 0}`
   const draftScoreLine = `${draftScore[0]?.wins ?? 0}:${draftScore[1]?.wins ?? 0}`
 

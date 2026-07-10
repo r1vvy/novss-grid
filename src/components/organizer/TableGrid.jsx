@@ -246,7 +246,7 @@ const compactClasses = {
   disputed: 'border-nvssAlert/80 bg-gradient-to-b from-nvssAlert/16 to-nvssAlert/8 text-nvssText',
   investigating: 'border-amber-500/70 bg-gradient-to-b from-amber-500/18 to-amber-500/8 text-nvssText',
   awaiting_confirmation: 'border-nvssBlue/75 bg-gradient-to-b from-nvssBlue/12 to-nvssBlue/6 text-nvssText',
-  completed: 'border-nvssBorder bg-gradient-to-b from-nvssBg to-nvssSurface text-nvssText',
+  completed: 'border-emerald-700/70 bg-gradient-to-b from-emerald-100 to-emerald-50 text-nvssText',
 }
 
 const compactBadgeClasses = {
@@ -255,7 +255,7 @@ const compactBadgeClasses = {
   disputed: 'border-nvssAlert/40 bg-nvssAlert/10 text-nvssAlert',
   investigating: 'border-amber-500/40 bg-amber-500/10 text-amber-700',
   awaiting_confirmation: 'border-nvssBlue/30 bg-nvssBlue/10 text-nvssBlue',
-  completed: 'border-nvssBorder bg-nvssSurface text-nvssText',
+  completed: 'border-emerald-700/30 bg-emerald-50 text-emerald-700',
 }
 
 export function CompactLegend() {
@@ -282,7 +282,7 @@ const badgeClasses = {
   disputed: 'text-nvssAlert border-nvssAlert',
   investigating: 'text-amber-700 border-amber-500',
   awaiting_confirmation: 'text-nvssBlue border-nvssBlue',
-  completed: 'text-nvssGreen border-nvssBorder',
+  completed: 'text-emerald-700 border-emerald-700',
 }
 
 export function MatchSummaryRow({ tournament, match }) {
@@ -324,6 +324,8 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
     ? 'bg-nvssAlert/10'
     : isInvestigating
       ? 'bg-amber-400/10'
+      : status === 'completed'
+        ? 'bg-emerald-50 hover:bg-emerald-100'
       : 'hover:bg-nvssBg/60'
 
   return (

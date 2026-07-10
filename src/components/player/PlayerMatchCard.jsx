@@ -76,7 +76,7 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
       )}
 
       {status === 'completed' && (
-        <div className="mt-3 rounded border border-nvssGreen bg-nvssGreen/10 p-3 text-center font-semibold text-nvssGreen">
+        <div className="mt-3 rounded border border-emerald-700 bg-emerald-50 p-3 text-center font-semibold text-emerald-700">
           Mačs pabeigts
         </div>
       )}
