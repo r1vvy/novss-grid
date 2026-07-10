@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Activity, AlertTriangle, CheckCircle2, Clock, LayoutGrid, Rows3, Trophy, Users, X } from 'lucide-react'
 import { AlertRail } from './AlertRail'
 import { CompactLegend, TableGrid } from './TableGrid'
@@ -24,9 +24,11 @@ export function OrganizerDashboard({
   onGenerateRound,
   onOpenPlayers,
 }) {
+  const STANDINGS_PAGE_SIZE = 30
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [sortBy, setSortBy] = useState('table')
   const [viewMode, setViewMode] = useState('table')
+  const [standingsPage, setStandingsPage] = useState(1)
   const [overrideMatch, setOverrideMatch] = useState(null)
   const [overrideSetResults, setOverrideSetResults] = useState([])
   const [overrideReason, setOverrideReason] = useState('referee_decision')
@@ -45,8 +47,17 @@ export function OrganizerDashboard({
     [currentMatches, sortBy, tournament.maxSetsPerMatch],
   )
   const standings = useMemo(() => calculateStandings(tournament), [tournament])
+  const totalStandingsPages = Math.max(1, Math.ceil(standings.length / STANDINGS_PAGE_SIZE))
+  const pagedStandings = useMemo(() => {
+    const start = (standingsPage - 1) * STANDINGS_PAGE_SIZE
+    return standings.slice(start, start + STANDINGS_PAGE_SIZE)
+  }, [standings, standingsPage])
   const alerts = currentMatches.filter((match) => deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'disputed')
   const canGenerate = canGenerateNextRound(tournament)
+
+  useEffect(() => {
+    setStandingsPage((current) => Math.min(current, totalStandingsPages))
+  }, [totalStandingsPages])
 
   function updateSetup(field, value) {
     setSetup((current) => ({ ...current, [field]: value }))
@@ -148,20 +159,46 @@ export function OrganizerDashboard({
       <aside className="space-y-4">
         <AlertRail tournament={tournament} alerts={alerts} onMarkInvestigating={onMarkInvestigating} />
         <section className="rounded-md border border-nvssBorder bg-nvssSurface p-4">
-          <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
-            <Activity size={18} className="text-nvssGreen" />
-            Kopvērtējums
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <Activity size={18} className="text-nvssGreen" />
+              Kopvērtējums
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-nvssMuted">
+              Lapa {standingsPage}/{totalStandingsPages}
+            </span>
           </div>
           <div className="space-y-2">
-            {standings.slice(0, 10).map((player, index) => (
+            {pagedStandings.map((player, index) => (
               <div key={player.id} className="grid grid-cols-[28px_1fr_auto] items-center gap-2 text-sm">
-                <span className="text-nvssMuted">{index + 1}</span>
+                <span className="text-nvssMuted">{(standingsPage - 1) * STANDINGS_PAGE_SIZE + index + 1}</span>
                 <span className="truncate font-medium">{player.name}</span>
                 <span className="text-right text-nvssGreen">{player.points} p.</span>
                 <span />
                 <span className="text-xs text-nvssMuted">Buholcs {player.buchholz}</span>
               </div>
             ))}
+          </div>
+          <div className="mt-4 flex items-center justify-between gap-2 border-t border-nvssBorder pt-3">
+            <button
+              type="button"
+              onClick={() => setStandingsPage((current) => Math.max(1, current - 1))}
+              disabled={standingsPage === 1}
+              className="min-h-[36px] rounded border border-nvssBorder px-3 text-sm font-semibold text-nvssMuted disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Iepriekšējā
+            </button>
+            <span className="text-xs text-nvssMuted">
+              Rāda {(standingsPage - 1) * STANDINGS_PAGE_SIZE + 1}-{Math.min(standingsPage * STANDINGS_PAGE_SIZE, standings.length)} no {standings.length}
+            </span>
+            <button
+              type="button"
+              onClick={() => setStandingsPage((current) => Math.min(totalStandingsPages, current + 1))}
+              disabled={standingsPage === totalStandingsPages}
+              className="min-h-[36px] rounded border border-nvssBorder px-3 text-sm font-semibold text-nvssMuted disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Nākamā
+            </button>
           </div>
         </section>
       </aside>
