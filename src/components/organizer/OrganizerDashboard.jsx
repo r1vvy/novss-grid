@@ -397,7 +397,7 @@ function OverrideModal({
                   <div>
                     <p className="text-sm font-semibold text-nvssText">Jaunais rezultāts</p>
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isDraftValid ? 'bg-emerald-500/15 text-emerald-200' : 'bg-amber-500/15 text-amber-200'}`}>
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isDraftValid ? 'bg-emerald-500/15 text-emerald-200' : 'bg-amber-500/15 text-red-500'}`}>
                     {isDraftValid ? 'Var saglabāt' : 'Nepilnīgs melnraksts'}
                   </span>
                 </div>
@@ -462,7 +462,7 @@ function OverrideModal({
                 </div>
 
                 <div className="mt-4 rounded-xl border border-dashed border-nvssBorder bg-nvssSurface px-4 py-3">
-                  <p className={`text-sm font-medium ${isDraftValid ? 'text-emerald-200' : 'text-amber-200'}`}>
+                  <p className={`text-sm font-medium ${isDraftValid ? 'text-emerald-200' : 'text-red-500'}`}>
                     {isDraftValid
                       ? 'Melnraksts ir korekts un saglabājot spēle tiks apstiprināta.'
                       : `Pašlaik nevar saglabāt. Lūdzu pārbaudiet ievadītos datus.`}
