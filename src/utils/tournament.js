@@ -187,19 +187,18 @@ export function resetMatchInvestigation(tournament, matchId) {
 export function forceOverrideResult(tournament, matchId, setResults, metadata = {}) {
   return updateMatch(tournament, matchId, (match) => {
     const allowedWinnerIds = new Set([match.playerAId, match.playerBId])
-    const nextSetResults = Array.isArray(setResults)
+    const submittedSetResults = Array.isArray(setResults)
       ? setResults
         .filter((set) => allowedWinnerIds.has(set?.winnerId))
         .slice(0, tournament.maxSetsPerMatch)
         .map((set) => ({ winnerId: set.winnerId }))
       : []
+    const nextSetResults = []
 
-    const draftMatch = { ...match, setResults: nextSetResults }
-    const winnerId = getMatchWinnerId(draftMatch, tournament.maxSetsPerMatch)
-    const isDraw = nextSetResults.length === tournament.maxSetsPerMatch
-      && !winnerId
-      && getSetScore(draftMatch, match.playerAId) === getSetScore(draftMatch, match.playerBId)
-    if (!winnerId && !isDraw) return match
+    for (const set of submittedSetResults) {
+      nextSetResults.push(set)
+      if (getMatchWinnerId({ ...match, setResults: nextSetResults }, tournament.maxSetsPerMatch)) break
+    }
 
     return buildOverriddenMatch(match, nextSetResults, metadata, tournament.maxSetsPerMatch)
   })
@@ -412,28 +411,54 @@ function isDrawMatch(match, maxSetsPerMatch = match.maxSetsPerMatch) {
 function buildOverriddenMatch(match, setResults, metadata, maxSetsPerMatch = match.maxSetsPerMatch) {
   const previousWinnerId = getMatchWinnerId(match, maxSetsPerMatch)
   const previousStatus = deriveMatchStatus(match, maxSetsPerMatch)
+  const nextMatch = { ...match, setResults }
+  const isFinalResult = Boolean(getMatchWinnerId(nextMatch, maxSetsPerMatch))
+    || isDrawMatch(nextMatch, maxSetsPerMatch)
+  const previousScore = {
+    [match.playerAId]: getSetScore(match, match.playerAId),
+    [match.playerBId]: getSetScore(match, match.playerBId),
+  }
+  const nextScore = {
+    [match.playerAId]: getSetScore(nextMatch, match.playerAId),
+    [match.playerBId]: getSetScore(nextMatch, match.playerBId),
+  }
+  const previousAudit = match.overrideMeta?.reason
+    ? {
+        ...match.overrideMeta,
+        nextScore: match.overrideMeta.nextScore || previousScore,
+      }
+    : null
+  const editHistory = Array.isArray(match.overrideMeta?.editHistory)
+    ? match.overrideMeta.editHistory
+    : previousAudit
+      ? [previousAudit]
+      : []
+  const auditEntry = {
+    editedBy: metadata.editedBy || 'Organizators',
+    reason: metadata.reason || 'other',
+    note: metadata.note?.trim() || '',
+    previousWinnerId,
+    previousStatus,
+    previousScore,
+    nextScore,
+    editedAt: metadata.editedAt || 'Tikko',
+  }
 
   return {
     ...match,
     setResults,
-    confirmations: {
-      [match.playerAId]: true,
-      [match.playerBId]: true,
-    },
+    confirmations: isFinalResult
+      ? {
+          [match.playerAId]: true,
+          [match.playerBId]: true,
+        }
+      : resetConfirmations(match),
     refereeRequested: false,
     refereeRequestedBy: null,
-    status: 'completed',
+    status: isFinalResult ? 'completed' : setResults.length > 0 ? 'in_progress' : 'scheduled',
     overrideMeta: {
-      editedBy: metadata.editedBy || 'Organizators',
-      reason: metadata.reason || 'other',
-      note: metadata.note?.trim() || '',
-      previousWinnerId,
-      previousStatus,
-      previousScore: {
-        [match.playerAId]: getSetScore(match, match.playerAId),
-        [match.playerBId]: getSetScore(match, match.playerBId),
-      },
-      editedAt: metadata.editedAt || 'Tikko',
+      ...auditEntry,
+      editHistory: [...editHistory, auditEntry],
     },
   }
 }

@@ -1,6 +1,6 @@
 import React from 'react'
 import { AlertTriangle, CheckCircle2, Clock, Grip, Pencil, RotateCcw, Search, X } from 'lucide-react'
-import { deriveMatchStatus, getMatchPlayers, getOverrideAuditLabel, getSetScore } from '../../utils/tournament'
+import { deriveMatchStatus, getMatchPlayers, getSetScore } from '../../utils/tournament'
 
 const statusLabels = {
   scheduled: 'Ieplānots',
@@ -115,7 +115,6 @@ function CompactTableMap({ tournament, matches, canReassignTables, onClearAlert,
           const isInvestigating = status === 'investigating'
           const canEditResult = status !== 'scheduled'
           const editLabel = getEditLabel(status)
-          const overrideLabel = getOverrideAuditLabel(match)
 
           return (
             <div
@@ -142,12 +141,6 @@ function CompactTableMap({ tournament, matches, canReassignTables, onClearAlert,
                     <span>{compactStatusLabels[status]}</span>
                   </span>
                 </div>
-
-                {overrideLabel ? (
-                  <div className="mt-3 inline-flex items-center self-start rounded-full border border-nvssBlue/40 bg-nvssBlue/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-nvssBlue">
-                    Labots
-                  </div>
-                ) : null}
 
                 <div className="mt-auto flex flex-wrap gap-1.5 pt-3">
                   {canEditResult ? (
@@ -319,7 +312,6 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
   const isInvestigating = status === 'investigating'
   const canEditResult = status !== 'scheduled'
   const editLabel = getEditLabel(status)
-  const overrideLabel = getOverrideAuditLabel(match)
   const rowState = isDisputed
     ? 'bg-nvssAlert/10'
     : isInvestigating
@@ -354,11 +346,6 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
           <StatusIcon status={status} />
           {statusLabels[status]}
         </span>
-        {overrideLabel ? (
-          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-nvssBlue/10 px-2 py-1 text-[11px] font-semibold text-nvssBlue">
-            Labots organizatora pusē
-          </div>
-        ) : null}
       </td>
       <td className="px-4 py-3">
         <div className="flex flex-wrap gap-2">

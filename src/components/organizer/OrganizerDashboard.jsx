@@ -9,6 +9,7 @@ import {
   canGenerateNextRound,
   deriveMatchStatus,
   generateNextSwissRound,
+  getOverrideAuditLabel,
   getRequiredWins,
   getCurrentRoundMatches,
 } from '../../utils/tournament'
@@ -66,14 +67,14 @@ export function OrganizerDashboard({
   function openOverride(match) {
     setOverrideMatch(match)
     setOverrideSetResults(match.setResults.map((set) => ({ winnerId: set.winnerId })))
-    setOverrideReason(match.overrideMeta?.reason || defaultReasonForStatus(deriveMatchStatus(match, tournament.maxSetsPerMatch)))
+    setOverrideReason(match.overrideMeta?.reason || '')
     setOverrideNote(match.overrideMeta?.note || '')
   }
 
   function closeOverride() {
     setOverrideMatch(null)
     setOverrideSetResults([])
-    setOverrideReason('referee_decision')
+    setOverrideReason('')
     setOverrideNote('')
   }
 
@@ -343,6 +344,18 @@ function OverrideModal({
   onClose,
   onSubmit,
 }) {
+  const [isReasonFormVisible, setIsReasonFormVisible] = useState(false)
+  const [auditPage, setAuditPage] = useState(1)
+
+  useEffect(() => {
+    function closeOnEscape(event) {
+      if (event.key === 'Escape') onClose()
+    }
+
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [onClose])
+
   const winnerOptions = tournament.players.filter((player) => [match.playerAId, match.playerBId].includes(player.id))
   const status = deriveMatchStatus(match, tournament.maxSetsPerMatch)
   const currentScore = winnerOptions.map((player) => ({
@@ -356,14 +369,25 @@ function OverrideModal({
   }))
   const requiredWins = getRequiredWins(tournament.maxSetsPerMatch)
   const draftWinner = draftScore.find((player) => player.wins >= requiredWins)
-  const canAddSet = setResults.length < tournament.maxSetsPerMatch
+  const canAddSet = setResults.length < tournament.maxSetsPerMatch && !draftWinner
   const isDrawDraft = setResults.length === tournament.maxSetsPerMatch
     && !draftWinner
     && draftScore[0]?.wins === draftScore[1]?.wins
   const isDraftValid = isDrawDraft || (Boolean(draftWinner) && draftScore.filter((player) => player.wins >= requiredWins).length === 1)
+  const hasResultChanged = setResults.length !== match.setResults.length
+    || setResults.some((set, index) => set.winnerId !== match.setResults[index]?.winnerId)
   const title = getOverrideTitle(status)
   const currentScoreLine = `${currentScore[0]?.wins ?? 0}:${currentScore[1]?.wins ?? 0}`
   const draftScoreLine = `${draftScore[0]?.wins ?? 0}:${draftScore[1]?.wins ?? 0}`
+  const auditEntries = Array.isArray(match.overrideMeta?.editHistory)
+    ? match.overrideMeta.editHistory
+    : match.overrideMeta?.reason
+      ? [match.overrideMeta]
+      : []
+  const auditPageSize = 10
+  const auditPageCount = Math.max(1, Math.ceil(auditEntries.length / auditPageSize))
+  const auditStart = (auditPage - 1) * auditPageSize
+  const pagedAuditEntries = auditEntries.slice(auditStart, auditStart + auditPageSize)
 
   function updateSetWinner(index, winnerId) {
     onSetResultsChange(setResults.map((set, setIndex) => (
@@ -383,14 +407,25 @@ function OverrideModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6">
-      <div className="flex max-h-[calc(100vh-48px)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-nvssBorder bg-nvssSurface shadow-2xl">
+    <>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="override-modal-title"
+        className="flex max-h-[calc(100vh-48px)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-nvssBorder bg-nvssSurface shadow-2xl"
+      >
         <div className="border-b border-nvssBorder px-5 py-4">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px_40px] lg:items-start">
             <div className="min-w-0">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-nvssGreen">Rezultāta rediģēšana</p>
-                <h3 className="mt-1 text-2xl font-semibold text-nvssText">{title}</h3>
+                <h3 id="override-modal-title" className="mt-1 text-2xl font-semibold text-nvssText">{title}</h3>
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-nvssMuted">
                   <span className="rounded-full bg-nvssBg px-3 py-1 font-semibold text-nvssText">Galds {match.table}</span>
                   <StatusBadge status={status} />
@@ -434,8 +469,8 @@ function OverrideModal({
                   <div>
                     <p className="text-sm font-semibold text-nvssText">Jaunais rezultāts</p>
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isDraftValid ? 'bg-emerald-500/15 text-emerald-200' : 'bg-amber-500/15 text-red-500'}`}>
-                    {isDraftValid ? 'Var saglabāt' : 'Nepilnīgs melnraksts'}
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isDraftValid ? 'bg-emerald-500/15 text-emerald-200' : 'bg-nvssBlue/15 text-nvssBlue'}`}>
+                    {isDraftValid ? 'Gala rezultāts' : 'Daļējs rezultāts'}
                   </span>
                 </div>
 
@@ -449,7 +484,7 @@ function OverrideModal({
                       ? 'Abi spēlētāji pabeidz maču neizšķirti.'
                       : draftWinner
                         ? `${draftWinner.name} sasniedz nepieciešamo setu skaitu un rezultātu var saglabāt.`
-                        : 'Lai saglabātu, vienam spēlētājam jāsasniedz nepieciešamais uzvarēto setu skaits vai jāaizpilda visi seti līdz neizšķirtam.'}
+                        : 'Saglabājot šo daļējo rezultātu, spēle paliks statusā “Notiek”.'}
                   </p>
                 </div>
 
@@ -499,66 +534,127 @@ function OverrideModal({
                 </div>
 
                 <div className="mt-4 rounded-xl border border-dashed border-nvssBorder bg-nvssSurface px-4 py-3">
-                  <p className={`text-sm font-medium ${isDraftValid ? 'text-emerald-200' : 'text-red-500'}`}>
+                  <p className={`text-sm font-medium ${isDraftValid ? 'text-emerald-200' : 'text-nvssBlue'}`}>
                     {isDraftValid
-                      ? 'Melnraksts ir korekts un saglabājot spēle tiks apstiprināta.'
-                      : `Pašlaik nevar saglabāt. Lūdzu pārbaudiet ievadītos datus.`}
+                      ? 'Gala rezultāts tiks apstiprināts, to saglabājot.'
+                      : 'Daļējo rezultātu var saglabāt un turpināt labot, kamēr spēle notiek.'}
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-xl border border-nvssBorder bg-nvssBg p-4">
-                <p className="text-sm font-semibold text-nvssText">Kāpēc rezultāts tiek labots?</p>
-                <div className="mt-4 grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
-                  <label className="block text-sm font-medium text-nvssMuted">
-                    Iemesls
-                    <select
-                      value={reason}
-                      onChange={(event) => onReasonChange(event.target.value)}
-                      className="mt-1 min-h-[44px] w-full rounded-lg border border-nvssBorder bg-nvssSurface px-3 text-nvssText"
-                    >
-                      <option value="referee_decision">Tiesneša lēmums</option>
-                      <option value="score_entry_error">Nepareizi ievadīts rezultāts</option>
-                      <option value="other">Cits iemesls</option>
-                    </select>
-                  </label>
-                  <label className="block text-sm font-medium text-nvssMuted">
-                    Piezīme
-                    <textarea
-                      value={note}
-                      onChange={(event) => onNoteChange(event.target.value)}
-                      rows={3}
-                      className="mt-1 w-full rounded-lg border border-nvssBorder bg-nvssSurface px-3 py-2 text-nvssText"
-                      placeholder="Īss skaidrojums auditam"
-                    />
-                  </label>
-                </div>
-                {match.overrideMeta?.reason ? (
-                  <div className="mt-4 rounded-xl border border-nvssBorder bg-nvssSurface px-4 py-3 text-sm">
-                    <p className="font-medium text-nvssText">Iepriekšējais organizatora labojums</p>
-                    <p className="mt-1 text-nvssMuted">{match.overrideMeta.note || 'Nav iepriekšējās piezīmes'}</p>
+              {auditEntries.length > 0 ? (
+                <section className="rounded-xl border border-nvssBlue/40 bg-nvssBlue/10 p-3" aria-label="Labojumu audits">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-nvssText">Labojumu audits</p>
+                    <span className="text-xs text-nvssMuted">{auditEntries.length} labojumi</span>
                   </div>
-                ) : null}
-              </div>
+                  <ol className="mt-2 divide-y divide-nvssBorder rounded-lg border border-nvssBorder bg-nvssSurface px-3">
+                    {pagedAuditEntries.map((audit, index) => (
+                      <li key={`${audit.editedAt}-${auditStart + index}`} className="grid gap-x-3 py-2 text-xs sm:grid-cols-[auto_auto_1fr_auto] sm:items-center">
+                        <span className="font-mono text-nvssMuted">{auditStart + index + 1}.</span>
+                        <span className="font-mono font-bold text-nvssText">{formatAuditScore(audit.previousScore, match)} → {formatAuditScore(audit.nextScore, match)}</span>
+                        <span className="truncate text-nvssMuted" title={audit.note || ''}>{getOverrideAuditLabel({ overrideMeta: audit })}{audit.note ? ` · ${audit.note}` : ''}</span>
+                        <span className="text-nvssMuted">{audit.editedBy || 'Organizators'} · {audit.editedAt || '—'}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  {auditPageCount > 1 ? (
+                    <div className="mt-2 flex items-center justify-between gap-2 text-xs text-nvssMuted">
+                      <button type="button" onClick={() => setAuditPage((page) => Math.max(1, page - 1))} disabled={auditPage === 1} className="rounded border border-nvssBorder px-2 py-1 disabled:opacity-50">Iepriekšējie</button>
+                      <span>Lapa {auditPage}/{auditPageCount}</span>
+                      <button type="button" onClick={() => setAuditPage((page) => Math.min(auditPageCount, page + 1))} disabled={auditPage === auditPageCount} className="rounded border border-nvssBorder px-2 py-1 disabled:opacity-50">Nākamie</button>
+                    </div>
+                  ) : null}
+                </section>
+              ) : null}
+
             </section>
           </div>
         </div>
         <div className="border-t border-nvssBorder bg-nvssSurface/95 px-5 py-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-nvssMuted">
-              {isDraftValid
-                ? 'Rezultāts ir gatavs saglabāšanai.'
-                : 'Saglabāšana bloķēta, kamēr nav veikta pareiza ievade.'}
+              {!hasResultChanged
+                ? 'Veiciet izmaiņas, lai varētu saglabāt rezultātu.'
+                : isDraftValid
+                  ? 'Gala rezultāts ir gatavs saglabāšanai.'
+                  : 'Daļējo rezultātu var saglabāt.'}
             </div>
             <div className="flex justify-end gap-2">
               <button type="button" onClick={onClose} className="min-h-[44px] rounded-lg border border-nvssBorder px-4 font-semibold text-nvssMuted hover:text-nvssText">
                 Atcelt
               </button>
-              <button type="button" disabled={!isDraftValid} onClick={onSubmit} className="min-h-[44px] rounded-lg bg-nvssGreenAction px-5 font-semibold text-nvssSurface disabled:cursor-not-allowed disabled:opacity-50 hover:bg-nvssAlert">
+              <button
+                type="button"
+                disabled={!hasResultChanged}
+                onClick={() => {
+                  if (hasResultChanged) setIsReasonFormVisible(true)
+                }}
+                className="min-h-[44px] rounded-lg bg-nvssGreenAction px-5 font-semibold text-nvssSurface hover:bg-nvssAlert disabled:cursor-not-allowed disabled:opacity-50"
+              >
                 Saglabāt rezultātu
               </button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+    {isReasonFormVisible ? (
+      <ReasonModal
+        reason={reason}
+        note={note}
+        onReasonChange={onReasonChange}
+        onNoteChange={onNoteChange}
+        onBack={() => setIsReasonFormVisible(false)}
+        onSubmit={onSubmit}
+      />
+    ) : null}
+    </>
+  )
+}
+
+function ReasonModal({ reason, note, onReasonChange, onNoteChange, onBack, onSubmit }) {
+  const canSubmit = Boolean(reason)
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 px-4 py-6">
+      <div role="dialog" aria-modal="true" aria-labelledby="reason-modal-title" className="w-full max-w-xl rounded-2xl border border-nvssBorder bg-nvssSurface p-5 shadow-2xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-nvssGreen">Pirms saglabāšanas</p>
+        <h3 id="reason-modal-title" className="mt-1 text-2xl font-semibold text-nvssText">Kāpēc rezultāts tiek labots?</h3>
+        <p className="mt-2 text-sm text-nvssMuted">Norādiet labojuma iemeslu, lai varētu saglabāt rezultātu.</p>
+        <div className="mt-5 grid gap-4">
+          <label className="block text-sm font-medium text-nvssMuted">
+            Iemesls <span className="text-nvssAlert">*</span>
+            <select
+              required
+              value={reason}
+              onChange={(event) => onReasonChange(event.target.value)}
+              className="mt-1 min-h-[44px] w-full rounded-lg border border-nvssBorder bg-nvssBg px-3 text-nvssText"
+            >
+              <option value="">Izvēlieties iemeslu</option>
+              <option value="referee_decision">Tiesneša lēmums</option>
+              <option value="score_entry_error">Nepareizi ievadīts rezultāts</option>
+              <option value="other">Cits iemesls</option>
+            </select>
+          </label>
+          <label className="block text-sm font-medium text-nvssMuted">
+            Piezīme
+            <textarea
+              value={note}
+              onChange={(event) => onNoteChange(event.target.value)}
+              rows={3}
+              className="mt-1 w-full rounded-lg border border-nvssBorder bg-nvssBg px-3 py-2 text-nvssText"
+              placeholder="Īss skaidrojums auditam"
+            />
+          </label>
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <button type="button" onClick={onBack} className="min-h-[44px] rounded-lg border border-nvssBorder px-4 font-semibold text-nvssMuted hover:text-nvssText">
+            Atpakaļ
+          </button>
+          <button type="button" disabled={!canSubmit} onClick={onSubmit} className="min-h-[44px] rounded-lg bg-nvssGreenAction px-5 font-semibold text-nvssSurface disabled:cursor-not-allowed disabled:opacity-50 hover:bg-nvssAlert">
+            Apstiprināt rezultātu
+          </button>
         </div>
       </div>
     </div>
@@ -573,10 +669,9 @@ function getOverrideTitle(status) {
   return 'Koriģēt gala rezultātu'
 }
 
-function defaultReasonForStatus(status) {
-  if (status === 'disputed' || status === 'investigating') return 'referee_decision'
-  if (status === 'in_progress') return 'manual_finish'
-  return 'score_entry_error'
+function formatAuditScore(score, match) {
+  if (!score) return '—'
+  return `${score[match.playerAId] ?? 0}:${score[match.playerBId] ?? 0}`
 }
 
 function StatusBadge({ status }) {
