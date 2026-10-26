@@ -35,16 +35,18 @@ export function RefereeButton({ disabled, onClick, label = 'Izsaukt tiesnesi', r
         type="button"
         disabled={disabled}
         onClick={handleClick}
-        className={`flex min-h-[56px] w-full items-center justify-center gap-2 rounded border px-4 text-lg font-black disabled:cursor-not-allowed disabled:border-nvssBorder disabled:text-nvssMuted ${
-          armed ? 'border-nvssAlert bg-nvssAlert text-nvssSurface' : 'border-nvssAlert text-nvssAlert hover:bg-nvssAlert hover:text-nvssSurface'
+        className={`flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl px-4 text-[15px] font-semibold transition-all duration-150 active:scale-[0.98] ${
+          armed
+            ? 'bg-apple-red text-white shadow-sm ring-4 ring-apple-red/30 animate-pulse'
+            : 'border border-apple-red/30 bg-apple-red/10 text-apple-red hover:bg-apple-red/15 active:bg-apple-red/25 disabled:cursor-not-allowed disabled:border-black/[0.08] disabled:bg-black/[0.03] disabled:text-slate-400'
         }`}
       >
-        <ShieldAlert size={22} />
-        {armed ? 'Piespied vēlreiz, lai izsauktu tiesnesi' : label}
+        <ShieldAlert size={19} strokeWidth={2.2} />
+        <span>{armed ? 'Piespiediet vēlreiz, lai izsauktu tiesnesi' : label}</span>
       </button>
       {requireConfirm && !disabled ? (
-        <p className="mt-2 text-center text-xs text-nvssMuted">
-          Divi pieskārieni, lai izvairītos no nejaušas nospiešanas.
+        <p className="mt-2 text-center text-[11px] text-[#8E8E93]">
+          Divi pieskārieni, lai novērstu nejaušu tiesneša izsaukšanu.
         </p>
       ) : null}
     </div>

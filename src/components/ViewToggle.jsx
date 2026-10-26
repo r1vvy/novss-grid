@@ -3,26 +3,30 @@ import { Grid3X3, User } from 'lucide-react'
 
 export function ViewToggle({ view, onViewChange }) {
   return (
-    <div className="grid grid-cols-2 rounded-md border border-nvssBorder bg-nvssBg p-1">
+    <div className="inline-flex rounded-xl border border-black/[0.04] bg-black/[0.06] p-1">
       <button
         type="button"
         onClick={() => onViewChange('organizer')}
-        className={`flex min-h-[44px] items-center justify-center gap-2 rounded px-4 text-sm font-semibold ${
-          view === 'organizer' ? 'bg-nvssGreenAction text-nvssSurface' : 'text-nvssMuted hover:text-nvssText'
+        className={`flex min-h-[36px] items-center justify-center gap-2 rounded-lg px-4 text-xs font-semibold transition-all ${
+          view === 'organizer'
+            ? 'bg-white text-slate-900 shadow-apple-sm'
+            : 'text-slate-500 hover:text-slate-900'
         }`}
       >
-        <Grid3X3 size={18} />
-        Organizer
+        <Grid3X3 size={15} strokeWidth={2.2} />
+        <span>Organizators</span>
       </button>
       <button
         type="button"
         onClick={() => onViewChange('player')}
-        className={`flex min-h-[44px] items-center justify-center gap-2 rounded px-4 text-sm font-semibold ${
-          view === 'player' ? 'bg-nvssGreenAction text-nvssSurface' : 'text-nvssMuted hover:text-nvssText'
+        className={`flex min-h-[36px] items-center justify-center gap-2 rounded-lg px-4 text-xs font-semibold transition-all ${
+          view === 'player'
+            ? 'bg-white text-slate-900 shadow-apple-sm'
+            : 'text-slate-500 hover:text-slate-900'
         }`}
       >
-        <User size={18} />
-        Player
+        <User size={15} strokeWidth={2.2} />
+        <span>Spēlētājs</span>
       </button>
     </div>
   )

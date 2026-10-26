@@ -20,54 +20,63 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
   const isInvestigating = status === 'investigating'
   const canEditResult = status !== 'scheduled'
   const editLabel = getEditLabel(status)
-  const cardState = isDisputed
-    ? 'border-nvssAlert ring-2 ring-nvssAlert/50'
+
+  const cardBorder = isDisputed
+    ? 'border-apple-red/40 ring-2 ring-apple-red/20'
     : isInvestigating
-      ? 'border-amber-400 ring-2 ring-amber-300/40'
+      ? 'border-apple-orange/40 ring-2 ring-apple-orange/20'
     : status === 'in_progress'
-      ? 'border-nvssGreen'
+      ? 'border-apple-blue/30'
       : status === 'completed'
-        ? 'border-emerald-700 bg-emerald-50'
-      : 'border-nvssBorder'
+        ? 'border-emerald-500/30'
+      : 'border-black/[0.08]'
 
   return (
-    <article className={`rounded-md border bg-nvssSurface p-3 ${cardState}`} {...dragProps}>
+    <article className={`rounded-2xl border bg-white p-4 shadow-apple-card transition-all ${cardBorder}`} {...dragProps}>
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs uppercase text-nvssMuted">Galds</p>
-          <div className="text-3xl font-black leading-none">{match.table}</div>
+        <div className="flex items-baseline gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">Galds</span>
+          <span className="font-mono text-3xl font-black tabular-nums leading-none text-[#1C1C1E]">{match.table}</span>
         </div>
         <StatusBadge status={status} />
       </div>
-      <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">
+
+      <div className="mt-4 space-y-2 rounded-xl bg-[#F2F2F7]/50 p-2.5">
         <PlayerLine name={playerA?.name || 'TBD'} club={playerA?.representation} score={scoreA} />
+        <div className="border-t border-black/[0.04]" />
         <PlayerLine name={playerB?.name || 'TBD'} club={playerB?.representation} score={scoreB} />
       </div>
-      <div className="mt-3 grid gap-2 border-t border-nvssBorder pt-3 sm:grid-cols-2">
+
+      <div className="mt-3.5 grid gap-2 sm:grid-cols-2">
         {isDisputed ? (
           <button
             type="button"
             onClick={() => onMarkInvestigating(match.id)}
-            className="flex min-h-[40px] items-center justify-center gap-2 rounded border border-amber-400/70 bg-amber-400/10 px-3 text-sm font-semibold text-amber-200 hover:bg-amber-400/20"
+            className="flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-apple-orange/30 bg-apple-orange/10 px-3 text-xs font-semibold text-amber-800 transition hover:bg-apple-orange/20 active:scale-[0.98]"
           >
-            <Search size={15} />
-            Marķēt kā izmeklē
+            <Search size={14} strokeWidth={2.3} />
+            <span>Marķēt kā izmeklē</span>
           </button>
         ) : null}
         {canEditResult ? (
           <button
             type="button"
             onClick={() => onOpenOverride(match)}
-            className="flex min-h-[40px] items-center justify-center gap-2 rounded border border-nvssGreen bg-nvssGreen/10 px-3 text-sm font-semibold text-nvssGreen hover:bg-nvssGreen/20"
+            className="flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-apple-blue/20 bg-apple-blue/10 px-3 text-xs font-semibold text-apple-blue transition hover:bg-apple-blue/20 active:scale-[0.98]"
           >
-            <Pencil size={15} />
-            {editLabel}
+            <Pencil size={14} strokeWidth={2.3} />
+            <span>{editLabel}</span>
           </button>
         ) : null}
       </div>
+
       {isDisputed ? (
-        <div className="mt-3 flex items-center justify-end border-t border-nvssBorder pt-3 text-xs text-nvssMuted">
-          <button type="button" onClick={() => onClearAlert(match.id)} className="shrink-0 rounded border border-nvssAlert px-2 py-1 font-semibold text-nvssAlert hover:bg-nvssAlert hover:text-nvssSurface">
+        <div className="mt-3 flex items-center justify-end border-t border-black/[0.06] pt-2.5">
+          <button
+            type="button"
+            onClick={() => onClearAlert(match.id)}
+            className="rounded-lg border border-apple-red/30 px-2.5 py-1 text-[11px] font-semibold text-apple-red transition hover:bg-apple-red hover:text-white"
+          >
             Noņemt brīdinājumu
           </button>
         </div>
@@ -84,32 +93,32 @@ function getEditLabel(status) {
   return 'Koriģēt rezultātu'
 }
 
-function PlayerLine({ name, club: represents, score }) {
+function PlayerLine({ name, club, score }) {
   return (
-    <>
+    <div className="flex items-center justify-between gap-2">
       <div className="min-w-0">
-        <p className="truncate font-semibold">{name}</p>
-        <p className="truncate text-xs text-nvssMuted">{represents || 'Gaida spēlētāju'}</p>
+        <p className="truncate text-xs font-bold text-[#1C1C1E]">{name}</p>
+        <p className="truncate text-[10px] text-[#8E8E93]">{club || 'Gaida spēlētāju'}</p>
       </div>
-      <div className="text-2xl font-black">{score}</div>
-    </>
+      <span className="font-mono text-lg font-bold tabular-nums text-[#1C1C1E]">{score}</span>
+    </div>
   )
 }
 
 function StatusBadge({ status }) {
   const classes = {
-    scheduled: 'text-nvssMuted border-nvssBorder',
-    in_progress: 'text-nvssGreen border-nvssGreen',
-    disputed: 'text-nvssAlert border-nvssAlert',
-    investigating: 'text-amber-200 border-amber-400',
-    awaiting_confirmation: 'text-nvssBlue border-nvssBlue',
-    completed: 'text-emerald-700 border-emerald-700',
+    scheduled: 'text-[#8E8E93] border-black/[0.08] bg-black/[0.04]',
+    in_progress: 'text-apple-blue border-apple-blue/20 bg-apple-blue/10',
+    disputed: 'text-apple-red border-apple-red/25 bg-apple-red/10',
+    investigating: 'text-amber-800 border-apple-orange/25 bg-apple-orange/10',
+    awaiting_confirmation: 'text-apple-purple border-apple-purple/25 bg-apple-purple/10',
+    completed: 'text-emerald-700 border-emerald-500/20 bg-emerald-500/10',
   }
   const Icon = status === 'disputed' ? AlertTriangle : status === 'investigating' ? Search : status === 'completed' ? CheckCircle2 : Clock
   return (
-    <span className={`inline-flex items-center gap-1 rounded border px-2 py-1 text-xs font-semibold ${classes[status]}`}>
-      <Icon size={14} className={status === 'in_progress' ? 'animate-pulse' : ''} />
-      {statusLabels[status]}
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${classes[status]}`}>
+      <Icon size={12} strokeWidth={2.3} className={status === 'in_progress' ? 'animate-pulse text-apple-blue' : ''} />
+      <span>{statusLabels[status]}</span>
     </span>
   )
 }

@@ -136,39 +136,62 @@ export default function App() {
 
 function HomeScreen({ hasPlayerSession, onOrganizer, onPlayer }) {
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-90px)] max-w-5xl items-center px-4 py-8">
-      <div className="grid w-full gap-4 md:grid-cols-2">
-        <RoleCard
-          icon={ShieldCheck}
-          title="Organizators"
-          description="Atver vadības paneli, pārskati brīdinājumus un pārvaldi aktīvo kārtu."
-          actionLabel="Organizatora pieslēgšanās"
-          onClick={onOrganizer}
-        />
-        <RoleCard
-          icon={UserRound}
-          title="Spēlētājs"
-          description={hasPlayerSession ? 'Atjauno savu sesiju vai ievadi reģistrācijas kodu.' : 'Reģistrējies ar savu kodu un atver spēles ekrānu.'}
-          actionLabel={hasPlayerSession ? 'Atvērt spēlētāja skatu' : 'Ievadīt spēlētāja kodu'}
-          onClick={onPlayer}
-        />
+    <main className="mx-auto flex min-h-[calc(100vh-80px)] max-w-4xl items-center px-4 py-10 sm:px-6">
+      <div className="w-full space-y-6">
+        <div className="text-center max-w-lg mx-auto">
+          <p className="text-xs font-semibold uppercase tracking-wider text-apple-blue">Turnīra vadība</p>
+          <h2 className="mt-1 text-3xl sm:text-4xl font-bold tracking-tight text-[#1C1C1E]">
+            Izvēlieties savu lomu
+          </h2>
+          <p className="mt-2 text-sm text-[#8E8E93]">
+            Piekļūstiet organizatora vadības panelim vai ievadiet savu spēlētāja kodu, lai sekotu galdam un setu rezultātiem.
+          </p>
+        </div>
+
+        <div className="grid w-full gap-5 sm:grid-cols-2">
+          <RoleCard
+            icon={ShieldCheck}
+            iconBg="bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-sm"
+            badge="Tiesnešiem & vadībai"
+            title="Organizators"
+            description="Pārskatiet visus galdus, apstipriniet rezultātus, reaģējiet uz strīdiem un ģenerējiet Šveices sistēmas kārtas."
+            actionLabel="Organizatora panelis"
+            onClick={onOrganizer}
+          />
+          <RoleCard
+            icon={UserRound}
+            iconBg="bg-gradient-to-b from-indigo-500 to-indigo-600 text-white shadow-sm"
+            badge={hasPlayerSession ? "Aktīva sesija" : "Spēlētājiem"}
+            title="Spēlētājs"
+            description={hasPlayerSession ? 'Atjaunojiet savu aktīvo sesiju un turpiniet spēles rezultātu reģistrēšanu.' : 'Pieslēdzieties ar savu 6 zīmju dalībnieka kodu, lai skatītu galda piešķīrumu un ievadītu setus.'}
+            actionLabel={hasPlayerSession ? 'Atvērt manu spēli' : 'Ievadīt spēlētāja kodu'}
+            onClick={onPlayer}
+          />
+        </div>
       </div>
     </main>
   )
 }
 
-function RoleCard({ icon: Icon, title, description, actionLabel, onClick }) {
+function RoleCard({ icon: Icon, iconBg, badge, title, description, actionLabel, onClick }) {
   return (
-    <section className="rounded-md border border-nvssBorder bg-nvssSurface p-6 shadow-[0_20px_60px_rgba(28,25,23,0.06)]">
-      <div className="flex size-14 items-center justify-center rounded-md bg-nvssBg text-nvssGreen">
-        <Icon size={28} />
+    <section className="group flex flex-col justify-between rounded-2xl border border-black/[0.08] bg-white p-6 sm:p-7 shadow-[0_2px_12px_rgba(0,0,0,0.04)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-0.5">
+      <div>
+        <div className="flex items-center justify-between">
+          <div className={`flex size-14 items-center justify-center rounded-2xl ${iconBg}`}>
+            <Icon size={28} strokeWidth={2.2} />
+          </div>
+          <span className="rounded-full bg-black/[0.04] px-2.5 py-1 text-[11px] font-medium text-slate-500">
+            {badge}
+          </span>
+        </div>
+        <h3 className="mt-5 text-2xl font-bold tracking-tight text-[#1C1C1E]">{title}</h3>
+        <p className="mt-2 text-sm leading-relaxed text-[#636366]">{description}</p>
       </div>
-      <h2 className="mt-6 text-3xl font-semibold">{title}</h2>
-      <p className="mt-3 max-w-sm text-sm leading-6 text-nvssMuted">{description}</p>
       <button
         type="button"
         onClick={onClick}
-        className="mt-8 min-h-[52px] rounded-md bg-nvssGreenAction px-5 font-semibold text-nvssSurface hover:bg-nvssAlert"
+        className="mt-8 flex min-h-[48px] w-full items-center justify-center rounded-xl bg-apple-blue px-5 text-[15px] font-semibold text-white shadow-sm transition-all duration-150 hover:bg-apple-blueHover active:scale-[0.98] focus-visible:ring-4 focus-visible:ring-apple-blue/30"
       >
         {actionLabel}
       </button>
@@ -181,40 +204,48 @@ function OrganizerLogin({ onSubmit }) {
   const [password, setPassword] = useState('')
 
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-90px)] max-w-md items-center px-4 py-6">
+    <main className="mx-auto flex min-h-[calc(100vh-80px)] max-w-md items-center px-4 py-8">
       <form
         onSubmit={(event) => {
           event.preventDefault()
           onSubmit({ email, password })
         }}
-        className="w-full rounded-md border border-nvssBorder bg-nvssSurface p-5 shadow-[0_20px_60px_rgba(28,25,23,0.08)]"
+        className="w-full rounded-2xl border border-black/[0.08] bg-white p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
       >
-        <div className="mb-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nvssGreen">Testa piekļuve</p>
-          <h2 className="mt-2 text-2xl font-semibold">Organizatora pieslēgšanās</h2>
-          <p className="mt-2 text-sm text-nvssMuted">Šī ir pagaidu piekļuve organizatora saskarnei. Derēs jebkuri dati.</p>
+        <div className="mb-6">
+          <span className="inline-flex items-center rounded-full bg-apple-blue/10 px-2.5 py-0.5 text-xs font-semibold tracking-wide text-apple-blue">
+            Testa vide
+          </span>
+          <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#1C1C1E]">Organizatora pieslēgšanās</h2>
+          <p className="mt-1.5 text-sm text-[#8E8E93]">Šī ir demonstrācijas piekļuve organizatora saskarnei. Derēs jebkuri ievades dati.</p>
         </div>
-        <label className="block text-sm font-medium text-nvssMuted">
-          E-pasts
-          <input
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            className="mt-1 min-h-[48px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-nvssText"
-            placeholder="organizer@nvssgrid.local"
-          />
-        </label>
-        <label className="mt-4 block text-sm font-medium text-nvssMuted">
-          Parole
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="mt-1 min-h-[48px] w-full rounded border border-nvssBorder bg-nvssBg px-3 text-nvssText"
-            placeholder="testa-parole"
-          />
-        </label>
-        <button type="submit" className="mt-5 min-h-[52px] w-full rounded-md bg-nvssGreenAction px-4 font-semibold text-nvssSurface hover:bg-nvssAlert">
-          Turpināt uz organizatora skatu
+        <div className="space-y-4">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#636366]">
+            E-pasts
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="mt-1.5 min-h-[46px] w-full rounded-xl border border-black/[0.1] bg-[#F2F2F7] px-3.5 text-[15px] text-[#1C1C1E] transition-all focus:bg-white focus:border-apple-blue focus:ring-4 focus:ring-apple-blue/20"
+              placeholder="organizer@nvssgrid.local"
+            />
+          </label>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[#636366]">
+            Parole
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="mt-1.5 min-h-[46px] w-full rounded-xl border border-black/[0.1] bg-[#F2F2F7] px-3.5 text-[15px] text-[#1C1C1E] transition-all focus:bg-white focus:border-apple-blue focus:ring-4 focus:ring-apple-blue/20"
+              placeholder="testa-parole"
+            />
+          </label>
+        </div>
+        <button
+          type="submit"
+          className="mt-6 flex min-h-[48px] w-full items-center justify-center rounded-xl bg-apple-blue px-4 text-[15px] font-semibold text-white shadow-sm transition-all duration-150 hover:bg-apple-blueHover active:scale-[0.98] focus-visible:ring-4 focus-visible:ring-apple-blue/30"
+        >
+          Turpināt uz vadības paneli
         </button>
       </form>
     </main>

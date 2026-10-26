@@ -4,40 +4,66 @@
 
 :root {
   color-scheme: light;
-  font-family:
-    "Fraunces", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  background: #f7f3e9;
-  --color-bg-main: #f7f3e9;
-  --color-bg-surface: #faf8f3;
-  --color-border: #e5dec9;
-  --color-text-main: #1c1917;
-  --color-text-muted: #6b6560;
-  --color-primary: #b91c1c;
-  --color-primary-hover: #991b1b;
-  --color-dark-action: #1c1917;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f2f2f7;
+  color: #1c1c1e;
+
+  --color-bg-main: #f2f2f7;
+  --color-bg-surface: #ffffff;
+  --color-border: #e5e5ea;
+  --color-text-main: #1c1c1e;
+  --color-text-muted: #8e8e93;
+  --color-primary: #007aff;
+  --color-primary-hover: #0066d6;
+  --color-dark-action: #1c1c1e;
 }
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  color: var(--color-text-main);
-  background:
-    radial-gradient(circle at top, rgba(185, 28, 28, 0.08), transparent 30%),
-    linear-gradient(180deg, #faf8f3 0%, #f7f3e9 35%, #f3eddf 100%);
+  color: #1c1c1e;
+  background-color: #f2f2f7;
+  background-image: radial-gradient(at 50% 0%, rgba(0, 122, 255, 0.04) 0px, transparent 400px);
+  background-attachment: fixed;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
+/* Apple HIG Focus Ring */
 button:focus-visible,
-input:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.35);
+}
+
+/* Subtle Apple Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
 }

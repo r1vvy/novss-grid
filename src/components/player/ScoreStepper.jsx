@@ -14,7 +14,7 @@ export function ScoreStepper({
   onPlayerBRemove,
 }) {
   return (
-    <div className="mt-5 grid gap-3">
+    <div className="mt-5 space-y-2.5">
       <ScoreRow
         name={playerAName}
         label="Spēlētājs A"
@@ -38,31 +38,40 @@ export function ScoreStepper({
 }
 
 function ScoreRow({ name, label, score, disabled, addDisabled, onAdd, onRemove }) {
+  const isRemoveDisabled = disabled || score <= 0
+  const isAddDisabled = disabled || addDisabled
+
   return (
-    <div className="grid grid-cols-[1fr_auto] items-center gap-3 rounded border border-nvssBorder bg-nvssSurface p-3">
-      <div className="min-w-0">
-        <p className="text-xs uppercase text-nvssMuted">{label}</p>
-        <p className="truncate text-base font-black text-nvssText">{name}</p>
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-black/[0.06] bg-[#F2F2F7]/60 p-3.5 transition-all">
+      <div className="min-w-0 pr-2">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</span>
+        <p className="truncate text-[15px] font-bold text-[#1C1C1E]">{name}</p>
       </div>
-      <div className="flex items-center gap-2">
+
+      {/* Apple HIG Segmented Stepper */}
+      <div className="flex items-center rounded-2xl border border-black/[0.06] bg-black/[0.04] p-1 shadow-inner">
         <button
           type="button"
           aria-label={`Noņemt setu: ${name}`}
-          disabled={disabled || score <= 0}
+          disabled={isRemoveDisabled}
           onClick={onRemove}
-          className="flex size-11 items-center justify-center rounded bg-nvssSlateAction text-nvssText disabled:cursor-not-allowed disabled:text-nvssMuted"
+          className="flex size-10 items-center justify-center rounded-xl bg-white text-slate-800 shadow-apple-sm transition-all hover:bg-slate-50 active:scale-95 disabled:bg-transparent disabled:text-slate-300 disabled:shadow-none disabled:cursor-not-allowed"
         >
-          <Minus size={20} />
+          <Minus size={18} strokeWidth={2.5} />
         </button>
-        <span className="min-w-8 text-center text-2xl font-black text-nvssText">{score}</span>
+
+        <span className="w-11 text-center font-mono text-xl font-bold tabular-nums text-[#1C1C1E]">
+          {score}
+        </span>
+
         <button
           type="button"
           aria-label={`Pievienot setu: ${name}`}
-          disabled={disabled || addDisabled}
+          disabled={isAddDisabled}
           onClick={onAdd}
-          className="flex size-11 items-center justify-center rounded bg-nvssGreenAction text-nvssSurface disabled:cursor-not-allowed disabled:bg-nvssSlateAction disabled:text-nvssMuted"
+          className="flex size-10 items-center justify-center rounded-xl bg-apple-blue text-white shadow-apple-sm transition-all hover:bg-apple-blueHover active:scale-95 disabled:bg-transparent disabled:text-slate-300 disabled:shadow-none disabled:cursor-not-allowed"
         >
-          <Plus size={20} />
+          <Plus size={18} strokeWidth={2.5} />
         </button>
       </div>
     </div>
