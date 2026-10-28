@@ -42,6 +42,7 @@ export default {
           purple: '#5856D6',
           teal: '#30B0C7',
           bg: '#F2F2F7',
+          canvas: '#F2F2F7',
           card: '#FFFFFF',
           subtle: '#F8F8FA',
           separator: '#E5E5EA',

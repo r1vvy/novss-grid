@@ -1,9 +1,19 @@
 import React, { useMemo, useState } from 'react'
-import { BadgeCheck, ChevronLeft, MapPin, User, LogOut } from 'lucide-react'
+import { BadgeCheck, LogOut, MapPin, User } from 'lucide-react'
 import { PlayerMatchCard } from './PlayerMatchCard'
 import { getCurrentRoundMatches } from '../../utils/tournament'
 
-export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreRemove, onConfirm, onCallReferee, onCancelReferee, onSignOut }) {
+export function PlayerView({
+  tournament,
+  player,
+  onCheckIn,
+  onScoreAdd,
+  onScoreRemove,
+  onConfirm,
+  onCallReferee,
+  onCancelReferee,
+  onSignOut,
+}) {
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const currentMatch = useMemo(() => {
@@ -22,10 +32,10 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
             const ok = onCheckIn(code)
             setError(ok ? '' : 'Reģistrācijas kods netika atrasts. Lūdzu pārbaudiet kodu.')
           }}
-          className="w-full rounded-3xl border border-black/[0.08] bg-white p-7 shadow-[0_4px_24px_rgba(0,0,0,0.06)]"
+          className="w-full rounded-3xl border border-black/[0.08] bg-white p-7 shadow-apple-modal"
         >
           <div className="mb-6 flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-sm">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-apple-blue text-white shadow-sm">
               <User size={26} strokeWidth={2.2} />
             </div>
             <div>
@@ -41,7 +51,7 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
                 value={code}
                 maxLength={6}
                 onChange={(event) => setCode(event.target.value.toUpperCase())}
-                className="h-16 w-full rounded-2xl border border-black/[0.1] bg-[#F2F2F7] px-4 text-center font-mono text-3xl font-bold uppercase tracking-[0.25em] text-[#1C1C1E] transition-all placeholder:font-sans placeholder:text-base placeholder:tracking-normal placeholder:text-slate-400 focus:border-apple-blue focus:bg-white focus:ring-4 focus:ring-apple-blue/20"
+                className="h-16 w-full rounded-2xl border border-black/[0.1] bg-[#F2F2F7] px-4 text-center font-mono text-3xl font-bold uppercase tracking-[0.25em] text-[#1C1C1E] transition-all placeholder:font-sans placeholder:text-base placeholder:tracking-normal placeholder:text-apple-secondary focus:border-apple-blue focus:bg-white focus:ring-4 focus:ring-apple-blue/20"
                 placeholder="PIEM. ANNA42"
                 aria-label="Reģistrācijas kods"
                 autoFocus
@@ -49,14 +59,14 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
             </div>
 
             {error && (
-              <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-3.5 py-2.5 text-center text-xs font-semibold text-apple-red">
+              <div className="rounded-xl border border-apple-red/20 bg-apple-red/10 px-3.5 py-2.5 text-center text-xs font-semibold text-apple-red">
                 {error}
               </div>
             )}
 
             <button
               type="submit"
-              className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-apple-blue px-4 text-[16px] font-semibold text-white shadow-sm transition-all duration-150 hover:bg-apple-blueHover active:scale-[0.98] focus-visible:ring-4 focus-visible:ring-apple-blue/30"
+              className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-apple-blue px-4 text-[16px] font-semibold text-white shadow-sm transition-all duration-150 hover:bg-apple-blueHover active:scale-[0.98] focus-visible:ring-4 focus-visible:ring-apple-blue/30"
             >
               <BadgeCheck size={20} strokeWidth={2.2} />
               Pieslēgties turnīram
@@ -74,9 +84,9 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
         <button
           type="button"
           onClick={onSignOut}
-          className="flex min-h-[38px] items-center gap-1.5 rounded-xl border border-black/[0.08] bg-black/[0.03] px-3 text-xs font-medium text-slate-700 transition hover:bg-black/[0.06] active:bg-black/[0.1]"
+          className="flex min-h-[44px] items-center gap-1.5 rounded-xl border border-black/[0.08] bg-black/[0.03] px-3.5 text-xs font-medium text-[#1C1C1E] transition hover:bg-black/[0.06] active:bg-black/[0.1]"
         >
-          <LogOut size={14} className="text-slate-500" />
+          <LogOut size={14} className="text-apple-secondary" />
           Iziet
         </button>
 
@@ -94,12 +104,12 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
       </div>
 
       {/* Tournament location pill */}
-      <div className="mb-4 flex items-center justify-between rounded-xl border border-black/[0.06] bg-white/70 px-4 py-2.5 text-xs text-slate-600 backdrop-blur shadow-sm">
+      <div className="mb-4 flex items-center justify-between rounded-xl border border-black/[0.06] bg-white/70 px-4 py-2.5 text-xs text-[#636366] backdrop-blur shadow-sm">
         <div className="flex items-center gap-2 truncate">
           <MapPin size={15} className="shrink-0 text-apple-blue" />
           <span className="truncate font-medium">{tournament.name}</span>
         </div>
-        <span className="shrink-0 rounded-full bg-black/[0.05] px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+        <span className="shrink-0 rounded-full bg-black/[0.05] px-2 py-0.5 text-[11px] font-semibold tabular-nums text-[#1C1C1E]">
           Kārta {tournament.currentRound} no {tournament.totalRounds}
         </span>
       </div>
@@ -117,7 +127,7 @@ export function PlayerView({ tournament, player, onCheckIn, onScoreAdd, onScoreR
         />
       ) : (
         <section className="rounded-2xl border border-black/[0.06] bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-black/[0.04] text-slate-400">
+          <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-black/[0.04] text-apple-secondary">
             <User size={28} />
           </div>
           <h3 className="mt-4 text-xl font-bold tracking-tight text-[#1C1C1E]">Nav aktīva galda</h3>

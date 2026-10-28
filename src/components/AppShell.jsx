@@ -32,7 +32,7 @@ export function AppShell({ title, showBack = false, onBack, children }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-black/[0.06] bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium text-slate-500">
+            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-black/[0.06] bg-black/[0.03] px-2.5 py-1 text-[11px] font-medium text-[#8E8E93]">
               <span className="size-1.5 rounded-full bg-apple-green animate-pulse" />
               Tiešsaiste
             </span>

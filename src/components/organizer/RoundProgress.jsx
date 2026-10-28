@@ -20,7 +20,7 @@ export function RoundProgress({ tournament, canGenerate, onGenerate, embedded = 
           type="button"
           disabled={!canGenerate}
           onClick={onGenerate}
-          className="inline-flex min-h-[40px] shrink-0 items-center justify-center gap-2 rounded-xl bg-apple-blue px-4 text-xs font-semibold text-white shadow-sm transition-all duration-150 hover:bg-apple-blueHover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-black/[0.06] disabled:text-slate-400 disabled:shadow-none"
+          className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-xl bg-apple-blue px-4 text-xs font-semibold text-white shadow-sm transition-all duration-150 hover:bg-apple-blueHover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-black/[0.06] disabled:text-apple-tertiary disabled:shadow-none"
         >
           <CheckCircle2 size={16} strokeWidth={2.2} />
           <span>Ģenerēt nākamo kārtu</span>
@@ -30,11 +30,11 @@ export function RoundProgress({ tournament, canGenerate, onGenerate, embedded = 
       <div className="mt-3.5 flex items-center gap-3">
         <div className="h-2 w-full overflow-hidden rounded-full bg-black/[0.06]">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-apple-blue to-blue-500 transition-all duration-500 ease-out"
+            className="h-full rounded-full bg-apple-blue transition-all duration-500 ease-out"
             style={{ width: `${percent}%` }}
           />
         </div>
-        <span className="text-[11px] font-semibold tabular-nums text-slate-500 shrink-0">
+        <span className="text-[11px] font-semibold tabular-nums text-[#8E8E93] shrink-0">
           {Math.round(percent)}%
         </span>
       </div>

@@ -38,7 +38,7 @@ export function RefereeButton({ disabled, onClick, label = 'Izsaukt tiesnesi', r
         className={`flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl px-4 text-[15px] font-semibold transition-all duration-150 active:scale-[0.98] ${
           armed
             ? 'bg-apple-red text-white shadow-sm ring-4 ring-apple-red/30 animate-pulse'
-            : 'border border-apple-red/30 bg-apple-red/10 text-apple-red hover:bg-apple-red/15 active:bg-apple-red/25 disabled:cursor-not-allowed disabled:border-black/[0.08] disabled:bg-black/[0.03] disabled:text-slate-400'
+            : 'border border-apple-red/30 bg-apple-red/10 text-apple-red hover:bg-apple-red/15 active:bg-apple-red/25 disabled:cursor-not-allowed disabled:border-black/[0.08] disabled:bg-black/[0.03] disabled:text-apple-tertiary'
         }`}
       >
         <ShieldAlert size={19} strokeWidth={2.2} />

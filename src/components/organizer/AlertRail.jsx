@@ -17,7 +17,7 @@ export function AlertRail({ tournament, alerts, onMarkInvestigating }) {
             {alerts.length}
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+          <span className="inline-flex items-center gap-1 rounded-full bg-apple-green/10 px-2.5 py-0.5 text-[11px] font-medium text-apple-green">
             <CheckCircle2 size={12} />
             Mierīgs
           </span>
@@ -46,7 +46,7 @@ export function AlertRail({ tournament, alerts, onMarkInvestigating }) {
               <button
                 type="button"
                 onClick={() => onMarkInvestigating(match.id)}
-                className="mt-3 inline-flex min-h-[36px] w-full items-center justify-center gap-1.5 rounded-lg bg-apple-orange px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-amber-600 active:scale-[0.98]"
+                className="mt-3 inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl bg-apple-orange px-3 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 active:scale-[0.98]"
               >
                 <Search size={14} strokeWidth={2.2} />
                 <span>Marķēt kā izmeklē</span>

@@ -7,10 +7,10 @@ export function ViewToggle({ view, onViewChange }) {
       <button
         type="button"
         onClick={() => onViewChange('organizer')}
-        className={`flex min-h-[36px] items-center justify-center gap-2 rounded-lg px-4 text-xs font-semibold transition-all ${
+        className={`flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-4 text-xs font-semibold transition-all ${
           view === 'organizer'
-            ? 'bg-white text-slate-900 shadow-apple-sm'
-            : 'text-slate-500 hover:text-slate-900'
+            ? 'bg-white text-[#1C1C1E] shadow-apple-sm'
+            : 'text-[#8E8E93] hover:text-[#1C1C1E]'
         }`}
       >
         <Grid3X3 size={15} strokeWidth={2.2} />
@@ -19,10 +19,10 @@ export function ViewToggle({ view, onViewChange }) {
       <button
         type="button"
         onClick={() => onViewChange('player')}
-        className={`flex min-h-[36px] items-center justify-center gap-2 rounded-lg px-4 text-xs font-semibold transition-all ${
+        className={`flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-4 text-xs font-semibold transition-all ${
           view === 'player'
-            ? 'bg-white text-slate-900 shadow-apple-sm'
-            : 'text-slate-500 hover:text-slate-900'
+            ? 'bg-white text-[#1C1C1E] shadow-apple-sm'
+            : 'text-[#8E8E93] hover:text-[#1C1C1E]'
         }`}
       >
         <User size={15} strokeWidth={2.2} />

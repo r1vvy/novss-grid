@@ -151,7 +151,7 @@ function HomeScreen({ hasPlayerSession, onOrganizer, onPlayer }) {
         <div className="grid w-full gap-5 sm:grid-cols-2">
           <RoleCard
             icon={ShieldCheck}
-            iconBg="bg-gradient-to-b from-blue-500 to-blue-600 text-white shadow-sm"
+            iconBg="bg-gradient-to-b from-apple-blue to-apple-blueHover text-white shadow-sm"
             badge="Tiesnešiem & vadībai"
             title="Organizators"
             description="Pārskatiet visus galdus, apstipriniet rezultātus, reaģējiet uz strīdiem un ģenerējiet Šveices sistēmas kārtas."
@@ -160,7 +160,7 @@ function HomeScreen({ hasPlayerSession, onOrganizer, onPlayer }) {
           />
           <RoleCard
             icon={UserRound}
-            iconBg="bg-gradient-to-b from-indigo-500 to-indigo-600 text-white shadow-sm"
+            iconBg="bg-gradient-to-b from-apple-purple to-[#4844B4] text-white shadow-sm"
             badge={hasPlayerSession ? "Aktīva sesija" : "Spēlētājiem"}
             title="Spēlētājs"
             description={hasPlayerSession ? 'Atjaunojiet savu aktīvo sesiju un turpiniet spēles rezultātu reģistrēšanu.' : 'Pieslēdzieties ar savu 6 zīmju dalībnieka kodu, lai skatītu galda piešķīrumu un ievadītu setus.'}
@@ -181,7 +181,7 @@ function RoleCard({ icon: Icon, iconBg, badge, title, description, actionLabel, 
           <div className={`flex size-14 items-center justify-center rounded-2xl ${iconBg}`}>
             <Icon size={28} strokeWidth={2.2} />
           </div>
-          <span className="rounded-full bg-black/[0.04] px-2.5 py-1 text-[11px] font-medium text-slate-500">
+          <span className="rounded-full bg-black/[0.04] px-2.5 py-1 text-[11px] font-medium text-[#8E8E93]">
             {badge}
           </span>
         </div>

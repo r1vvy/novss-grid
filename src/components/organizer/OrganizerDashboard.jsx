@@ -1,16 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { Activity, AlertTriangle, CheckCircle2, Clock, LayoutGrid, Rows3, Trophy, Users, X, ChevronRight } from 'lucide-react'
+import React, { useMemo, useState } from 'react'
+import { Activity, AlertTriangle, CheckCircle2, Clock, LayoutGrid, Rows3, Trophy, Users, X } from 'lucide-react'
 import { AlertRail } from './AlertRail'
 import { CompactLegend, TableGrid } from './TableGrid'
 import { RoundProgress } from './RoundProgress'
 import { TournamentHeader } from './TournamentHeader'
+import { useModalDismiss } from '../../hooks/useModalDismiss'
+import { useMatchOverride } from '../../hooks/useMatchOverride'
+import { useStandingsPagination } from '../../hooks/useStandingsPagination'
 import {
   calculateStandings,
   canGenerateNextRound,
   deriveMatchStatus,
   generateNextSwissRound,
   getOverrideAuditLabel,
-  getRequiredWins,
   getCurrentRoundMatches,
 } from '../../utils/tournament'
 
@@ -29,11 +31,7 @@ export function OrganizerDashboard({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [sortBy, setSortBy] = useState('table')
   const [viewMode, setViewMode] = useState('table')
-  const [standingsPage, setStandingsPage] = useState(1)
   const [overrideMatch, setOverrideMatch] = useState(null)
-  const [overrideSetResults, setOverrideSetResults] = useState([])
-  const [overrideReason, setOverrideReason] = useState('referee_decision')
-  const [overrideNote, setOverrideNote] = useState('')
   const [setup, setSetup] = useState({
     name: tournament.name,
     maxSetsPerMatch: tournament.maxSetsPerMatch,
@@ -42,40 +40,29 @@ export function OrganizerDashboard({
     closeWin: tournament.pointAllocation.closeWin,
     loss: tournament.pointAllocation.loss,
   })
+
   const currentMatches = getCurrentRoundMatches(tournament)
   const sortedMatches = useMemo(
     () => [...currentMatches].sort((a, b) => compareMatches(a, b, sortBy, tournament.maxSetsPerMatch)),
     [currentMatches, sortBy, tournament.maxSetsPerMatch],
   )
+
   const standings = useMemo(() => calculateStandings(tournament), [tournament])
-  const totalStandingsPages = Math.max(1, Math.ceil(standings.length / STANDINGS_PAGE_SIZE))
-  const pagedStandings = useMemo(() => {
-    const start = (standingsPage - 1) * STANDINGS_PAGE_SIZE
-    return standings.slice(start, start + STANDINGS_PAGE_SIZE)
-  }, [standings, standingsPage])
+  const {
+    pagedStandings,
+    currentPage: standingsPage,
+    totalPages: totalStandingsPages,
+    nextPage,
+    prevPage,
+  } = useStandingsPagination(standings, STANDINGS_PAGE_SIZE)
+
   const alerts = currentMatches.filter((match) => deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'disputed')
   const canGenerate = canGenerateNextRound(tournament)
 
-  useEffect(() => {
-    setStandingsPage((current) => Math.min(current, totalStandingsPages))
-  }, [totalStandingsPages])
+  const settingsDismiss = useModalDismiss(isSettingsOpen, () => setIsSettingsOpen(false))
 
   function updateSetup(field, value) {
     setSetup((current) => ({ ...current, [field]: value }))
-  }
-
-  function openOverride(match) {
-    setOverrideMatch(match)
-    setOverrideSetResults(match.setResults.map((set) => ({ winnerId: set.winnerId })))
-    setOverrideReason(match.overrideMeta?.reason || '')
-    setOverrideNote(match.overrideMeta?.note || '')
-  }
-
-  function closeOverride() {
-    setOverrideMatch(null)
-    setOverrideSetResults([])
-    setOverrideReason('')
-    setOverrideNote('')
   }
 
   return (
@@ -97,52 +84,52 @@ export function OrganizerDashboard({
           onClearAlert={onClearAlert}
           onMarkInvestigating={onMarkInvestigating}
           onResetInvestigation={onResetInvestigation}
-          onOpenOverride={openOverride}
+          onOpenOverride={setOverrideMatch}
           onSwapTables={onSwapTables}
           titleActions={(
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              {/* Apple HIG Segmented Control: View Mode */}
+              {/* Apple HIG Segmented Control: View Mode (Min 44px hit target) */}
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-[#8E8E93]">Skats:</span>
-                <div className="inline-flex rounded-xl border border-black/[0.04] bg-black/[0.06] p-0.5">
+                <div className="inline-flex rounded-xl border border-black/[0.04] bg-black/[0.06] p-1">
                   <button
                     type="button"
                     onClick={() => setViewMode('table')}
-                    className={`flex min-h-[30px] items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-all ${
+                    className={`flex min-h-[44px] items-center gap-1.5 rounded-lg px-3.5 text-xs font-semibold transition-all ${
                       viewMode === 'table'
-                        ? 'bg-white text-slate-900 shadow-apple-sm'
-                        : 'text-slate-500 hover:text-slate-800'
+                        ? 'bg-white text-[#1C1C1E] shadow-apple-sm'
+                        : 'text-[#8E8E93] hover:text-[#1C1C1E]'
                     }`}
                   >
-                    <Rows3 size={14} strokeWidth={2.2} />
+                    <Rows3 size={15} strokeWidth={2.2} />
                     <span>Tabula</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setViewMode('compact')}
-                    className={`flex min-h-[30px] items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-all ${
+                    className={`flex min-h-[44px] items-center gap-1.5 rounded-lg px-3.5 text-xs font-semibold transition-all ${
                       viewMode === 'compact'
-                        ? 'bg-white text-slate-900 shadow-apple-sm'
-                        : 'text-slate-500 hover:text-slate-800'
+                        ? 'bg-white text-[#1C1C1E] shadow-apple-sm'
+                        : 'text-[#8E8E93] hover:text-[#1C1C1E]'
                     }`}
                   >
-                    <LayoutGrid size={14} strokeWidth={2.2} />
+                    <LayoutGrid size={15} strokeWidth={2.2} />
                     <span>Kompakts</span>
                   </button>
                 </div>
               </div>
 
-              {/* Apple HIG Segmented Control: Sort By */}
+              {/* Apple HIG Segmented Control: Sort By (Min 44px hit target) */}
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-[#8E8E93]">Kārtot:</span>
-                <div className="inline-flex rounded-xl border border-black/[0.04] bg-black/[0.06] p-0.5">
+                <div className="inline-flex rounded-xl border border-black/[0.04] bg-black/[0.06] p-1">
                   <button
                     type="button"
                     onClick={() => setSortBy('table')}
-                    className={`min-h-[30px] rounded-lg px-3 text-xs font-semibold transition-all ${
+                    className={`min-h-[44px] rounded-lg px-3.5 text-xs font-semibold transition-all ${
                       sortBy === 'table'
-                        ? 'bg-white text-slate-900 shadow-apple-sm'
-                        : 'text-slate-500 hover:text-slate-800'
+                        ? 'bg-white text-[#1C1C1E] shadow-apple-sm'
+                        : 'text-[#8E8E93] hover:text-[#1C1C1E]'
                     }`}
                   >
                     Pēc galda
@@ -150,10 +137,10 @@ export function OrganizerDashboard({
                   <button
                     type="button"
                     onClick={() => setSortBy('status')}
-                    className={`min-h-[30px] rounded-lg px-3 text-xs font-semibold transition-all ${
+                    className={`min-h-[44px] rounded-lg px-3.5 text-xs font-semibold transition-all ${
                       sortBy === 'status'
-                        ? 'bg-white text-slate-900 shadow-apple-sm'
-                        : 'text-slate-500 hover:text-slate-800'
+                        ? 'bg-white text-[#1C1C1E] shadow-apple-sm'
+                        : 'text-[#8E8E93] hover:text-[#1C1C1E]'
                     }`}
                   >
                     Pēc statusa
@@ -190,7 +177,7 @@ export function OrganizerDashboard({
               </div>
               <span>Kopvērtējums</span>
             </div>
-            <span className="text-[11px] font-semibold text-[#8E8E93]">
+            <span className="text-[11px] font-semibold text-[#8E8E93] tabular-nums">
               Lapa {standingsPage} no {totalStandingsPages}
             </span>
           </div>
@@ -199,13 +186,13 @@ export function OrganizerDashboard({
             {pagedStandings.map((player, index) => {
               const rank = (standingsPage - 1) * STANDINGS_PAGE_SIZE + index + 1
               return (
-                <div key={player.id} className="grid grid-cols-[24px_1fr_auto] items-center gap-2 py-2 text-xs transition-colors hover:bg-slate-500/[0.03] rounded-lg px-1">
+                <div key={player.id} className="grid grid-cols-[24px_1fr_auto] items-center gap-2 py-2 text-xs transition-colors hover:bg-black/[0.03] rounded-lg px-1">
                   <span className={`font-mono text-xs font-semibold tabular-nums ${rank <= 3 ? 'text-apple-blue font-bold' : 'text-[#8E8E93]'}`}>
                     {rank}.
                   </span>
                   <div className="min-w-0 pr-1">
                     <p className="truncate font-semibold text-[#1C1C1E]">{player.name}</p>
-                    <p className="truncate text-[10px] text-[#8E8E93]">Buholcs: {player.buchholz}</p>
+                    <p className="truncate text-[10px] text-[#8E8E93] tabular-nums">Buholcs: {player.buchholz}</p>
                   </div>
                   <span className="font-mono text-xs font-bold tabular-nums text-apple-blue">
                     {player.points} p.
@@ -218,9 +205,9 @@ export function OrganizerDashboard({
           <div className="mt-4 flex items-center justify-between gap-2 border-t border-black/[0.06] pt-3">
             <button
               type="button"
-              onClick={() => setStandingsPage((current) => Math.max(1, current - 1))}
+              onClick={prevPage}
               disabled={standingsPage === 1}
-              className="inline-flex min-h-[32px] items-center rounded-lg border border-black/[0.08] bg-black/[0.02] px-3 text-xs font-semibold text-slate-700 transition hover:bg-black/[0.06] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex min-h-[44px] items-center rounded-xl border border-black/[0.08] bg-black/[0.02] px-3.5 text-xs font-semibold text-[#1C1C1E] transition hover:bg-black/[0.06] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Iepriekšējā
             </button>
@@ -229,9 +216,9 @@ export function OrganizerDashboard({
             </span>
             <button
               type="button"
-              onClick={() => setStandingsPage((current) => Math.min(totalStandingsPages, current + 1))}
+              onClick={nextPage}
               disabled={standingsPage === totalStandingsPages}
-              className="inline-flex min-h-[32px] items-center rounded-lg border border-black/[0.08] bg-black/[0.02] px-3 text-xs font-semibold text-slate-700 transition hover:bg-black/[0.06] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex min-h-[44px] items-center rounded-xl border border-black/[0.08] bg-black/[0.02] px-3.5 text-xs font-semibold text-[#1C1C1E] transition hover:bg-black/[0.06] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Nākamā
             </button>
@@ -239,9 +226,15 @@ export function OrganizerDashboard({
         </section>
       </aside>
 
-      {/* Tournament Settings Modal - macOS Sheet Style */}
+      {/* Tournament Settings Modal - macOS Sheet Style with useModalDismiss */}
       {isSettingsOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 backdrop-blur-md px-4 py-6">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="settings-modal-title"
+          onMouseDown={settingsDismiss.onBackdropClick}
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 backdrop-blur-md px-4 py-6"
+        >
           <div className="max-h-[calc(100vh-48px)] w-full max-w-2xl overflow-y-auto rounded-3xl border border-black/[0.08] bg-white p-6 shadow-apple-modal">
             <div className="mb-5 flex items-center justify-between gap-3 border-b border-black/[0.06] pb-4">
               <div className="flex items-center gap-2.5">
@@ -249,17 +242,17 @@ export function OrganizerDashboard({
                   <Trophy size={18} strokeWidth={2.3} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold tracking-tight text-[#1C1C1E]">Turnīra iestatījumi</h3>
+                  <h3 id="settings-modal-title" className="text-lg font-bold tracking-tight text-[#1C1C1E]">Turnīra iestatījumi</h3>
                   <p className="text-xs text-[#8E8E93]">Konfigurējiet punktus un setu skaitu</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsSettingsOpen(false)}
-                className="flex size-8 items-center justify-center rounded-full bg-black/[0.06] text-slate-600 transition hover:bg-black/[0.1] active:scale-95"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/[0.06] text-[#636366] transition hover:bg-black/[0.1] active:scale-95"
                 aria-label="Aizvērt"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 
@@ -304,13 +297,13 @@ export function OrganizerDashboard({
                 <button
                   type="button"
                   onClick={() => setIsSettingsOpen(false)}
-                  className="min-h-[42px] rounded-xl border border-black/[0.08] bg-black/[0.03] px-4 text-xs font-semibold text-slate-700 transition hover:bg-black/[0.06] active:scale-[0.98]"
+                  className="min-h-[44px] rounded-xl border border-black/[0.08] bg-black/[0.03] px-4 text-xs font-semibold text-[#1C1C1E] transition hover:bg-black/[0.06] active:scale-[0.98]"
                 >
                   Atcelt
                 </button>
                 <button
                   type="submit"
-                  className="min-h-[42px] rounded-xl bg-apple-blue px-5 text-xs font-semibold text-white shadow-sm transition hover:bg-apple-blueHover active:scale-[0.98]"
+                  className="min-h-[44px] rounded-xl bg-apple-blue px-5 text-xs font-semibold text-white shadow-sm transition hover:bg-apple-blueHover active:scale-[0.98]"
                 >
                   Saglabāt iestatījumus
                 </button>
@@ -320,26 +313,15 @@ export function OrganizerDashboard({
         </div>
       ) : null}
 
-      {/* Override Modal */}
+      {/* Single-Sheet Override Modal with Inlined Audit Reason & Notes */}
       {overrideMatch ? (
         <OverrideModal
           tournament={tournament}
           match={overrideMatch}
-          setResults={overrideSetResults}
-          onSetResultsChange={setOverrideSetResults}
-          reason={overrideReason}
-          note={overrideNote}
-          onReasonChange={setOverrideReason}
-          onNoteChange={setOverrideNote}
-          onClose={closeOverride}
-          onSubmit={() => {
-            onForceOverride(overrideMatch.id, overrideSetResults, {
-              reason: overrideReason,
-              note: overrideNote,
-              editedBy: 'Organizators',
-              editedAt: 'Tikko',
-            })
-            closeOverride()
+          onClose={() => setOverrideMatch(null)}
+          onSubmit={(setResults, metadata) => {
+            onForceOverride(overrideMatch.id, setResults, metadata)
+            setOverrideMatch(null)
           }}
         />
       ) : null}
@@ -363,9 +345,9 @@ const modalStatusClasses = {
   scheduled: 'text-[#8E8E93] border-black/[0.08] bg-black/[0.04]',
   in_progress: 'text-apple-blue border-apple-blue/20 bg-apple-blue/10',
   disputed: 'text-apple-red border-apple-red/25 bg-apple-red/10',
-  investigating: 'text-amber-800 border-apple-orange/25 bg-apple-orange/10',
+  investigating: 'text-apple-orange border-apple-orange/25 bg-apple-orange/10',
   awaiting_confirmation: 'text-apple-purple border-apple-purple/25 bg-apple-purple/10',
-  completed: 'text-emerald-700 border-emerald-500/20 bg-emerald-500/10',
+  completed: 'text-apple-green border-apple-green/20 bg-apple-green/10',
 }
 
 const modalStatusLabels = {
@@ -395,53 +377,44 @@ function compareMatches(a, b, sortBy, maxSetsPerMatch) {
   return a.table - b.table
 }
 
+/**
+ * Single-Sheet Override Modal conforming to Apple HIG:
+ * - Single surface dialog with backdrop blur
+ * - Inlined "Audita pamatojums" section directly in the sheet (eliminating ReasonModal)
+ * - Minimum 44px touch targets on buttons, selects, and controls
+ * - Keyboard Escape dismissal and backdrop dismissal via useModalDismiss
+ */
 function OverrideModal({
   tournament,
   match,
-  setResults,
-  onSetResultsChange,
-  reason,
-  note,
-  onReasonChange,
-  onNoteChange,
   onClose,
   onSubmit,
 }) {
-  const [isReasonFormVisible, setIsReasonFormVisible] = useState(false)
+  const modalDismiss = useModalDismiss(Boolean(match), onClose)
+  const {
+    setResults,
+    reason,
+    setReason,
+    note,
+    setNote,
+    winnerOptions,
+    currentScore,
+    draftScore,
+    canAddSet,
+    isDraftValid,
+    hasResultChanged,
+    canSubmit,
+    updateSetWinner,
+    addSet,
+    removeSet,
+  } = useMatchOverride(match, tournament)
+
   const [auditPage, setAuditPage] = useState(1)
-
-  useEffect(() => {
-    function closeOnEscape(event) {
-      if (event.key === 'Escape') onClose()
-    }
-
-    window.addEventListener('keydown', closeOnEscape)
-    return () => window.removeEventListener('keydown', closeOnEscape)
-  }, [onClose])
-
-  const winnerOptions = tournament.players.filter((player) => [match.playerAId, match.playerBId].includes(player.id))
   const status = deriveMatchStatus(match, tournament.maxSetsPerMatch)
-  const currentScore = winnerOptions.map((player) => ({
-    ...player,
-    wins: match.setResults.filter((set) => set.winnerId === player.id).length,
-    confirmed: Boolean(match.confirmations?.[player.id]),
-  }))
-  const draftScore = winnerOptions.map((player) => ({
-    ...player,
-    wins: setResults.filter((set) => set.winnerId === player.id).length,
-  }))
-  const requiredWins = getRequiredWins(tournament.maxSetsPerMatch)
-  const draftWinner = draftScore.find((player) => player.wins >= requiredWins)
-  const canAddSet = setResults.length < tournament.maxSetsPerMatch && !draftWinner
-  const isDrawDraft = setResults.length === tournament.maxSetsPerMatch
-    && !draftWinner
-    && draftScore[0]?.wins === draftScore[1]?.wins
-  const isDraftValid = isDrawDraft || (Boolean(draftWinner) && draftScore.filter((player) => player.wins >= requiredWins).length === 1)
-  const hasResultChanged = setResults.length !== match.setResults.length
-    || setResults.some((set, index) => set.winnerId !== match.setResults[index]?.winnerId)
   const title = getOverrideTitle(status)
   const currentScoreLine = `${currentScore[0]?.wins ?? 0} : ${currentScore[1]?.wins ?? 0}`
   const draftScoreLine = `${draftScore[0]?.wins ?? 0} : ${draftScore[1]?.wins ?? 0}`
+
   const auditEntries = Array.isArray(match.overrideMeta?.editHistory)
     ? match.overrideMeta.editHistory
     : match.overrideMeta?.reason
@@ -452,37 +425,26 @@ function OverrideModal({
   const auditStart = (auditPage - 1) * auditPageSize
   const pagedAuditEntries = auditEntries.slice(auditStart, auditStart + auditPageSize)
 
-  function updateSetWinner(index, winnerId) {
-    onSetResultsChange(setResults.map((set, setIndex) => (
-      setIndex === index
-        ? { winnerId }
-        : set
-    )))
-  }
-
-  function addSet() {
-    if (!canAddSet) return
-    onSetResultsChange([...setResults, { winnerId: winnerOptions[0]?.id || '' }])
-  }
-
-  function removeSet(index) {
-    onSetResultsChange(setResults.filter((_, setIndex) => setIndex !== index))
+  function handleSave() {
+    if (!canSubmit) return
+    onSubmit(setResults, {
+      reason,
+      note,
+      editedBy: 'Organizators',
+      editedAt: 'Tikko',
+    })
   }
 
   return (
-    <>
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="override-modal-title"
+      onMouseDown={modalDismiss.onBackdropClick}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md px-4 py-6"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="override-modal-title"
-        className="flex max-h-[calc(100vh-48px)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-black/[0.08] bg-white shadow-apple-modal"
-      >
+      <div className="flex max-h-[calc(100vh-48px)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-black/[0.08] bg-white shadow-apple-modal">
+        {/* Modal Header */}
         <div className="border-b border-black/[0.06] px-6 py-4">
           <div className="flex items-center justify-between gap-4">
             <div>
@@ -498,13 +460,14 @@ function OverrideModal({
               type="button"
               onClick={onClose}
               aria-label="Aizvērt"
-              className="flex size-8 items-center justify-center rounded-full bg-black/[0.06] text-slate-600 transition hover:bg-black/[0.1] active:scale-95"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-black/[0.06] text-[#636366] transition hover:bg-black/[0.1] active:scale-95"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           </div>
         </div>
 
+        {/* Modal Body */}
         <div className="overflow-y-auto px-6 py-5 space-y-5">
           {/* Current Score Summary */}
           <div className="rounded-2xl border border-black/[0.06] bg-[#F2F2F7]/50 p-4">
@@ -533,7 +496,7 @@ function OverrideModal({
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-2xl font-black tabular-nums text-apple-blue">{draftScoreLine}</span>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${isDraftValid ? 'bg-emerald-500/10 text-emerald-700' : 'bg-apple-blue/10 text-apple-blue'}`}>
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${isDraftValid ? 'bg-apple-green/10 text-apple-green' : 'bg-apple-blue/10 text-apple-blue'}`}>
                   {isDraftValid ? 'Gala rezultāts' : 'Daļējs rezultāts'}
                 </span>
               </div>
@@ -542,12 +505,12 @@ function OverrideModal({
             <div className="mt-4 space-y-2.5">
               {setResults.map((set, index) => (
                 <div key={`${index}-${set.winnerId}`} className="flex items-center gap-3 rounded-xl border border-black/[0.06] bg-[#F2F2F7]/50 p-3">
-                  <span className="w-16 font-mono text-xs font-bold text-slate-500">Sets {index + 1}</span>
+                  <span className="w-16 font-mono text-xs font-bold text-[#8E8E93]">Sets {index + 1}</span>
                   <div className="flex-1">
                     <select
                       value={set.winnerId}
                       onChange={(event) => updateSetWinner(index, event.target.value)}
-                      className="min-h-[40px] w-full rounded-lg border border-black/[0.1] bg-white px-3 text-sm font-medium text-[#1C1C1E] transition focus:border-apple-blue focus:ring-2 focus:ring-apple-blue/20"
+                      className="min-h-[44px] w-full rounded-xl border border-black/[0.1] bg-white px-3.5 text-sm font-medium text-[#1C1C1E] transition focus:border-apple-blue focus:ring-4 focus:ring-apple-blue/20"
                     >
                       {winnerOptions.map((player) => (
                         <option key={player.id} value={player.id}>{player.name}</option>
@@ -557,7 +520,7 @@ function OverrideModal({
                   <button
                     type="button"
                     onClick={() => removeSet(index)}
-                    className="min-h-[40px] rounded-lg border border-black/[0.08] bg-white px-3 text-xs font-semibold text-apple-red transition hover:bg-apple-red/10 active:scale-95"
+                    className="min-h-[44px] rounded-xl border border-black/[0.08] bg-white px-3.5 text-xs font-semibold text-apple-red transition hover:bg-apple-red/10 active:scale-95"
                   >
                     Noņemt
                   </button>
@@ -566,17 +529,54 @@ function OverrideModal({
             </div>
 
             <div className="mt-4 flex items-center justify-between border-t border-black/[0.06] pt-3">
-              <span className="text-xs text-[#8E8E93]">
+              <span className="text-xs text-[#8E8E93] tabular-nums">
                 {setResults.length} no {tournament.maxSetsPerMatch} maksimālajiem setiem
               </span>
               <button
                 type="button"
                 onClick={addSet}
                 disabled={!canAddSet}
-                className="inline-flex min-h-[36px] items-center rounded-xl bg-apple-blue px-3.5 text-xs font-semibold text-white shadow-sm transition hover:bg-apple-blueHover active:scale-95 disabled:cursor-not-allowed disabled:bg-black/[0.06] disabled:text-slate-400"
+                className="inline-flex min-h-[44px] items-center rounded-xl bg-apple-blue px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-apple-blueHover active:scale-95 disabled:cursor-not-allowed disabled:bg-black/[0.06] disabled:text-apple-tertiary"
               >
                 + Pievienot setu
               </button>
+            </div>
+          </div>
+
+          {/* Inlined Audit Reason & Notes Section (Eliminating ReasonModal) */}
+          <div className="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-apple-card">
+            <div className="pb-3 border-b border-black/[0.06]">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-apple-blue">Audita fiksācija</span>
+              <h4 className="mt-0.5 text-base font-bold text-[#1C1C1E]">Audita pamatojums</h4>
+              <p className="text-xs text-[#8E8E93]">Norādiet labojuma iemeslu un piezīmi, lai izmaiņa tiktu reģistrēta žurnālā.</p>
+            </div>
+
+            <div className="mt-4 space-y-3.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#636366]">
+                Iemesls <span className="text-apple-red">*</span>
+                <select
+                  required
+                  value={reason}
+                  onChange={(event) => setReason(event.target.value)}
+                  className="mt-1.5 min-h-[44px] w-full rounded-xl border border-black/[0.1] bg-[#F2F2F7] px-3.5 text-sm font-medium text-[#1C1C1E] transition focus:bg-white focus:border-apple-blue focus:ring-4 focus:ring-apple-blue/20"
+                >
+                  <option value="">Izvēlieties iemeslu</option>
+                  <option value="referee_decision">Tiesneša lēmums</option>
+                  <option value="score_entry_error">Nepareizi ievadīts rezultāts</option>
+                  <option value="other">Cits iemesls</option>
+                </select>
+              </label>
+
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#636366]">
+                Piezīme
+                <textarea
+                  value={note}
+                  onChange={(event) => setNote(event.target.value)}
+                  rows={2}
+                  className="mt-1.5 w-full rounded-xl border border-black/[0.1] bg-[#F2F2F7] p-3 text-sm text-[#1C1C1E] transition focus:bg-white focus:border-apple-blue focus:ring-4 focus:ring-apple-blue/20"
+                  placeholder="Īss skaidrojums auditam..."
+                />
+              </label>
             </div>
           </div>
 
@@ -584,15 +584,17 @@ function OverrideModal({
           {auditEntries.length > 0 ? (
             <div className="rounded-2xl border border-black/[0.06] bg-[#F2F2F7]/40 p-4">
               <div className="flex items-center justify-between gap-2 mb-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-600">Labojumu audits</p>
-                <span className="text-[11px] text-[#8E8E93]">{auditEntries.length} ieraksti</span>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#636366]">Labojumu audits</p>
+                <span className="text-[11px] text-[#8E8E93] tabular-nums">{auditEntries.length} ieraksti</span>
               </div>
               <div className="divide-y divide-black/[0.04] rounded-xl border border-black/[0.06] bg-white px-3 py-1">
                 {pagedAuditEntries.map((audit, index) => (
                   <div key={`${audit.editedAt}-${auditStart + index}`} className="grid gap-2 py-2 text-xs sm:grid-cols-[auto_auto_1fr_auto] sm:items-center">
-                    <span className="font-mono text-[#8E8E93]">{auditStart + index + 1}.</span>
-                    <span className="font-mono font-bold text-[#1C1C1E]">{formatAuditScore(audit.previousScore, match)} → {formatAuditScore(audit.nextScore, match)}</span>
-                    <span className="truncate text-slate-600" title={audit.note || ''}>
+                    <span className="font-mono text-[#8E8E93] tabular-nums">{auditStart + index + 1}.</span>
+                    <span className="font-mono font-bold tabular-nums text-[#1C1C1E]">
+                      {formatAuditScore(audit.previousScore, match)} → {formatAuditScore(audit.nextScore, match)}
+                    </span>
+                    <span className="truncate text-[#636366]" title={audit.note || ''}>
                       {getOverrideAuditLabel({ overrideMeta: audit })}{audit.note ? ` · ${audit.note}` : ''}
                     </span>
                     <span className="text-[11px] text-[#8E8E93]">{audit.editedBy || 'Organizators'} · {audit.editedAt || '—'}</span>
@@ -603,107 +605,36 @@ function OverrideModal({
           ) : null}
         </div>
 
-        {/* Modal Footer */}
+        {/* Modal Footer with Minimum 44px Touch Targets */}
         <div className="border-t border-black/[0.06] bg-white px-6 py-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-xs text-[#8E8E93]">
               {!hasResultChanged
                 ? 'Veiciet izmaiņas setu sarakstā, lai saglabātu.'
-                : isDraftValid
-                  ? 'Gala rezultāts ir pabeigts un gatavs apstiprināšanai.'
-                  : 'Daļējo rezultātu var saglabāt spēles turpināšanai.'}
+                : !reason
+                  ? 'Lūdzu izvēlieties audita iemeslu, lai pabeigtu.'
+                  : isDraftValid
+                    ? 'Gala rezultāts ir pabeigts un gatavs apstiprināšanai.'
+                    : 'Daļējo rezultātu var saglabāt spēles turpināšanai.'}
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <button
                 type="button"
                 onClick={onClose}
-                className="min-h-[40px] rounded-xl border border-black/[0.08] bg-black/[0.03] px-4 text-xs font-semibold text-slate-700 transition hover:bg-black/[0.06] active:scale-[0.98]"
+                className="min-h-[44px] rounded-xl border border-black/[0.08] bg-black/[0.03] px-4 text-xs font-semibold text-[#1C1C1E] transition hover:bg-black/[0.06] active:scale-[0.98]"
               >
                 Atcelt
               </button>
               <button
                 type="button"
-                disabled={!hasResultChanged}
-                onClick={() => {
-                  if (hasResultChanged) setIsReasonFormVisible(true)
-                }}
-                className="min-h-[40px] rounded-xl bg-apple-blue px-5 text-xs font-semibold text-white shadow-sm transition hover:bg-apple-blueHover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-black/[0.06] disabled:text-slate-400 disabled:shadow-none"
+                disabled={!canSubmit}
+                onClick={handleSave}
+                className="min-h-[44px] rounded-xl bg-apple-blue px-5 text-xs font-semibold text-white shadow-sm transition hover:bg-apple-blueHover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-black/[0.06] disabled:text-apple-tertiary disabled:shadow-none"
               >
-                Saglabāt rezultātu
+                Apstiprināt un saglabāt
               </button>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    {isReasonFormVisible ? (
-      <ReasonModal
-        reason={reason}
-        note={note}
-        onReasonChange={onReasonChange}
-        onNoteChange={onNoteChange}
-        onBack={() => setIsReasonFormVisible(false)}
-        onSubmit={onSubmit}
-      />
-    ) : null}
-    </>
-  )
-}
-
-function ReasonModal({ reason, note, onReasonChange, onNoteChange, onBack, onSubmit }) {
-  const canSubmit = Boolean(reason)
-
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-md px-4 py-6">
-      <div role="dialog" aria-modal="true" aria-labelledby="reason-modal-title" className="w-full max-w-lg rounded-3xl border border-black/[0.08] bg-white p-6 shadow-apple-modal">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-apple-blue">Audita fiksācija</span>
-        <h3 id="reason-modal-title" className="mt-1 text-xl font-bold tracking-tight text-[#1C1C1E]">Kāpēc rezultāts tiek labots?</h3>
-        <p className="mt-1 text-xs text-[#8E8E93]">Norādiet labojuma iemeslu, lai informācija tiktu saglabāta žurnālā.</p>
-
-        <div className="mt-5 space-y-3.5">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#636366]">
-            Iemesls <span className="text-apple-red">*</span>
-            <select
-              required
-              value={reason}
-              onChange={(event) => onReasonChange(event.target.value)}
-              className="mt-1.5 min-h-[44px] w-full rounded-xl border border-black/[0.1] bg-[#F2F2F7] px-3.5 text-sm font-medium text-[#1C1C1E] transition focus:bg-white focus:border-apple-blue focus:ring-4 focus:ring-apple-blue/20"
-            >
-              <option value="">Izvēlieties iemeslu</option>
-              <option value="referee_decision">Tiesneša lēmums</option>
-              <option value="score_entry_error">Nepareizi ievadīts rezultāts</option>
-              <option value="other">Cits iemesls</option>
-            </select>
-          </label>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#636366]">
-            Piezīme
-            <textarea
-              value={note}
-              onChange={(event) => onNoteChange(event.target.value)}
-              rows={3}
-              className="mt-1.5 w-full rounded-xl border border-black/[0.1] bg-[#F2F2F7] p-3 text-sm text-[#1C1C1E] transition focus:bg-white focus:border-apple-blue focus:ring-4 focus:ring-apple-blue/20"
-              placeholder="Īss skaidrojums auditam..."
-            />
-          </label>
-        </div>
-
-        <div className="mt-6 flex justify-end gap-2.5">
-          <button
-            type="button"
-            onClick={onBack}
-            className="min-h-[40px] rounded-xl border border-black/[0.08] bg-black/[0.03] px-4 text-xs font-semibold text-slate-700 transition hover:bg-black/[0.06] active:scale-[0.98]"
-          >
-            Atpakaļ
-          </button>
-          <button
-            type="button"
-            disabled={!canSubmit}
-            onClick={onSubmit}
-            className="min-h-[40px] rounded-xl bg-apple-blue px-5 text-xs font-semibold text-white shadow-sm transition hover:bg-apple-blueHover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-black/[0.06] disabled:text-slate-400"
-          >
-            Apstiprināt un saglabāt
-          </button>
         </div>
       </div>
     </div>

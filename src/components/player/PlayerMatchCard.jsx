@@ -1,10 +1,19 @@
 import React from 'react'
-import { BadgeCheck, AlertTriangle, CheckCircle2, Clock, ShieldAlert } from 'lucide-react'
+import { AlertTriangle, BadgeCheck, CheckCircle2, Clock, ShieldAlert } from 'lucide-react'
 import { RefereeButton } from './RefereeButton'
 import { ScoreStepper } from './ScoreStepper'
 import { deriveMatchStatus, getMatchPlayers, getOpponentId, getSetScore } from '../../utils/tournament'
 
-export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScoreRemove, onConfirm, onCallReferee, onCancelReferee }) {
+export function PlayerMatchCard({
+  tournament,
+  match,
+  player,
+  onScoreAdd,
+  onScoreRemove,
+  onConfirm,
+  onCallReferee,
+  onCancelReferee,
+}) {
   const opponentId = getOpponentId(match, player.id)
   const { playerA, playerB } = getMatchPlayers(match, tournament.players)
   const opponent = opponentId === match.playerAId ? playerA : playerB
@@ -20,7 +29,7 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
   const playerRequestedReferee = match.refereeRequestedBy === player.id
 
   return (
-    <section className="rounded-3xl border border-black/[0.08] bg-white p-5 sm:p-6 shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
+    <section className="rounded-3xl border border-black/[0.08] bg-white p-5 sm:p-6 shadow-apple-card">
       {/* Table & Status Header */}
       <div className="flex items-center justify-between gap-3 pb-4 border-b border-black/[0.06]">
         <div className="flex items-center gap-3">
@@ -29,7 +38,7 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
             <span className="text-2xl font-black leading-none tabular-nums">{match.table}</span>
           </div>
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Mačs</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-apple-secondary">Mačs</span>
             <h3 className="text-base font-bold text-[#1C1C1E]">
               {tournament.maxSetsPerMatch} setu mačs
             </h3>
@@ -54,13 +63,13 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
 
           <div className="px-3 text-center">
             <div className="font-mono text-4xl sm:text-5xl font-black tabular-nums tracking-tight text-[#1C1C1E]">
-              {playerScore} <span className="text-slate-300">:</span> {opponentScore}
+              {playerScore} <span className="text-apple-tertiary">:</span> {opponentScore}
             </div>
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Rezultāts</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-apple-secondary">Rezultāts</span>
           </div>
 
           <div className="min-w-0 text-right">
-            <span className="inline-block rounded-full bg-black/[0.05] px-2 py-0.5 text-[10px] font-bold text-slate-500">
+            <span className="inline-block rounded-full bg-black/[0.05] px-2 py-0.5 text-[10px] font-bold text-[#8E8E93]">
               Pretinieks
             </span>
             <p className="mt-1 truncate text-base font-bold text-[#1C1C1E]">{opponent?.name || 'Pretinieks'}</p>
@@ -68,7 +77,7 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
               <p className="truncate text-xs text-[#8E8E93]">{opponent.representation}</p>
             )}
             {opponent?.rating ? (
-              <p className="truncate text-[11px] text-[#8E8E93]">R: {opponent.rating}</p>
+              <p className="truncate text-[11px] text-[#8E8E93] tabular-nums">R: {opponent.rating}</p>
             ) : null}
           </div>
         </div>
@@ -89,8 +98,8 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
       />
 
       {!isScoreKeeper && (
-        <div className="mt-3.5 flex items-center gap-2.5 rounded-2xl border border-black/[0.06] bg-black/[0.03] p-3 text-xs font-medium text-slate-600">
-          <Clock size={16} className="shrink-0 text-slate-400" />
+        <div className="mt-3.5 flex items-center gap-2.5 rounded-2xl border border-black/[0.06] bg-black/[0.03] p-3 text-xs font-medium text-[#636366]">
+          <Clock size={16} className="shrink-0 text-apple-secondary" />
           <span>Rezultātu ievada {playerA?.name || 'Spēlētājs A'}. Jūs varat apstiprināt rezultātu vai izsaukt tiesnesi.</span>
         </div>
       )}
@@ -101,7 +110,7 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
             type="button"
             disabled={playerConfirmed}
             onClick={() => onConfirm(match.id, player.id)}
-            className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-apple-green px-4 text-[16px] font-semibold text-white shadow-sm transition-all duration-150 hover:bg-emerald-600 active:scale-[0.98] disabled:bg-black/[0.1] disabled:text-slate-400 disabled:cursor-not-allowed"
+            className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-apple-green px-4 text-[16px] font-semibold text-white shadow-sm transition-all duration-150 hover:opacity-90 active:scale-[0.98] disabled:bg-black/[0.1] disabled:text-apple-tertiary disabled:cursor-not-allowed"
           >
             <BadgeCheck size={20} strokeWidth={2.2} />
             {playerConfirmed ? 'Gaida pretinieka apstiprinājumu...' : 'Apstiprināt gala rezultātu'}
@@ -115,14 +124,14 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
       )}
 
       {status === 'completed' && (
-        <div className="mt-4 flex items-center justify-center gap-2 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-3.5 text-center text-sm font-semibold text-emerald-800">
-          <CheckCircle2 size={18} className="text-emerald-600" />
+        <div className="mt-4 flex items-center justify-center gap-2 rounded-2xl border border-apple-green/20 bg-apple-green/10 p-3.5 text-center text-sm font-semibold text-apple-green">
+          <CheckCircle2 size={18} className="text-apple-green" />
           <span>Spēle ir pabeigta un rezultāts apstiprināts</span>
         </div>
       )}
 
       {status === 'disputed' && (
-        <div className="mt-4 rounded-2xl border border-red-500/25 bg-red-500/10 p-3.5 text-center text-xs font-medium text-apple-red">
+        <div className="mt-4 rounded-2xl border border-apple-red/25 bg-apple-red/10 p-3.5 text-center text-xs font-medium text-apple-red">
           <div className="flex items-center justify-center gap-1.5 font-bold">
             <ShieldAlert size={16} />
             <span>Tiesneša izsaukums aktīvs</span>
@@ -147,12 +156,12 @@ export function PlayerMatchCard({ tournament, match, player, onScoreAdd, onScore
 
 function StatusBadge({ status }) {
   const configs = {
-    scheduled: { label: 'Ieplānots', icon: Clock, badge: 'border-black/[0.08] bg-black/[0.04] text-slate-600' },
+    scheduled: { label: 'Ieplānots', icon: Clock, badge: 'border-black/[0.08] bg-black/[0.04] text-[#8E8E93]' },
     in_progress: { label: 'Notiek', icon: Clock, badge: 'border-apple-blue/20 bg-apple-blue/10 text-apple-blue animate-pulse' },
     disputed: { label: 'Strīds', icon: AlertTriangle, badge: 'border-apple-red/25 bg-apple-red/10 text-apple-red' },
     investigating: { label: 'Izmeklē', icon: Clock, badge: 'border-apple-orange/25 bg-apple-orange/10 text-apple-orange' },
     awaiting_confirmation: { label: 'Gaida apstiprinājumu', icon: Clock, badge: 'border-apple-purple/25 bg-apple-purple/10 text-apple-purple' },
-    completed: { label: 'Pabeigts', icon: CheckCircle2, badge: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700' },
+    completed: { label: 'Pabeigts', icon: CheckCircle2, badge: 'border-apple-green/20 bg-apple-green/10 text-apple-green' },
   }
 
   const current = configs[status] || configs.scheduled

@@ -28,7 +28,7 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
     : status === 'in_progress'
       ? 'border-apple-blue/30'
       : status === 'completed'
-        ? 'border-emerald-500/30'
+        ? 'border-apple-green/30'
       : 'border-black/[0.08]'
 
   return (
@@ -52,7 +52,7 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
           <button
             type="button"
             onClick={() => onMarkInvestigating(match.id)}
-            className="flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-apple-orange/30 bg-apple-orange/10 px-3 text-xs font-semibold text-amber-800 transition hover:bg-apple-orange/20 active:scale-[0.98]"
+            className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-apple-orange/30 bg-apple-orange/10 px-3 text-xs font-semibold text-apple-orange transition hover:bg-apple-orange/20 active:scale-[0.98]"
           >
             <Search size={14} strokeWidth={2.3} />
             <span>Marķēt kā izmeklē</span>
@@ -62,7 +62,7 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
           <button
             type="button"
             onClick={() => onOpenOverride(match)}
-            className="flex min-h-[38px] items-center justify-center gap-1.5 rounded-xl border border-apple-blue/20 bg-apple-blue/10 px-3 text-xs font-semibold text-apple-blue transition hover:bg-apple-blue/20 active:scale-[0.98]"
+            className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-apple-blue/20 bg-apple-blue/10 px-3 text-xs font-semibold text-apple-blue transition hover:bg-apple-blue/20 active:scale-[0.98]"
           >
             <Pencil size={14} strokeWidth={2.3} />
             <span>{editLabel}</span>
@@ -75,7 +75,7 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
           <button
             type="button"
             onClick={() => onClearAlert(match.id)}
-            className="rounded-lg border border-apple-red/30 px-2.5 py-1 text-[11px] font-semibold text-apple-red transition hover:bg-apple-red hover:text-white"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-apple-red/30 px-3 py-1.5 text-xs font-semibold text-apple-red transition hover:bg-apple-red hover:text-white active:scale-95"
           >
             Noņemt brīdinājumu
           </button>
@@ -110,9 +110,9 @@ function StatusBadge({ status }) {
     scheduled: 'text-[#8E8E93] border-black/[0.08] bg-black/[0.04]',
     in_progress: 'text-apple-blue border-apple-blue/20 bg-apple-blue/10',
     disputed: 'text-apple-red border-apple-red/25 bg-apple-red/10',
-    investigating: 'text-amber-800 border-apple-orange/25 bg-apple-orange/10',
+    investigating: 'text-apple-orange border-apple-orange/25 bg-apple-orange/10',
     awaiting_confirmation: 'text-apple-purple border-apple-purple/25 bg-apple-purple/10',
-    completed: 'text-emerald-700 border-emerald-500/20 bg-emerald-500/10',
+    completed: 'text-apple-green border-apple-green/20 bg-apple-green/10',
   }
   const Icon = status === 'disputed' ? AlertTriangle : status === 'investigating' ? Search : status === 'completed' ? CheckCircle2 : Clock
   return (

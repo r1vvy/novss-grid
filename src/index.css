@@ -9,6 +9,8 @@
   -moz-osx-font-smoothing: grayscale;
   background-color: #f2f2f7;
   color: #1c1c1e;
+  font-feature-settings: "tnum", "cv02", "cv03", "cv04", "cv11";
+  font-variant-numeric: tabular-nums;
 
   --color-bg-main: #f2f2f7;
   --color-bg-surface: #ffffff;
@@ -33,7 +35,8 @@ body {
   background-color: #f2f2f7;
   background-image: radial-gradient(at 50% 0%, rgba(0, 122, 255, 0.04) 0px, transparent 400px);
   background-attachment: fixed;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  font-feature-settings: "tnum", "cv02", "cv03", "cv04", "cv11";
+  font-variant-numeric: tabular-nums;
 }
 
 button,

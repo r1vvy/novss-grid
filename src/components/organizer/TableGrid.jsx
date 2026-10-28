@@ -134,7 +134,7 @@ function CompactTableMap({ tournament, matches, canReassignTables, onClearAlert,
                     <span className="shrink-0 font-mono text-2xl font-black leading-none tabular-nums text-[#1C1C1E]">{match.table}</span>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">Galds</span>
                   </div>
-                  <Grip size={13} className="shrink-0 text-slate-400 opacity-40 transition-opacity group-hover:opacity-100" />
+                  <Grip size={13} className="shrink-0 text-apple-secondary opacity-40 transition-opacity group-hover:opacity-100" />
                 </div>
 
                 <div className="mt-3">
@@ -147,7 +147,7 @@ function CompactTableMap({ tournament, matches, canReassignTables, onClearAlert,
                   </span>
                 </div>
 
-                <div className="mt-auto flex flex-wrap gap-1.5 pt-3">
+                <div className="mt-auto flex flex-wrap gap-1 pt-3">
                   {canEditResult ? (
                     <CompactActionButton
                       title={editLabel}
@@ -194,24 +194,30 @@ function CompactTableMap({ tournament, matches, canReassignTables, onClearAlert,
   )
 }
 
+/**
+ * CompactActionButton conforms to Apple HIG minimum 44x44pt touch target envelope
+ * using an outer 44px container around the compact visual button.
+ */
 function CompactActionButton({ title, className, onClick, children }) {
   return (
-    <button
-      type="button"
-      title={title}
-      aria-label={title}
-      onClick={(event) => {
-        event.stopPropagation()
-        onClick()
-      }}
-      onDragStart={(event) => {
-        event.preventDefault()
-        event.stopPropagation()
-      }}
-      className={`inline-flex size-7 items-center justify-center rounded-lg border transition-all active:scale-90 ${className}`}
-    >
-      {children}
-    </button>
+    <div className="relative inline-flex min-h-[44px] min-w-[44px] items-center justify-center">
+      <button
+        type="button"
+        title={title}
+        aria-label={title}
+        onClick={(event) => {
+          event.stopPropagation()
+          onClick()
+        }}
+        onDragStart={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+        }}
+        className={`inline-flex size-7 items-center justify-center rounded-lg border transition-all active:scale-90 ${className}`}
+      >
+        {children}
+      </button>
+    </div>
   )
 }
 
@@ -244,7 +250,7 @@ const compactClasses = {
   disputed: 'border-apple-red/40 bg-apple-red/[0.04] text-[#1C1C1E]',
   investigating: 'border-apple-orange/40 bg-apple-orange/[0.04] text-[#1C1C1E]',
   awaiting_confirmation: 'border-apple-purple/30 bg-apple-purple/[0.03] text-[#1C1C1E]',
-  completed: 'border-emerald-500/30 bg-emerald-500/[0.04] text-[#1C1C1E]',
+  completed: 'border-apple-green/30 bg-apple-green/[0.04] text-[#1C1C1E]',
 }
 
 const compactBadgeClasses = {
@@ -253,7 +259,7 @@ const compactBadgeClasses = {
   disputed: 'border-apple-red/25 bg-apple-red/10 text-apple-red',
   investigating: 'border-apple-orange/25 bg-apple-orange/10 text-apple-orange',
   awaiting_confirmation: 'border-apple-purple/25 bg-apple-purple/10 text-apple-purple',
-  completed: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700',
+  completed: 'border-apple-green/25 bg-apple-green/10 text-apple-green',
 }
 
 export function CompactLegend() {
@@ -279,9 +285,9 @@ const badgeClasses = {
   scheduled: 'text-[#8E8E93] border-black/[0.08] bg-black/[0.04]',
   in_progress: 'text-apple-blue border-apple-blue/20 bg-apple-blue/10',
   disputed: 'text-apple-red border-apple-red/25 bg-apple-red/10',
-  investigating: 'text-amber-800 border-apple-orange/25 bg-apple-orange/10',
+  investigating: 'text-apple-orange border-apple-orange/25 bg-apple-orange/10',
   awaiting_confirmation: 'text-apple-purple border-apple-purple/25 bg-apple-purple/10',
-  completed: 'text-emerald-700 border-emerald-500/20 bg-emerald-500/10',
+  completed: 'text-apple-green border-apple-green/20 bg-apple-green/10',
 }
 
 export function MatchSummaryRow({ tournament, match }) {
@@ -324,14 +330,14 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
     : isInvestigating
       ? 'bg-apple-orange/[0.04]'
       : status === 'completed'
-        ? 'bg-emerald-500/[0.02]'
-      : 'hover:bg-slate-500/[0.03]'
+        ? 'bg-apple-green/[0.02]'
+      : 'hover:bg-black/[0.02]'
 
   return (
     <tr className={`transition-colors align-middle ${rowState}`} {...dragProps}>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <Grip size={14} className={dragProps.draggable ? 'text-slate-400 cursor-grab active:cursor-grabbing' : 'text-slate-200'} />
+          <Grip size={14} className={dragProps.draggable ? 'text-apple-secondary cursor-grab active:cursor-grabbing' : 'text-apple-tertiary'} />
           <span className="font-mono text-base font-bold tabular-nums text-[#1C1C1E]">{match.table}</span>
         </div>
       </td>
@@ -355,7 +361,7 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
         </span>
       </td>
       <td className="px-4 py-3">
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1">
           <TableActionButton
             title={editLabel}
             enabled={canEditResult}
@@ -394,22 +400,28 @@ function MatchRow({ tournament, match, onClearAlert, onMarkInvestigating, onRese
   )
 }
 
+/**
+ * TableActionButton conforms to Apple HIG minimum 44x44pt touch target envelope
+ * using an outer 44px container around the 32px visual button.
+ */
 function TableActionButton({ title, enabled, onClick, activeClassName, children }) {
   return (
-    <button
-      type="button"
-      onClick={enabled ? onClick : undefined}
-      title={title}
-      aria-label={title}
-      disabled={!enabled}
-      className={`inline-flex size-8 items-center justify-center rounded-lg border transition-all active:scale-95 ${
-        enabled
-          ? activeClassName
-          : 'cursor-not-allowed border-black/[0.06] bg-black/[0.02] text-slate-300'
-      }`}
-    >
-      {children}
-    </button>
+    <div className="relative inline-flex min-h-[44px] min-w-[44px] items-center justify-center">
+      <button
+        type="button"
+        onClick={enabled ? onClick : undefined}
+        title={title}
+        aria-label={title}
+        disabled={!enabled}
+        className={`inline-flex size-8 items-center justify-center rounded-lg border transition-all active:scale-95 ${
+          enabled
+            ? activeClassName
+            : 'cursor-not-allowed border-black/[0.06] bg-black/[0.02] text-apple-tertiary'
+        }`}
+      >
+        {children}
+      </button>
+    </div>
   )
 }
 

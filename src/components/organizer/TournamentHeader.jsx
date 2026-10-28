@@ -28,18 +28,18 @@ export function TournamentHeader({ tournament, matches, alerts, onOpenSettings, 
             <button
               type="button"
               onClick={onOpenPlayers}
-              className="inline-flex min-h-[38px] items-center gap-1.5 rounded-xl border border-black/[0.08] bg-black/[0.03] px-3.5 text-xs font-semibold text-slate-700 shadow-apple-subtle transition-all hover:bg-black/[0.06] active:scale-[0.98] active:bg-black/[0.1]"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-black/[0.08] bg-black/[0.03] px-3.5 text-xs font-semibold text-[#1C1C1E] shadow-apple-subtle transition-all hover:bg-black/[0.06] active:scale-[0.98] active:bg-black/[0.1]"
             >
-              <SquarePen size={15} className="text-slate-500" strokeWidth={2.2} />
-              Spēlētāji ({tournament.players.length})
+              <SquarePen size={15} className="text-apple-secondary" strokeWidth={2.2} />
+              <span>Spēlētāji (<span className="tabular-nums">{tournament.players.length}</span>)</span>
             </button>
             <button
               type="button"
               onClick={onOpenSettings}
-              className="inline-flex min-h-[38px] items-center gap-1.5 rounded-xl border border-black/[0.08] bg-black/[0.03] px-3.5 text-xs font-semibold text-slate-700 shadow-apple-subtle transition-all hover:bg-black/[0.06] active:scale-[0.98] active:bg-black/[0.1]"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-black/[0.08] bg-black/[0.03] px-3.5 text-xs font-semibold text-[#1C1C1E] shadow-apple-subtle transition-all hover:bg-black/[0.06] active:scale-[0.98] active:bg-black/[0.1]"
             >
-              <Settings size={15} className="text-slate-500" strokeWidth={2.2} />
-              Iestatījumi
+              <Settings size={15} className="text-apple-secondary" strokeWidth={2.2} />
+              <span>Iestatījumi</span>
             </button>
           </div>
 
