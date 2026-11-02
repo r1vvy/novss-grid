@@ -9,7 +9,12 @@ export function PlayerView({
   onCheckIn,
   onScoreAdd,
   onScoreRemove,
+  onPerfectPlayAdd,
+  onPerfectPlayRemove,
   onConfirm,
+  onContestScore,
+  onConfirmArrival,
+  onReadyToPlay,
   onCallReferee,
   onCancelReferee,
   onSignOut,
@@ -121,7 +126,12 @@ export function PlayerView({
           player={player}
           onScoreAdd={onScoreAdd}
           onScoreRemove={onScoreRemove}
+          onPerfectPlayAdd={onPerfectPlayAdd}
+          onPerfectPlayRemove={onPerfectPlayRemove}
           onConfirm={onConfirm}
+          onContestScore={onContestScore}
+          onConfirmArrival={onConfirmArrival}
+          onReadyToPlay={onReadyToPlay}
           onCallReferee={onCallReferee}
           onCancelReferee={onCancelReferee}
         />

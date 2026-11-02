@@ -8,6 +8,13 @@ import {
   deriveMatchStatus,
   calculateStandings,
   forceOverrideResult,
+  getMatchPerfectPlays,
+  adjustCurrentSetPerfectPlays,
+  appendSetResult,
+  contestFinalScore,
+  confirmPlayerArrival,
+  startMatchReady,
+  isTournamentComplete,
 } from './tournament'
 import { initialTournament } from '../data/mockTournament'
 
@@ -76,5 +83,118 @@ describe('Tournament Domain Logic', () => {
     expect(match.setResults).toHaveLength(4)
     expect(match.overrideMeta.reason).toBe('score_entry_error')
     expect(match.overrideMeta.note).toBe('Labots rezultāts pēc video apskata')
+  })
+
+  it('tracks and tallies perfect plays across completed and current sets', () => {
+    const match = {
+      playerAId: 'p1',
+      playerBId: 'p2',
+      setResults: [
+        { winnerId: 'p1', perfectPlays: { p1: 1, p2: 0 } },
+        { winnerId: 'p1', perfectPlays: { p1: 2, p2: 1 } },
+      ],
+      currentSetPerfectPlays: { p1: 1, p2: 0 },
+    }
+
+    expect(getMatchPerfectPlays(match, 'p1')).toBe(4)
+    expect(getMatchPerfectPlays(match, 'p2')).toBe(1)
+  })
+
+  it('adjusts current set perfect plays and appends them with the next set result', () => {
+    const tournament = {
+      ...initialTournament,
+      matches: [
+        {
+          id: 'test-m1',
+          round: 4,
+          playerAId: 'p1',
+          playerBId: 'p2',
+          setResults: [],
+          status: 'in_progress',
+          confirmations: { p1: false, p2: false },
+        },
+      ],
+    }
+
+    // Increment perfect play for p1
+    let state = adjustCurrentSetPerfectPlays(tournament, 'test-m1', 'p1', 1, 'p1')
+    expect(state.matches[0].currentSetPerfectPlays.p1).toBe(1)
+
+    // Increment again
+    state = adjustCurrentSetPerfectPlays(state, 'test-m1', 'p1', 1, 'p1')
+    expect(state.matches[0].currentSetPerfectPlays.p1).toBe(2)
+
+    // Append set won by p1
+    state = appendSetResult(state, 'test-m1', 'p1', 'p1')
+    expect(state.matches[0].setResults).toHaveLength(1)
+    expect(state.matches[0].setResults[0].perfectPlays.p1).toBe(2)
+    expect(state.matches[0].currentSetPerfectPlays.p1).toBe(0)
+  })
+
+  it('handles score contesting by triggering automatic referee call and dispute', () => {
+    const tournament = {
+      ...initialTournament,
+      matches: [
+        {
+          id: 'test-m2',
+          round: 4,
+          playerAId: 'p1',
+          playerBId: 'p2',
+          setResults: [{ winnerId: 'p1' }, { winnerId: 'p1' }, { winnerId: 'p1' }, { winnerId: 'p1' }],
+          status: 'awaiting_confirmation',
+          confirmations: { p1: true, p2: false },
+        },
+      ],
+    }
+
+    const state = contestFinalScore(tournament, 'test-m2', 'p2', 'Nepareizs 4. seta uzvarētājs')
+    const match = state.matches[0]
+
+    expect(match.status).toBe('disputed')
+    expect(match.refereeRequested).toBe(true)
+    expect(match.refereeRequestedBy).toBe('p2')
+    expect(match.contestMeta.reason).toBe('Nepareizs 4. seta uzvarētājs')
+    expect(match.confirmations.p1).toBe(false)
+  })
+
+  it('handles player arrival and ready transitions', () => {
+    const tournament = {
+      ...initialTournament,
+      matches: [
+        {
+          id: 'test-m3',
+          round: 4,
+          playerAId: 'p1',
+          playerBId: 'p2',
+          setResults: [],
+          status: 'scheduled',
+          arrivals: { p1: false, p2: false },
+        },
+      ],
+    }
+
+    let state = confirmPlayerArrival(tournament, 'test-m3', 'p1')
+    expect(state.matches[0].arrivals.p1).toBe(true)
+    expect(state.matches[0].arrivals.p2).toBe(false)
+
+    state = startMatchReady(state, 'test-m3', 'p1')
+    expect(state.matches[0].status).toBe('in_progress')
+  })
+
+  it('evaluates tournament completion lifecycle correctly', () => {
+    const completedTourney = {
+      ...initialTournament,
+      currentRound: 4,
+      totalRounds: 4,
+      matches: initialTournament.matches.map((m) => ({
+        ...m,
+        status: 'completed',
+        refereeRequested: false,
+        refereeRequestedBy: null,
+        confirmations: { [m.playerAId]: true, [m.playerBId]: true },
+      })),
+    }
+
+    expect(isTournamentComplete(completedTourney)).toBe(true)
   })
 })

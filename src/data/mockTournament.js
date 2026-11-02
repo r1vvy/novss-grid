@@ -59,21 +59,31 @@ export const initialTournament = {
   ],
 }
 
-function wins(winnerId, winnerSets, loserId, loserSets) {
+function wins(winnerId, winnerSets, loserId, loserSets, perfectPlaysMap = {}) {
   const rows = []
   for (let i = 0; i < Math.max(winnerSets, loserSets); i += 1) {
-    if (i < winnerSets) rows.push({ winnerId })
-    if (i < loserSets) rows.push({ winnerId: loserId })
+    if (i < winnerSets) {
+      rows.push({
+        winnerId,
+        perfectPlays: perfectPlaysMap[rows.length] || { [winnerId]: 0, [loserId]: 0 },
+      })
+    }
+    if (i < loserSets) {
+      rows.push({
+        winnerId: loserId,
+        perfectPlays: perfectPlaysMap[rows.length] || { [winnerId]: 0, [loserId]: 0 },
+      })
+    }
   }
   return rows.slice(0, winnerSets + loserSets)
 }
 
 function roundFourMatches() {
   const pairs = [
-    ['p1', 'p5', 'in_progress', wins('p1', 3, 'p5', 1)],
+    ['p1', 'p5', 'in_progress', wins('p1', 3, 'p5', 1, { 0: { p1: 1, p5: 0 }, 2: { p1: 2, p5: 0 } })],
     ['p2', 'p6', 'disputed', wins('p2', 2, 'p6', 2)],
     ['p3', 'p7', 'scheduled', []],
-    ['p4', 'p8', 'completed', wins('p4', 4, 'p8', 1)],
+    ['p4', 'p8', 'completed', wins('p4', 4, 'p8', 1, { 1: { p4: 1, p8: 0 } })],
     ['p9', 'p10', 'in_progress', wins('p10', 2, 'p9', 1)],
     ['p11', 'p12', 'awaiting_confirmation', wins('p11', 3, 'p12', 3)],
     ['p13', 'p14', 'disputed', wins('p13', 1, 'p14', 1)],

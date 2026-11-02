@@ -80,5 +80,43 @@ describe('ScoreStepper Apple HIG & Functionality', () => {
       expect(btn).toBeDisabled()
     })
   })
+
+  it('renders Perfect Play controls and triggers callbacks', () => {
+    const onPerfectAdd = vi.fn()
+    const onPerfectRemove = vi.fn()
+
+    render(
+      <ScoreStepper
+        disabled={false}
+        targetReached={false}
+        playerAName="Jānis Bērziņš"
+        playerBName="Pēteris Ozols"
+        playerAScore={1}
+        playerBScore={1}
+        playerAPerfectPlays={2}
+        playerBPerfectPlays={0}
+        onPlayerAAdd={vi.fn()}
+        onPlayerBAdd={vi.fn()}
+        onPlayerARemove={vi.fn()}
+        onPlayerBRemove={vi.fn()}
+        onPlayerAPerfectPlayAdd={onPerfectAdd}
+        onPlayerAPerfectPlayRemove={onPerfectRemove}
+      />
+    )
+
+    expect(screen.getByText('★ x2')).toBeInTheDocument()
+
+    const addBtn = screen.getByRole('button', { name: /Pievienot ideālo gājienu: Jānis Bērziņš/i })
+    const removeBtn = screen.getByRole('button', { name: /Noņemt ideālo gājienu: Jānis Bērziņš/i })
+
+    expect(addBtn.className).toContain('min-h-[44px]')
+    expect(removeBtn.className).toContain('min-h-[44px]')
+
+    fireEvent.click(addBtn)
+    expect(onPerfectAdd).toHaveBeenCalledTimes(1)
+
+    fireEvent.click(removeBtn)
+    expect(onPerfectRemove).toHaveBeenCalledTimes(1)
+  })
 })
 

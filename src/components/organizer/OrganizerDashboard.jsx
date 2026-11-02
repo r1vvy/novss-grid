@@ -34,6 +34,8 @@ export function OrganizerDashboard({
   const [overrideMatch, setOverrideMatch] = useState(null)
   const [setup, setSetup] = useState({
     name: tournament.name,
+    format: tournament.format || 'target_wins',
+    totalRounds: tournament.totalRounds || 7,
     maxSetsPerMatch: tournament.maxSetsPerMatch,
     win: tournament.pointAllocation.win,
     draw: tournament.pointAllocation.draw,
@@ -272,9 +274,60 @@ export function OrganizerDashboard({
                 />
               </label>
 
+              {/* Tournament Format Segmented Control */}
+              <div className="mt-4">
+                <span className="block text-xs font-semibold uppercase tracking-wider text-[#636366] mb-1.5">
+                  Turnīra maču formāts
+                </span>
+                <div className="grid grid-cols-2 gap-2 rounded-xl border border-black/[0.06] bg-black/[0.04] p-1">
+                  <button
+                    type="button"
+                    onClick={() => updateSetup('format', 'target_wins')}
+                    className={`min-h-[44px] rounded-lg text-xs font-semibold transition-all ${
+                      setup.format === 'target_wins'
+                        ? 'bg-white text-[#1C1C1E] shadow-apple-sm'
+                        : 'text-[#8E8E93] hover:text-[#1C1C1E]'
+                    }`}
+                  >
+                    Mērķa uzvaras (Race)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateSetup('format', 'fixed_sets')}
+                    className={`min-h-[44px] rounded-lg text-xs font-semibold transition-all ${
+                      setup.format === 'fixed_sets'
+                        ? 'bg-white text-[#1C1C1E] shadow-apple-sm'
+                        : 'text-[#8E8E93] hover:text-[#1C1C1E]'
+                    }`}
+                  >
+                    Fiksēts setu skaits (Draws)
+                  </button>
+                </div>
+              </div>
+
               <div className="mt-4 grid grid-cols-2 gap-3.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#636366]">
+                  Kopējās kārtas
+                  <input
+                    type="number"
+                    min="1"
+                    className="mt-1.5 min-h-[46px] w-full rounded-xl border border-black/[0.1] bg-[#F2F2F7] px-3.5 font-mono text-sm font-semibold tabular-nums text-[#1C1C1E] transition-all focus:bg-white focus:border-apple-blue focus:ring-4 focus:ring-apple-blue/20"
+                    value={setup.totalRounds}
+                    onChange={(e) => updateSetup('totalRounds', e.target.value)}
+                  />
+                </label>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#636366]">
+                  {setup.format === 'fixed_sets' ? 'Fiksēti seti (pāra skaitlis)' : 'Maks. seti mačā'}
+                  <input
+                    type="number"
+                    min="1"
+                    className="mt-1.5 min-h-[46px] w-full rounded-xl border border-black/[0.1] bg-[#F2F2F7] px-3.5 font-mono text-sm font-semibold tabular-nums text-[#1C1C1E] transition-all focus:bg-white focus:border-apple-blue focus:ring-4 focus:ring-apple-blue/20"
+                    value={setup.maxSetsPerMatch}
+                    onChange={(e) => updateSetup('maxSetsPerMatch', e.target.value)}
+                  />
+                </label>
+
                 {[
-                  ['maxSetsPerMatch', 'Maks. seti mačā'],
                   ['win', 'Punkti: Uzvara'],
                   ['draw', 'Punkti: Neizšķirts'],
                   ['closeWin', 'Punkti: Cieša uzvara'],

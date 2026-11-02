@@ -6,10 +6,13 @@ import { OrganizerDashboard } from './components/organizer/OrganizerDashboard'
 import { OrganizerPlayersView } from './components/organizer/OrganizerPlayersView'
 import { PlayerView } from './components/player/PlayerView'
 import {
+  adjustCurrentSetPerfectPlays,
   appendSetResult,
   checkInPlayerByCode,
   clearRefereeRequest,
   confirmFinalScore,
+  confirmPlayerArrival,
+  contestFinalScore,
   createRegistrationTournament,
   forceOverrideResult,
   getPlayerById,
@@ -17,6 +20,7 @@ import {
   resetMatchInvestigation,
   removeSetResult,
   requestReferee,
+  startMatchReady,
   swapMatchTables,
   updatePlayer,
 } from './utils/tournament'
@@ -120,7 +124,12 @@ export default function App() {
           onCheckIn={handleCheckIn}
           onScoreAdd={(matchId, winnerId, actorPlayerId) => setTournament((current) => appendSetResult(current, matchId, winnerId, actorPlayerId))}
           onScoreRemove={(matchId, winnerId, actorPlayerId) => setTournament((current) => removeSetResult(current, matchId, winnerId, actorPlayerId))}
+          onPerfectPlayAdd={(matchId, playerId, actorPlayerId) => setTournament((current) => adjustCurrentSetPerfectPlays(current, matchId, playerId, 1, actorPlayerId))}
+          onPerfectPlayRemove={(matchId, playerId, actorPlayerId) => setTournament((current) => adjustCurrentSetPerfectPlays(current, matchId, playerId, -1, actorPlayerId))}
           onConfirm={(matchId, playerId) => setTournament((current) => confirmFinalScore(current, matchId, playerId))}
+          onContestScore={(matchId, playerId, reason) => setTournament((current) => contestFinalScore(current, matchId, playerId, reason))}
+          onConfirmArrival={(matchId, playerId) => setTournament((current) => confirmPlayerArrival(current, matchId, playerId))}
+          onReadyToPlay={(matchId, playerId) => setTournament((current) => startMatchReady(current, matchId, playerId))}
           onCallReferee={(matchId, playerId) => setTournament((current) => requestReferee(current, matchId, playerId))}
           onCancelReferee={(matchId, playerId) => setTournament((current) => clearRefereeRequest(current, matchId, playerId))}
           onSignOut={() => {

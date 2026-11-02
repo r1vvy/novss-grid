@@ -21,6 +21,15 @@ export function getRequiredWins(maxSetsPerMatch) {
   return Math.floor(maxSetsPerMatch / 2) + 1
 }
 
+export function getMatchPerfectPlays(match, playerId) {
+  if (!match) return 0
+  const completedCount = (match.setResults || []).reduce((sum, set) => {
+    return sum + (Number(set?.perfectPlays?.[playerId]) || 0)
+  }, 0)
+  const currentCount = Number(match.currentSetPerfectPlays?.[playerId]) || 0
+  return completedCount + currentCount
+}
+
 export function hasReachedTargetWins(match, playerId, maxSetsPerMatch = match.maxSetsPerMatch) {
   if (!Number.isFinite(maxSetsPerMatch)) return false
 
@@ -69,11 +78,32 @@ export function appendSetResult(tournament, matchId, winnerId, actorPlayerId) {
       || isMatchAtSetLimit(match, tournament.maxSetsPerMatch)
     ) return match
 
+    const currentPerfectPlays = match.currentSetPerfectPlays || {
+      [match.playerAId]: 0,
+      [match.playerBId]: 0,
+    }
+
     const nextSetResults = [
       ...match.setResults,
-      { winnerId },
+      {
+        winnerId,
+        perfectPlays: {
+          [match.playerAId]: Number(currentPerfectPlays[match.playerAId]) || 0,
+          [match.playerBId]: Number(currentPerfectPlays[match.playerBId]) || 0,
+        },
+      },
     ]
-    const nextMatch = { ...match, setResults: nextSetResults, status: 'in_progress' }
+
+    const nextMatch = {
+      ...match,
+      setResults: nextSetResults,
+      currentSetPerfectPlays: {
+        [match.playerAId]: 0,
+        [match.playerBId]: 0,
+      },
+      status: 'in_progress',
+    }
+
     const winnerReachedTarget = hasReachedTargetWins(nextMatch, winnerId, tournament.maxSetsPerMatch)
     const drawReachedLimit = isDrawMatch(nextMatch, tournament.maxSetsPerMatch)
 
@@ -81,6 +111,73 @@ export function appendSetResult(tournament, matchId, winnerId, actorPlayerId) {
       ...nextMatch,
       confirmations: resetConfirmations(match),
       status: winnerReachedTarget || drawReachedLimit ? 'awaiting_confirmation' : 'in_progress',
+    }
+  })
+}
+
+export function adjustCurrentSetPerfectPlays(tournament, matchId, playerId, delta, actorPlayerId) {
+  return updateMatch(tournament, matchId, (match) => {
+    if (actorPlayerId && actorPlayerId !== match.playerAId) return match
+    const status = deriveMatchStatus(match, tournament.maxSetsPerMatch)
+    if (status === 'disputed' || status === 'completed') return match
+
+    const current = match.currentSetPerfectPlays || {
+      [match.playerAId]: 0,
+      [match.playerBId]: 0,
+    }
+    const currentVal = Number(current[playerId]) || 0
+    const nextVal = Math.max(0, currentVal + delta)
+
+    return {
+      ...match,
+      currentSetPerfectPlays: {
+        ...current,
+        [playerId]: nextVal,
+      },
+    }
+  })
+}
+
+export function confirmPlayerArrival(tournament, matchId, playerId) {
+  return updateMatch(tournament, matchId, (match) => {
+    const arrivals = {
+      ...(match.arrivals || { [match.playerAId]: false, [match.playerBId]: false }),
+      [playerId]: true,
+    }
+    return {
+      ...match,
+      arrivals,
+    }
+  })
+}
+
+export function startMatchReady(tournament, matchId, playerId) {
+  return updateMatch(tournament, matchId, (match) => {
+    const ready = {
+      ...(match.ready || { [match.playerAId]: false, [match.playerBId]: false }),
+      [playerId]: true,
+    }
+    return {
+      ...match,
+      ready,
+      status: 'in_progress',
+    }
+  })
+}
+
+export function contestFinalScore(tournament, matchId, playerId, reason = 'Rezultāts apstrīdēts') {
+  return updateMatch(tournament, matchId, (match) => {
+    return {
+      ...match,
+      refereeRequested: true,
+      refereeRequestedBy: playerId,
+      status: 'disputed',
+      contestMeta: {
+        contestedBy: playerId,
+        reason,
+        contestedAt: new Date().toLocaleTimeString('lv-LV', { hour: '2-digit', minute: '2-digit' }),
+      },
+      confirmations: resetConfirmations(match),
     }
   })
 }
@@ -307,7 +404,20 @@ export function calculateBuchholz(playerId, tournament) {
   }, 0)
 }
 
+export function isTournamentComplete(tournament) {
+  if (!tournament || !tournament.totalRounds) return false
+  const matches = getCurrentRoundMatches(tournament)
+  return (
+    tournament.currentRound >= tournament.totalRounds
+    && matches.length > 0
+    && matches.every((match) => deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'completed')
+  )
+}
+
 export function canGenerateNextRound(tournament) {
+  if (tournament.totalRounds > 0 && tournament.currentRound >= tournament.totalRounds) {
+    return false
+  }
   const currentMatches = getCurrentRoundMatches(tournament)
   return currentMatches.length > 0 && currentMatches.every((match) => deriveMatchStatus(match) === 'completed')
 }
@@ -363,14 +473,16 @@ export function getCurrentRoundMatches(tournament) {
 }
 
 export function createRegistrationTournament(config) {
+  const format = config.format || (Number(config.draw) > 0 ? 'fixed_sets' : 'target_wins')
   return {
     id: `novuss-${Date.now()}`,
     name: config.name,
     venue: 'Setup desk',
     status: 'registration',
+    format,
     currentRound: 0,
-    totalRounds: 7,
-    maxSetsPerMatch: Number(config.maxSetsPerMatch),
+    totalRounds: Number(config.totalRounds) || 7,
+    maxSetsPerMatch: Number(config.maxSetsPerMatch) || 6,
     pointAllocation: {
       win: Number(config.win),
       draw: Number(config.draw),

@@ -1,6 +1,6 @@
 import React from 'react'
-import { AlertTriangle, CheckCircle2, Clock, Pencil, Search } from 'lucide-react'
-import { deriveMatchStatus, getMatchPlayers, getSetScore } from '../../utils/tournament'
+import { AlertTriangle, CheckCircle2, Clock, Pencil, Search, Star } from 'lucide-react'
+import { deriveMatchStatus, getMatchPerfectPlays, getMatchPlayers, getSetScore } from '../../utils/tournament'
 
 const statusLabels = {
   scheduled: 'Ieplānots',
@@ -16,6 +16,8 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
   const status = deriveMatchStatus(match, tournament.maxSetsPerMatch)
   const scoreA = getSetScore(match, match.playerAId)
   const scoreB = getSetScore(match, match.playerBId)
+  const perfectA = getMatchPerfectPlays(match, match.playerAId)
+  const perfectB = getMatchPerfectPlays(match, match.playerBId)
   const isDisputed = status === 'disputed'
   const isInvestigating = status === 'investigating'
   const canEditResult = status !== 'scheduled'
@@ -41,10 +43,16 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
         <StatusBadge status={status} />
       </div>
 
+      {match.contestMeta?.reason && (
+        <div className="mt-2.5 rounded-lg border border-apple-red/30 bg-apple-red/10 px-2.5 py-1 text-[11px] font-semibold text-apple-red">
+          Strīds: {match.contestMeta.reason}
+        </div>
+      )}
+
       <div className="mt-4 space-y-2 rounded-xl bg-[#F2F2F7]/50 p-2.5">
-        <PlayerLine name={playerA?.name || 'TBD'} club={playerA?.representation} score={scoreA} />
+        <PlayerLine name={playerA?.name || 'TBD'} club={playerA?.representation} score={scoreA} perfectPlays={perfectA} />
         <div className="border-t border-black/[0.04]" />
-        <PlayerLine name={playerB?.name || 'TBD'} club={playerB?.representation} score={scoreB} />
+        <PlayerLine name={playerB?.name || 'TBD'} club={playerB?.representation} score={scoreB} perfectPlays={perfectB} />
       </div>
 
       <div className="mt-3.5 grid gap-2 sm:grid-cols-2">
@@ -93,11 +101,18 @@ function getEditLabel(status) {
   return 'Koriģēt rezultātu'
 }
 
-function PlayerLine({ name, club, score }) {
+function PlayerLine({ name, club, score, perfectPlays = 0 }) {
   return (
     <div className="flex items-center justify-between gap-2">
       <div className="min-w-0">
-        <p className="truncate text-xs font-bold text-[#1C1C1E]">{name}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="truncate text-xs font-bold text-[#1C1C1E]">{name}</p>
+          {perfectPlays > 0 && (
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/15 px-1.5 py-0.2 text-[10px] font-bold text-amber-700">
+              <Star size={9} className="fill-amber-500" /> {perfectPlays}
+            </span>
+          )}
+        </div>
         <p className="truncate text-[10px] text-[#8E8E93]">{club || 'Gaida spēlētāju'}</p>
       </div>
       <span className="font-mono text-lg font-bold tabular-nums text-[#1C1C1E]">{score}</span>
