@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { Activity, AlertTriangle, CheckCircle2, Clock, LayoutGrid, Rows3, Trophy, Users, X } from 'lucide-react'
+import { Activity, AlertTriangle, CheckCircle2, Clock, Layers, LayoutGrid, Rows3, Trophy, Users, X } from 'lucide-react'
 import { AlertRail } from './AlertRail'
 import { CompactLegend, TableGrid } from './TableGrid'
 import { RoundProgress } from './RoundProgress'
@@ -12,6 +12,7 @@ import {
   canGenerateNextRound,
   deriveMatchStatus,
   generateNextSwissRound,
+  getAuditActorName,
   getOverrideAuditLabel,
   getCurrentRoundMatches,
 } from '../../utils/tournament'
@@ -30,7 +31,7 @@ export function OrganizerDashboard({
   const STANDINGS_PAGE_SIZE = 30
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [sortBy, setSortBy] = useState('table')
-  const [viewMode, setViewMode] = useState('table')
+  const [viewMode, setViewMode] = useState('cards')
   const [overrideMatch, setOverrideMatch] = useState(null)
   const [setup, setSetup] = useState({
     name: tournament.name,
@@ -96,6 +97,18 @@ export function OrganizerDashboard({
                 <div className="inline-flex rounded-xl border border-black/[0.04] bg-black/[0.06] p-1">
                   <button
                     type="button"
+                    onClick={() => setViewMode('cards')}
+                    className={`flex min-h-[44px] items-center gap-1.5 rounded-lg px-3.5 text-xs font-semibold transition-all ${
+                      viewMode === 'cards'
+                        ? 'bg-white text-[#1C1C1E] shadow-apple-sm'
+                        : 'text-[#8E8E93] hover:text-[#1C1C1E]'
+                    }`}
+                  >
+                    <LayoutGrid size={15} strokeWidth={2.2} />
+                    <span>Kartītes</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setViewMode('table')}
                     className={`flex min-h-[44px] items-center gap-1.5 rounded-lg px-3.5 text-xs font-semibold transition-all ${
                       viewMode === 'table'
@@ -115,7 +128,7 @@ export function OrganizerDashboard({
                         : 'text-[#8E8E93] hover:text-[#1C1C1E]'
                     }`}
                   >
-                    <LayoutGrid size={15} strokeWidth={2.2} />
+                    <Layers size={15} strokeWidth={2.2} />
                     <span>Kompakts</span>
                   </button>
                 </div>
@@ -187,16 +200,25 @@ export function OrganizerDashboard({
           <div className="divide-y divide-black/[0.04]">
             {pagedStandings.map((player, index) => {
               const rank = (standingsPage - 1) * STANDINGS_PAGE_SIZE + index + 1
+              const rankBadge = rank === 1
+                ? 'bg-amber-500/15 text-amber-900 border-amber-500/35 font-black shadow-2xs'
+                : rank === 2
+                  ? 'bg-slate-300/40 text-slate-800 border-slate-400/30 font-bold'
+                  : rank === 3
+                    ? 'bg-amber-700/15 text-amber-900 border-amber-700/30 font-bold'
+                    : 'text-[#8E8E93] border-transparent'
               return (
-                <div key={player.id} className="grid grid-cols-[24px_1fr_auto] items-center gap-2 py-2 text-xs transition-colors hover:bg-black/[0.03] rounded-lg px-1">
-                  <span className={`font-mono text-xs font-semibold tabular-nums ${rank <= 3 ? 'text-apple-blue font-bold' : 'text-[#8E8E93]'}`}>
-                    {rank}.
+                <div key={player.id} className="grid grid-cols-[28px_1fr_auto] items-center gap-2.5 py-2 text-xs transition-colors hover:bg-black/[0.02] rounded-xl px-1">
+                  <span className={`flex size-6 items-center justify-center rounded-md font-mono text-[11px] tabular-nums border ${rankBadge}`}>
+                    {rank}
                   </span>
                   <div className="min-w-0 pr-1">
                     <p className="truncate font-semibold text-[#1C1C1E]">{player.name}</p>
-                    <p className="truncate text-[10px] text-[#8E8E93] tabular-nums">Buholcs: {player.buchholz}</p>
+                    <p className="truncate text-[10px] text-[#8E8E93] tabular-nums">
+                      {[player.representation, `Buholcs: ${player.buchholz}`].filter(Boolean).join(' · ')}
+                    </p>
                   </div>
-                  <span className="font-mono text-xs font-bold tabular-nums text-apple-blue">
+                  <span className="font-mono text-xs font-bold tabular-nums text-apple-blue border border-apple-blue/20 bg-apple-blue/10 rounded-lg px-2.5 py-0.5">
                     {player.points} p.
                   </span>
                 </div>
@@ -209,18 +231,18 @@ export function OrganizerDashboard({
               type="button"
               onClick={prevPage}
               disabled={standingsPage === 1}
-              className="inline-flex min-h-[44px] items-center rounded-xl border border-black/[0.08] bg-black/[0.02] px-3.5 text-xs font-semibold text-[#1C1C1E] transition hover:bg-black/[0.06] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-black/[0.08] bg-black/[0.03] px-3.5 text-xs font-semibold text-[#1C1C1E] transition hover:bg-black/[0.06] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Iepriekšējā
             </button>
-            <span className="text-[10px] text-[#8E8E93] tabular-nums">
+            <span className="text-[10px] font-medium text-[#8E8E93] tabular-nums">
               {(standingsPage - 1) * STANDINGS_PAGE_SIZE + 1}–{Math.min(standingsPage * STANDINGS_PAGE_SIZE, standings.length)} no {standings.length}
             </span>
             <button
               type="button"
               onClick={nextPage}
               disabled={standingsPage === totalStandingsPages}
-              className="inline-flex min-h-[44px] items-center rounded-xl border border-black/[0.08] bg-black/[0.02] px-3.5 text-xs font-semibold text-[#1C1C1E] transition hover:bg-black/[0.06] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-black/[0.08] bg-black/[0.03] px-3.5 text-xs font-semibold text-[#1C1C1E] transition hover:bg-black/[0.06] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Nākamā
             </button>
@@ -653,6 +675,55 @@ function OverrideModal({
                     <span className="text-[11px] text-[#8E8E93]">{audit.editedBy || 'Organizators'} · {audit.editedAt || '—'}</span>
                   </div>
                 ))}
+              </div>
+            </div>
+          ) : null}
+
+          {/* Player Actions & Match Events Audit Trail */}
+          {match.auditTrail && match.auditTrail.length > 0 ? (
+            <div className="rounded-2xl border border-black/[0.06] bg-[#F2F2F7]/40 p-4">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#636366]">Spēlētāju darbību un notikumu žurnāls</p>
+                <span className="text-[11px] text-[#8E8E93] tabular-nums">{match.auditTrail.length} notikumi</span>
+              </div>
+              <div className="max-h-40 overflow-y-auto divide-y divide-black/[0.04] rounded-xl border border-black/[0.06] bg-white px-3 py-1">
+                {[...match.auditTrail].reverse().map((entry) => {
+                  const actorName = getAuditActorName(entry.actor, tournament.players)
+                  const isPlayer = entry.actorRole === 'player'
+                  return (
+                    <div key={entry.id} className="py-2 text-xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                            isPlayer ? 'bg-apple-blue/10 text-apple-blue' : 'bg-black/[0.06] text-[#1C1C1E]'
+                          }`}>
+                            {actorName}
+                          </span>
+                          <span className="truncate font-medium text-[#1C1C1E]">{entry.message}</span>
+                        </div>
+                        <span className="font-mono text-[10px] tabular-nums text-[#8E8E93] shrink-0">{entry.timestamp}</span>
+                      </div>
+                      {((entry.addedTo && entry.addedTo.length > 0) || (entry.takenFrom && entry.takenFrom.length > 0)) && (
+                        <div className="mt-1 flex flex-wrap gap-1.5 pl-1">
+                          {entry.takenFrom?.map((item) => (
+                            <span key={`otaken-${item.playerId}`} className="inline-flex items-center gap-1 rounded bg-apple-red/10 px-1.5 py-0.5 text-[10px] font-semibold text-apple-red">
+                              <span>Noņemts no:</span>
+                              <span className="font-bold">{getAuditActorName(item.playerId, tournament.players)}</span>
+                              <span className="font-mono tabular-nums">(-{item.count})</span>
+                            </span>
+                          ))}
+                          {entry.addedTo?.map((item) => (
+                            <span key={`oadded-${item.playerId}`} className="inline-flex items-center gap-1 rounded bg-apple-green/10 px-1.5 py-0.5 text-[10px] font-semibold text-apple-green">
+                              <span>Pievienots:</span>
+                              <span className="font-bold">{getAuditActorName(item.playerId, tournament.players)}</span>
+                              <span className="font-mono tabular-nums">(+{item.count})</span>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           ) : null}

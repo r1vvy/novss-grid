@@ -1,5 +1,6 @@
 import React from 'react'
 import { AlertTriangle, CheckCircle2, Clock, Grip, Pencil, RotateCcw, Search, X } from 'lucide-react'
+import { MatchCard } from './MatchCard'
 import { deriveMatchStatus, getMatchPlayers, getSetScore } from '../../utils/tournament'
 
 const statusLabels = {
@@ -57,7 +58,23 @@ export function TableGrid({
         </div>
       ) : null}
 
-      {viewMode === 'compact' ? (
+      {viewMode === 'cards' ? (
+        <div className="p-4 sm:p-5 bg-[#F2F2F7]/40">
+          <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
+            {matches.map((match) => (
+              <MatchCard
+                key={match.id}
+                tournament={tournament}
+                match={match}
+                onClearAlert={onClearAlert}
+                onMarkInvestigating={onMarkInvestigating}
+                onOpenOverride={onOpenOverride}
+                dragProps={buildDragProps(match.id, onSwapTables, canReassignTables)}
+              />
+            ))}
+          </div>
+        </div>
+      ) : viewMode === 'compact' ? (
         <CompactTableMap
           tournament={tournament}
           matches={matches}

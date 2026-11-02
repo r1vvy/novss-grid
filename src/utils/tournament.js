@@ -21,6 +21,22 @@ export function getRequiredWins(maxSetsPerMatch) {
   return Math.floor(maxSetsPerMatch / 2) + 1
 }
 
+export function recordAuditEntry(match, entry) {
+  const timestamp = entry.timestamp || new Date().toLocaleTimeString('lv-LV', { hour: '2-digit', minute: '2-digit' })
+  const auditEntry = {
+    id: `audit-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    timestamp,
+    ...entry,
+  }
+  return [...(match.auditTrail || []), auditEntry]
+}
+
+export function getAuditActorName(actor, players = []) {
+  if (!actor || actor === 'organizer' || actor === 'Organizators') return 'Organizators'
+  const player = players.find((p) => p.id === actor)
+  return player ? player.name : actor
+}
+
 export function getMatchPerfectPlays(match, playerId) {
   if (!match) return 0
   const completedCount = (match.setResults || []).reduce((sum, set) => {
@@ -104,11 +120,24 @@ export function appendSetResult(tournament, matchId, winnerId, actorPlayerId) {
       status: 'in_progress',
     }
 
+    const scoreA = getSetScore(nextMatch, match.playerAId)
+    const scoreB = getSetScore(nextMatch, match.playerBId)
+    const auditTrail = recordAuditEntry(match, {
+      actor: actorPlayerId || match.playerAId,
+      actorRole: 'player',
+      type: 'set_added',
+      message: `Reģistrēts uzvarēts sets (${scoreA} : ${scoreB})`,
+      addedTo: [{ playerId: winnerId, count: 1 }],
+      takenFrom: [],
+      details: { winnerId, addedTo: winnerId, scoreA, scoreB },
+    })
+
     const winnerReachedTarget = hasReachedTargetWins(nextMatch, winnerId, tournament.maxSetsPerMatch)
     const drawReachedLimit = isDrawMatch(nextMatch, tournament.maxSetsPerMatch)
 
     return {
       ...nextMatch,
+      auditTrail,
       confirmations: resetConfirmations(match),
       status: winnerReachedTarget || drawReachedLimit ? 'awaiting_confirmation' : 'in_progress',
     }
@@ -128,12 +157,21 @@ export function adjustCurrentSetPerfectPlays(tournament, matchId, playerId, delt
     const currentVal = Number(current[playerId]) || 0
     const nextVal = Math.max(0, currentVal + delta)
 
+    const auditTrail = recordAuditEntry(match, {
+      actor: actorPlayerId || playerId,
+      actorRole: 'player',
+      type: delta > 0 ? 'perfect_play_added' : 'perfect_play_removed',
+      message: delta > 0 ? 'Pievienots ideālais gājiens (★)' : 'Noņemts ideālais gājiens',
+      details: { targetPlayerId: playerId, count: nextVal },
+    })
+
     return {
       ...match,
       currentSetPerfectPlays: {
         ...current,
         [playerId]: nextVal,
       },
+      auditTrail,
     }
   })
 }
@@ -144,9 +182,17 @@ export function confirmPlayerArrival(tournament, matchId, playerId) {
       ...(match.arrivals || { [match.playerAId]: false, [match.playerBId]: false }),
       [playerId]: true,
     }
+    const auditTrail = recordAuditEntry(match, {
+      actor: playerId,
+      actorRole: 'player',
+      type: 'player_arrival',
+      message: 'Reģistrēta ierašanās pie galda',
+      details: { playerId },
+    })
     return {
       ...match,
       arrivals,
+      auditTrail,
     }
   })
 }
@@ -157,16 +203,31 @@ export function startMatchReady(tournament, matchId, playerId) {
       ...(match.ready || { [match.playerAId]: false, [match.playerBId]: false }),
       [playerId]: true,
     }
+    const auditTrail = recordAuditEntry(match, {
+      actor: playerId,
+      actorRole: 'player',
+      type: 'player_ready',
+      message: 'Spēlētājs gatavs spēlei',
+      details: { playerId },
+    })
     return {
       ...match,
       ready,
       status: 'in_progress',
+      auditTrail,
     }
   })
 }
 
 export function contestFinalScore(tournament, matchId, playerId, reason = 'Rezultāts apstrīdēts') {
   return updateMatch(tournament, matchId, (match) => {
+    const auditTrail = recordAuditEntry(match, {
+      actor: playerId,
+      actorRole: 'player',
+      type: 'score_contested',
+      message: `Rezultāts apstrīdēts: ${reason || 'Nav norādīts'}`,
+      details: { playerId, reason },
+    })
     return {
       ...match,
       refereeRequested: true,
@@ -178,6 +239,7 @@ export function contestFinalScore(tournament, matchId, playerId, reason = 'Rezul
         contestedAt: new Date().toLocaleTimeString('lv-LV', { hour: '2-digit', minute: '2-digit' }),
       },
       confirmations: resetConfirmations(match),
+      auditTrail,
     }
   })
 }
@@ -198,8 +260,21 @@ export function removeSetResult(tournament, matchId, winnerId, actorPlayerId) {
       status: nextSetResults.length > 0 ? 'in_progress' : 'scheduled',
     }
 
+    const scoreA = getSetScore(nextMatch, match.playerAId)
+    const scoreB = getSetScore(nextMatch, match.playerBId)
+    const auditTrail = recordAuditEntry(match, {
+      actor: actorPlayerId || match.playerAId,
+      actorRole: 'player',
+      type: 'set_removed',
+      message: `Noņemts uzvarēts sets (${scoreA} : ${scoreB})`,
+      addedTo: [],
+      takenFrom: [{ playerId: winnerId, count: 1 }],
+      details: { winnerId, takenFrom: winnerId, scoreA, scoreB },
+    })
+
     return {
       ...nextMatch,
+      auditTrail,
       status: deriveMatchStatus(nextMatch, tournament.maxSetsPerMatch),
     }
   })
@@ -218,10 +293,19 @@ export function confirmFinalScore(tournament, matchId, playerId) {
       && confirmations[match.playerAId]
       && confirmations[match.playerBId]
 
+    const auditTrail = recordAuditEntry(match, {
+      actor: playerId,
+      actorRole: 'player',
+      type: 'score_confirmed',
+      message: fullyConfirmed ? 'Rezultāts pilnībā apstiprināts no abiem spēlētājiem' : 'Spēlētājs apstiprināja gala rezultātu',
+      details: { playerId, fullyConfirmed },
+    })
+
     return {
       ...match,
       confirmations,
       status: fullyConfirmed ? 'completed' : 'awaiting_confirmation',
+      auditTrail,
     }
   })
 }
@@ -230,11 +314,20 @@ export function requestReferee(tournament, matchId, playerId) {
   return updateMatch(tournament, matchId, (match) => {
     if (deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'disputed') return match
 
+    const auditTrail = recordAuditEntry(match, {
+      actor: playerId || 'player',
+      actorRole: 'player',
+      type: 'referee_requested',
+      message: 'Izsaukts tiesnesis pie galda',
+      details: { playerId },
+    })
+
     return {
       ...match,
       refereeRequested: true,
       refereeRequestedBy: playerId || null,
       status: 'disputed',
+      auditTrail,
     }
   })
 }
@@ -249,20 +342,39 @@ export function clearRefereeRequest(tournament, matchId, playerId) {
       refereeRequestedBy: null,
       status: match.setResults.length > 0 ? 'in_progress' : 'scheduled',
     }
+
+    const auditTrail = recordAuditEntry(match, {
+      actor: playerId || 'organizer',
+      actorRole: playerId ? 'player' : 'organizer',
+      type: 'referee_cleared',
+      message: playerId ? 'Spēlētājs atsauca tiesneša izsaukumu' : 'Organizators noņēma tiesneša brīdinājumu',
+      details: { playerId },
+    })
+
     return {
       ...restored,
       status: deriveMatchStatus(restored, tournament.maxSetsPerMatch),
+      auditTrail,
     }
   })
 }
 
 export function markMatchInvestigating(tournament, matchId) {
-  return updateMatch(tournament, matchId, (match) => ({
-    ...match,
-    refereeRequested: false,
-    refereeRequestedBy: null,
-    status: 'investigating',
-  }))
+  return updateMatch(tournament, matchId, (match) => {
+    const auditTrail = recordAuditEntry(match, {
+      actor: 'organizer',
+      actorRole: 'organizer',
+      type: 'investigation_started',
+      message: 'Organizators uzsāka izmeklēšanu pie galda',
+    })
+    return {
+      ...match,
+      refereeRequested: false,
+      refereeRequestedBy: null,
+      status: 'investigating',
+      auditTrail,
+    }
+  })
 }
 
 export function resetMatchInvestigation(tournament, matchId) {
@@ -273,10 +385,17 @@ export function resetMatchInvestigation(tournament, matchId) {
       refereeRequestedBy: null,
       status: match.setResults.length > 0 ? 'in_progress' : 'scheduled',
     }
+    const auditTrail = recordAuditEntry(match, {
+      actor: 'organizer',
+      actorRole: 'organizer',
+      type: 'investigation_reset',
+      message: 'Organizators atiestatīja izmeklēšanu',
+    })
 
     return {
       ...restored,
       status: deriveMatchStatus(restored, tournament.maxSetsPerMatch),
+      auditTrail,
     }
   })
 }
@@ -313,8 +432,30 @@ export function swapMatchTables(tournament, sourceMatchId, targetMatchId) {
   return {
     ...tournament,
     matches: tournament.matches.map((match) => {
-      if (match.id === sourceMatchId) return { ...match, table: targetMatch.table }
-      if (match.id === targetMatchId) return { ...match, table: sourceMatch.table }
+      if (match.id === sourceMatchId) {
+        return {
+          ...match,
+          table: targetMatch.table,
+          auditTrail: recordAuditEntry(match, {
+            actor: 'organizer',
+            actorRole: 'organizer',
+            type: 'table_swap',
+            message: `Galds mainīts no ${sourceMatch.table} uz ${targetMatch.table}`,
+          }),
+        }
+      }
+      if (match.id === targetMatchId) {
+        return {
+          ...match,
+          table: sourceMatch.table,
+          auditTrail: recordAuditEntry(match, {
+            actor: 'organizer',
+            actorRole: 'organizer',
+            type: 'table_swap',
+            message: `Galds mainīts no ${targetMatch.table} uz ${sourceMatch.table}`,
+          }),
+        }
+      }
       return match
     }),
   }
@@ -545,6 +686,17 @@ function buildOverriddenMatch(match, setResults, metadata, maxSetsPerMatch = mat
     : previousAudit
       ? [previousAudit]
       : []
+  const deltaA = nextScore[match.playerAId] - previousScore[match.playerAId]
+  const deltaB = nextScore[match.playerBId] - previousScore[match.playerBId]
+
+  const addedTo = []
+  const takenFrom = []
+
+  if (deltaA > 0) addedTo.push({ playerId: match.playerAId, count: deltaA })
+  if (deltaA < 0) takenFrom.push({ playerId: match.playerAId, count: Math.abs(deltaA) })
+  if (deltaB > 0) addedTo.push({ playerId: match.playerBId, count: deltaB })
+  if (deltaB < 0) takenFrom.push({ playerId: match.playerBId, count: Math.abs(deltaB) })
+
   const auditEntry = {
     editedBy: metadata.editedBy || 'Organizators',
     reason: metadata.reason || 'other',
@@ -553,8 +705,22 @@ function buildOverriddenMatch(match, setResults, metadata, maxSetsPerMatch = mat
     previousStatus,
     previousScore,
     nextScore,
+    addedTo,
+    takenFrom,
     editedAt: metadata.editedAt || 'Tikko',
   }
+
+  const overrideAudit = {
+    actor: metadata.editedBy || 'Organizators',
+    actorRole: 'organizer',
+    type: 'organizer_override',
+    message: `Organizatora labojums: ${getOverrideAuditLabel({ overrideMeta: metadata })}${metadata.note ? ` ("${metadata.note}")` : ''}`,
+    addedTo,
+    takenFrom,
+    details: auditEntry,
+    timestamp: metadata.editedAt || new Date().toLocaleTimeString('lv-LV', { hour: '2-digit', minute: '2-digit' }),
+  }
+  const auditTrail = recordAuditEntry(match, overrideAudit)
 
   return {
     ...match,
@@ -568,6 +734,7 @@ function buildOverriddenMatch(match, setResults, metadata, maxSetsPerMatch = mat
     refereeRequested: false,
     refereeRequestedBy: null,
     status: isFinalResult ? 'completed' : setResults.length > 0 ? 'in_progress' : 'scheduled',
+    auditTrail,
     overrideMeta: {
       ...auditEntry,
       editHistory: [...editHistory, auditEntry],

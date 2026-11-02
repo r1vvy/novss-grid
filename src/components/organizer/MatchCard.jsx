@@ -1,6 +1,12 @@
-import React from 'react'
-import { AlertTriangle, CheckCircle2, Clock, Pencil, Search, Star } from 'lucide-react'
-import { deriveMatchStatus, getMatchPerfectPlays, getMatchPlayers, getSetScore } from '../../utils/tournament'
+import React, { useState } from 'react'
+import { AlertTriangle, CheckCircle2, ChevronDown, Clock, History, Pencil, Search, Star } from 'lucide-react'
+import {
+  deriveMatchStatus,
+  getAuditActorName,
+  getMatchPerfectPlays,
+  getMatchPlayers,
+  getSetScore,
+} from '../../utils/tournament'
 
 const statusLabels = {
   scheduled: 'Ieplānots',
@@ -12,12 +18,14 @@ const statusLabels = {
 }
 
 export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating, onOpenOverride, dragProps = {} }) {
+  const [showAudit, setShowAudit] = useState(false)
   const { playerA, playerB } = getMatchPlayers(match, tournament.players)
   const status = deriveMatchStatus(match, tournament.maxSetsPerMatch)
   const scoreA = getSetScore(match, match.playerAId)
   const scoreB = getSetScore(match, match.playerBId)
   const perfectA = getMatchPerfectPlays(match, match.playerAId)
   const perfectB = getMatchPerfectPlays(match, match.playerBId)
+  const auditTrail = match.auditTrail || []
   const isDisputed = status === 'disputed'
   const isInvestigating = status === 'investigating'
   const canEditResult = status !== 'scheduled'
@@ -44,12 +52,13 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
       </div>
 
       {match.contestMeta?.reason && (
-        <div className="mt-2.5 rounded-lg border border-apple-red/30 bg-apple-red/10 px-2.5 py-1 text-[11px] font-semibold text-apple-red">
-          Strīds: {match.contestMeta.reason}
+        <div className="mt-2.5 rounded-xl border border-apple-red/25 bg-apple-red/10 px-3 py-2 text-xs font-semibold text-apple-red">
+          <span className="font-bold">Strīds: </span>
+          <span>{match.contestMeta.reason}</span>
         </div>
       )}
 
-      <div className="mt-4 space-y-2 rounded-xl bg-[#F2F2F7]/50 p-2.5">
+      <div className="mt-3.5 space-y-2.5 rounded-2xl border border-black/[0.04] bg-[#F2F2F7]/60 p-3">
         <PlayerLine name={playerA?.name || 'TBD'} club={playerA?.representation} score={scoreA} perfectPlays={perfectA} />
         <div className="border-t border-black/[0.04]" />
         <PlayerLine name={playerB?.name || 'TBD'} club={playerB?.representation} score={scoreB} perfectPlays={perfectB} />
@@ -89,6 +98,96 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
           </button>
         </div>
       ) : null}
+
+      {/* Audit Trail & Player-Made Actions Disclosure */}
+      <div className="mt-3.5 border-t border-black/[0.06] pt-2">
+        <button
+          type="button"
+          onClick={() => setShowAudit(!showAudit)}
+          className="flex min-h-[44px] w-full items-center justify-between rounded-xl px-2 text-xs font-semibold text-[#636366] transition hover:bg-black/[0.03] active:bg-black/[0.06]"
+          aria-expanded={showAudit}
+          aria-label="Pārslēgt audita žurnālu"
+        >
+          <div className="flex items-center gap-1.5">
+            <History size={14} className="text-[#8E8E93]" />
+            <span>Audita žurnāls</span>
+            {auditTrail.length > 0 && (
+              <span className="rounded-full bg-black/[0.06] px-2 py-0.5 text-[10px] font-bold tabular-nums text-[#1C1C1E]">
+                {auditTrail.length}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1 text-[11px] text-[#8E8E93]">
+            {auditTrail.length > 0 && !showAudit && (
+              <span className="truncate max-w-[130px] font-normal text-right">
+                {auditTrail[auditTrail.length - 1].message}
+              </span>
+            )}
+            <ChevronDown size={14} className={`transition-transform duration-200 ${showAudit ? 'rotate-180' : ''}`} />
+          </div>
+        </button>
+
+        {showAudit && (
+          <div className="mt-2 space-y-1.5 rounded-xl border border-black/[0.06] bg-[#F2F2F7]/70 p-2.5">
+            {auditTrail.length === 0 ? (
+              <p className="text-center text-[11px] text-[#8E8E93] py-2">Nav reģistrētu darbību</p>
+            ) : (
+              <div className="max-h-48 overflow-y-auto space-y-1.5 pr-0.5">
+                {[...auditTrail].reverse().map((entry) => {
+                  const actorName = getAuditActorName(entry.actor, tournament.players)
+                  const isPlayer = entry.actorRole === 'player'
+                  return (
+                    <div
+                      key={entry.id}
+                      className="rounded-lg border border-black/[0.04] bg-white p-2 text-[11px] shadow-2xs"
+                    >
+                      <div className="flex items-center justify-between gap-1 text-[#8E8E93]">
+                        <span className={`inline-block rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                          isPlayer ? 'bg-apple-blue/10 text-apple-blue' : 'bg-black/[0.06] text-[#1C1C1E]'
+                        }`}>
+                          {actorName}
+                        </span>
+                        <span className="font-mono text-[10px] tabular-nums shrink-0">{entry.timestamp}</span>
+                      </div>
+                      <p className="mt-1 font-medium text-[#1C1C1E]">{entry.message}</p>
+                      {((entry.addedTo && entry.addedTo.length > 0) || (entry.takenFrom && entry.takenFrom.length > 0)) && (
+                        <div className="mt-1.5 flex flex-wrap gap-1.5 pt-1 border-t border-black/[0.04]">
+                          {entry.takenFrom?.map((item) => {
+                            const name = getAuditActorName(item.playerId, tournament.players)
+                            return (
+                              <span
+                                key={`taken-${item.playerId}`}
+                                className="inline-flex items-center gap-1 rounded bg-apple-red/10 px-1.5 py-0.5 text-[10px] font-semibold text-apple-red"
+                              >
+                                <span>Noņemts no:</span>
+                                <span className="font-bold">{name}</span>
+                                <span className="font-mono tabular-nums">(-{item.count})</span>
+                              </span>
+                            )
+                          })}
+                          {entry.addedTo?.map((item) => {
+                            const name = getAuditActorName(item.playerId, tournament.players)
+                            return (
+                              <span
+                                key={`added-${item.playerId}`}
+                                className="inline-flex items-center gap-1 rounded bg-apple-green/10 px-1.5 py-0.5 text-[10px] font-semibold text-apple-green"
+                              >
+                                <span>Pievienots:</span>
+                                <span className="font-bold">{name}</span>
+                                <span className="font-mono tabular-nums">(+{item.count})</span>
+                              </span>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </article>
   )
 }
@@ -103,19 +202,19 @@ function getEditLabel(status) {
 
 function PlayerLine({ name, club, score, perfectPlays = 0 }) {
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className="flex items-center justify-between gap-3">
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
-          <p className="truncate text-xs font-bold text-[#1C1C1E]">{name}</p>
+          <p className="truncate text-sm font-bold text-[#1C1C1E]">{name}</p>
           {perfectPlays > 0 && (
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/15 px-1.5 py-0.2 text-[10px] font-bold text-amber-700">
-              <Star size={9} className="fill-amber-500" /> {perfectPlays}
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+              <Star size={10} className="fill-amber-500 text-amber-500" /> {perfectPlays}
             </span>
           )}
         </div>
-        <p className="truncate text-[10px] text-[#8E8E93]">{club || 'Gaida spēlētāju'}</p>
+        <p className="truncate text-xs text-[#8E8E93]">{club || 'Gaida spēlētāju'}</p>
       </div>
-      <span className="font-mono text-lg font-bold tabular-nums text-[#1C1C1E]">{score}</span>
+      <span className="font-mono text-xl font-black tabular-nums text-[#1C1C1E]">{score}</span>
     </div>
   )
 }

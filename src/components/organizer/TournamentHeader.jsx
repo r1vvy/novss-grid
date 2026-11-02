@@ -14,29 +14,29 @@ export function TournamentHeader({ tournament, matches, alerts, onOpenSettings, 
             <span>{tournament.venue}</span>
             <span>·</span>
             <span>{tournament.updatedAt}</span>
-            <span className="inline-flex items-center rounded-full bg-apple-blue/10 px-2 py-0.5 text-[10px] font-semibold text-apple-blue">
+            <span className="inline-flex items-center rounded-full border border-apple-blue/20 bg-apple-blue/10 px-2.5 py-0.5 text-xs font-semibold text-apple-blue">
               {tournament.status}
             </span>
           </div>
-          <h2 className="mt-1.5 text-2xl sm:text-3xl font-bold tracking-tight text-[#1C1C1E]">
+          <h2 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-[#1C1C1E]">
             {tournament.name}
           </h2>
         </div>
 
         <div className="flex flex-col gap-3.5 xl:min-w-[560px]">
-          <div className="flex flex-wrap justify-start gap-2 xl:justify-end">
+          <div className="flex flex-wrap justify-start gap-2.5 xl:justify-end">
             <button
               type="button"
               onClick={onOpenPlayers}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-black/[0.08] bg-black/[0.03] px-3.5 text-xs font-semibold text-[#1C1C1E] shadow-apple-subtle transition-all hover:bg-black/[0.06] active:scale-[0.98] active:bg-black/[0.1]"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-black/[0.08] bg-black/[0.03] px-4 text-xs font-semibold text-[#1C1C1E] shadow-apple-subtle transition-all hover:bg-black/[0.06] active:scale-[0.98] active:bg-black/[0.1]"
             >
               <SquarePen size={15} className="text-apple-secondary" strokeWidth={2.2} />
-              <span>Spēlētāji (<span className="tabular-nums">{tournament.players.length}</span>)</span>
+              <span>Spēlētāji (<span className="tabular-nums font-mono">{tournament.players.length}</span>)</span>
             </button>
             <button
               type="button"
               onClick={onOpenSettings}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-black/[0.08] bg-black/[0.03] px-3.5 text-xs font-semibold text-[#1C1C1E] shadow-apple-subtle transition-all hover:bg-black/[0.06] active:scale-[0.98] active:bg-black/[0.1]"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-black/[0.08] bg-black/[0.03] px-4 text-xs font-semibold text-[#1C1C1E] shadow-apple-subtle transition-all hover:bg-black/[0.06] active:scale-[0.98] active:bg-black/[0.1]"
             >
               <Settings size={15} className="text-apple-secondary" strokeWidth={2.2} />
               <span>Iestatījumi</span>
@@ -74,13 +74,13 @@ export function TournamentHeader({ tournament, matches, alerts, onOpenSettings, 
 
 function AppleStatCard({ icon: Icon, iconColor, iconBg, label, value }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-black/[0.06] bg-[#F2F2F7]/60 px-3.5 py-2.5">
-      <div className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${iconBg} ${iconColor}`}>
-        <Icon size={16} strokeWidth={2.3} />
+    <div className="flex items-center gap-3 rounded-2xl border border-black/[0.06] bg-[#F2F2F7]/60 px-3.5 py-3 transition hover:bg-[#F2F2F7]/80">
+      <div className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${iconBg} ${iconColor}`}>
+        <Icon size={17} strokeWidth={2.3} />
       </div>
       <div className="min-w-0">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-[#8E8E93] truncate">{label}</p>
-        <p className="text-base font-bold tabular-nums text-[#1C1C1E] leading-none mt-0.5 truncate">{value}</p>
+        <p className="text-base sm:text-lg font-bold tabular-nums text-[#1C1C1E] leading-tight mt-0.5 truncate">{value}</p>
       </div>
     </div>
   )

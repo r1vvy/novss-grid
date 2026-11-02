@@ -112,5 +112,21 @@ function roundFourMatches() {
     },
     refereeRequested: status === 'disputed',
     refereeRequestedBy: status === 'disputed' ? playerAId : null,
+    auditTrail: index === 0 ? [
+      { id: 'a1', timestamp: '12:05', actor: playerAId, actorRole: 'player', type: 'player_arrival', message: 'Reģistrēta ierašanās pie galda' },
+      { id: 'a2', timestamp: '12:07', actor: playerBId, actorRole: 'player', type: 'player_arrival', message: 'Reģistrēta ierašanās pie galda' },
+      { id: 'a3', timestamp: '12:12', actor: playerAId, actorRole: 'player', type: 'perfect_play_added', message: 'Pievienots ideālais gājiens (★)' },
+      { id: 'a4', timestamp: '12:13', actor: playerAId, actorRole: 'player', type: 'set_added', message: 'Reģistrēts uzvarēts sets (1 : 0)', addedTo: [{ playerId: playerAId, count: 1 }] },
+      { id: 'a5', timestamp: '12:20', actor: playerAId, actorRole: 'player', type: 'set_added', message: 'Reģistrēts uzvarēts sets (2 : 0)', addedTo: [{ playerId: playerAId, count: 1 }] },
+      { id: 'a6', timestamp: '12:28', actor: playerBId, actorRole: 'player', type: 'set_added', message: 'Reģistrēts uzvarēts sets (2 : 1)', addedTo: [{ playerId: playerBId, count: 1 }] },
+      { id: 'a7', timestamp: '12:35', actor: playerAId, actorRole: 'player', type: 'perfect_play_added', message: 'Pievienots ideālais gājiens (★)' },
+      { id: 'a8', timestamp: '12:36', actor: playerAId, actorRole: 'player', type: 'set_added', message: 'Reģistrēts uzvarēts sets (3 : 1)', addedTo: [{ playerId: playerAId, count: 1 }] },
+    ] : index === 1 ? [
+      { id: 'b1', timestamp: '12:06', actor: playerAId, actorRole: 'player', type: 'player_arrival', message: 'Reģistrēta ierašanās pie galda' },
+      { id: 'b2', timestamp: '12:10', actor: playerBId, actorRole: 'player', type: 'player_arrival', message: 'Reģistrēta ierašanās pie galda' },
+      { id: 'b3', timestamp: '12:18', actor: playerAId, actorRole: 'player', type: 'set_added', message: 'Reģistrēts uzvarēts sets (1 : 0)', addedTo: [{ playerId: playerAId, count: 1 }] },
+      { id: 'b4', timestamp: '12:25', actor: playerBId, actorRole: 'player', type: 'set_added', message: 'Reģistrēts uzvarēts sets (1 : 1)', addedTo: [{ playerId: playerBId, count: 1 }] },
+      { id: 'b5', timestamp: '12:32', actor: playerAId, actorRole: 'player', type: 'referee_requested', message: 'Izsaukts tiesnesis pie galda' },
+    ] : [],
   }))
 }

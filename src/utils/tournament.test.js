@@ -15,6 +15,8 @@ import {
   confirmPlayerArrival,
   startMatchReady,
   isTournamentComplete,
+  requestReferee,
+  removeSetResult,
 } from './tournament'
 import { initialTournament } from '../data/mockTournament'
 
@@ -196,5 +198,67 @@ describe('Tournament Domain Logic', () => {
     }
 
     expect(isTournamentComplete(completedTourney)).toBe(true)
+  })
+
+  it('audits all player-made calls, score entries, and edits into match auditTrail', () => {
+    let tournament = {
+      ...initialTournament,
+      matches: [
+        {
+          id: 'audit-test-m1',
+          round: 4,
+          table: 5,
+          playerAId: 'p1',
+          playerBId: 'p2',
+          setResults: [],
+          status: 'scheduled',
+          arrivals: { p1: false, p2: false },
+          confirmations: { p1: false, p2: false },
+          auditTrail: [],
+        },
+      ],
+    }
+
+    // 1. Player arrival call
+    tournament = confirmPlayerArrival(tournament, 'audit-test-m1', 'p1')
+    expect(tournament.matches[0].auditTrail).toHaveLength(1)
+    expect(tournament.matches[0].auditTrail[0].type).toBe('player_arrival')
+    expect(tournament.matches[0].auditTrail[0].actor).toBe('p1')
+
+    // 2. Score entry by scorekeeper
+    tournament = appendSetResult(tournament, 'audit-test-m1', 'p1', 'p1')
+    expect(tournament.matches[0].auditTrail).toHaveLength(2)
+    expect(tournament.matches[0].auditTrail[1].type).toBe('set_added')
+    expect(tournament.matches[0].auditTrail[1].message).toContain('1 : 0')
+    expect(tournament.matches[0].auditTrail[1].addedTo).toEqual([{ playerId: 'p1', count: 1 }])
+    expect(tournament.matches[0].auditTrail[1].takenFrom).toEqual([])
+
+    // 3. Remove set result (taken from p1)
+    tournament = removeSetResult(tournament, 'audit-test-m1', 'p1', 'p1')
+    expect(tournament.matches[0].auditTrail).toHaveLength(3)
+    expect(tournament.matches[0].auditTrail[2].type).toBe('set_removed')
+    expect(tournament.matches[0].auditTrail[2].takenFrom).toEqual([{ playerId: 'p1', count: 1 }])
+    expect(tournament.matches[0].auditTrail[2].addedTo).toEqual([])
+
+    // 4. Player requests referee
+    tournament = requestReferee(tournament, 'audit-test-m1', 'p2')
+    expect(tournament.matches[0].auditTrail).toHaveLength(4)
+    expect(tournament.matches[0].auditTrail[3].type).toBe('referee_requested')
+    expect(tournament.matches[0].auditTrail[3].actor).toBe('p2')
+
+    // 5. Opponent contests score
+    tournament = contestFinalScore(tournament, 'audit-test-m1', 'p2', 'Kļūdains sets')
+    expect(tournament.matches[0].auditTrail).toHaveLength(5)
+    expect(tournament.matches[0].auditTrail[4].type).toBe('score_contested')
+    expect(tournament.matches[0].auditTrail[4].message).toContain('Kļūdains sets')
+
+    // 6. Force override changing result from 0:0 to 1:0 for p2
+    tournament = forceOverrideResult(tournament, 'audit-test-m1', [{ winnerId: 'p2' }], {
+      reason: 'referee_decision',
+      editedBy: 'Galvenais tiesnesis',
+    })
+    const lastAudit = tournament.matches[0].auditTrail[tournament.matches[0].auditTrail.length - 1]
+    expect(lastAudit.type).toBe('organizer_override')
+    expect(lastAudit.addedTo).toEqual([{ playerId: 'p2', count: 1 }])
   })
 })
