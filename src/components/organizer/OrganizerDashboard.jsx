@@ -60,6 +60,7 @@ export function OrganizerDashboard({
   } = useStandingsPagination(standings, STANDINGS_PAGE_SIZE)
 
   const alerts = currentMatches.filter((match) => deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'disputed')
+  const investigations = currentMatches.filter((match) => deriveMatchStatus(match, tournament.maxSetsPerMatch) === 'investigating')
   const canGenerate = canGenerateNextRound(tournament)
 
   const settingsDismiss = useModalDismiss(isSettingsOpen, () => setIsSettingsOpen(false))
@@ -181,7 +182,15 @@ export function OrganizerDashboard({
       </section>
 
       <aside className="space-y-5">
-        <AlertRail tournament={tournament} alerts={alerts} onMarkInvestigating={onMarkInvestigating} />
+        <AlertRail
+          tournament={tournament}
+          alerts={alerts}
+          investigations={investigations}
+          onMarkInvestigating={onMarkInvestigating}
+          onResetInvestigation={onResetInvestigation}
+          onOpenOverride={setOverrideMatch}
+          onClearAlert={onClearAlert}
+        />
 
         {/* Apple Inset Grouped Standings Panel */}
         <section className="rounded-2xl border border-black/[0.08] bg-white p-4 shadow-apple-card">
