@@ -21,7 +21,8 @@ export function AppShell({ title, showBack = false, onBack, children }) {
 
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center rounded-full bg-apple-blue/10 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-apple-blue">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/80 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-[#1C1C1E] shadow-sm">
+                  <span className="size-1.5 rounded-full bg-rose-500" />
                   NVSSGRID
                 </span>
               </div>

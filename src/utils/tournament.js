@@ -155,22 +155,80 @@ export function adjustCurrentSetPerfectPlays(tournament, matchId, playerId, delt
       [match.playerBId]: 0,
     }
     const currentVal = Number(current[playerId]) || 0
-    const nextVal = Math.max(0, currentVal + delta)
+
+    if (delta < 0) {
+      let remaining = Math.abs(delta)
+      let nextCurrent = { ...current }
+      let nextSetResults = [...(match.setResults || [])]
+      let changed = false
+
+      if (currentVal > 0) {
+        const dec = Math.min(currentVal, remaining)
+        nextCurrent[playerId] = currentVal - dec
+        remaining -= dec
+        changed = true
+      }
+
+      if (remaining > 0) {
+        for (let i = nextSetResults.length - 1; i >= 0 && remaining > 0; i--) {
+          const setPerfect = Number(nextSetResults[i]?.perfectPlays?.[playerId]) || 0
+          if (setPerfect > 0) {
+            const dec = Math.min(setPerfect, remaining)
+            nextSetResults[i] = {
+              ...nextSetResults[i],
+              perfectPlays: {
+                ...nextSetResults[i].perfectPlays,
+                [playerId]: setPerfect - dec,
+              },
+            }
+            remaining -= dec
+            changed = true
+          }
+        }
+      }
+
+      if (!changed) return match
+
+      const nextMatch = {
+        ...match,
+        currentSetPerfectPlays: nextCurrent,
+        setResults: nextSetResults,
+      }
+
+      const auditTrail = recordAuditEntry(match, {
+        actor: actorPlayerId || playerId,
+        actorRole: 'player',
+        type: 'perfect_play_removed',
+        message: 'Noņemts ideālais gājiens',
+        details: { targetPlayerId: playerId, count: getMatchPerfectPlays(nextMatch, playerId) },
+      })
+
+      return {
+        ...nextMatch,
+        auditTrail,
+      }
+    }
+
+    const nextVal = currentVal + delta
+    const nextCurrent = {
+      ...current,
+      [playerId]: nextVal,
+    }
+    const nextMatch = {
+      ...match,
+      currentSetPerfectPlays: nextCurrent,
+    }
 
     const auditTrail = recordAuditEntry(match, {
       actor: actorPlayerId || playerId,
       actorRole: 'player',
-      type: delta > 0 ? 'perfect_play_added' : 'perfect_play_removed',
-      message: delta > 0 ? 'Pievienots ideālais gājiens (★)' : 'Noņemts ideālais gājiens',
-      details: { targetPlayerId: playerId, count: nextVal },
+      type: 'perfect_play_added',
+      message: 'Pievienots ideālais gājiens (★)',
+      details: { targetPlayerId: playerId, count: getMatchPerfectPlays(nextMatch, playerId) },
     })
 
     return {
-      ...match,
-      currentSetPerfectPlays: {
-        ...current,
-        [playerId]: nextVal,
-      },
+      ...nextMatch,
       auditTrail,
     }
   })

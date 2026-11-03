@@ -133,6 +133,48 @@ describe('Tournament Domain Logic', () => {
     expect(state.matches[0].currentSetPerfectPlays.p1).toBe(0)
   })
 
+  it('removes perfect play from completed sets when current set has zero perfect plays', () => {
+    const tournament = {
+      ...initialTournament,
+      matches: [
+        {
+          id: 'test-m1',
+          round: 4,
+          playerAId: 'p1',
+          playerBId: 'p2',
+          setResults: [
+            { winnerId: 'p1', perfectPlays: { p1: 1, p2: 0 } },
+            { winnerId: 'p1', perfectPlays: { p1: 2, p2: 0 } },
+          ],
+          currentSetPerfectPlays: { p1: 0, p2: 0 },
+          status: 'in_progress',
+          confirmations: { p1: false, p2: false },
+        },
+      ],
+    }
+
+    expect(getMatchPerfectPlays(tournament.matches[0], 'p1')).toBe(3)
+
+    // Decrement as p1 (Anna)
+    let state = adjustCurrentSetPerfectPlays(tournament, 'test-m1', 'p1', -1, 'p1')
+    expect(getMatchPerfectPlays(state.matches[0], 'p1')).toBe(2)
+    expect(state.matches[0].setResults[1].perfectPlays.p1).toBe(1)
+
+    // Decrement again
+    state = adjustCurrentSetPerfectPlays(state, 'test-m1', 'p1', -1, 'p1')
+    expect(getMatchPerfectPlays(state.matches[0], 'p1')).toBe(1)
+    expect(state.matches[0].setResults[1].perfectPlays.p1).toBe(0)
+
+    // Decrement again (reaches setResults[0])
+    state = adjustCurrentSetPerfectPlays(state, 'test-m1', 'p1', -1, 'p1')
+    expect(getMatchPerfectPlays(state.matches[0], 'p1')).toBe(0)
+    expect(state.matches[0].setResults[0].perfectPlays.p1).toBe(0)
+
+    // Decrement when 0: stays 0
+    state = adjustCurrentSetPerfectPlays(state, 'test-m1', 'p1', -1, 'p1')
+    expect(getMatchPerfectPlays(state.matches[0], 'p1')).toBe(0)
+  })
+
   it('handles score contesting by triggering automatic referee call and dispute', () => {
     const tournament = {
       ...initialTournament,

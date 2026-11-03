@@ -131,7 +131,7 @@ function ScoreRow({
             <button
               type="button"
               aria-label={`Pievienot ideālo gājienu: ${name}`}
-              disabled={disabled}
+              disabled={isAddDisabled}
               onClick={onPerfectPlayAdd}
               className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-amber-600 transition hover:bg-amber-500/10 active:scale-95 disabled:text-apple-tertiary disabled:cursor-not-allowed"
             >
