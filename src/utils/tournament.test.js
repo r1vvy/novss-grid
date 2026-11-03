@@ -17,6 +17,9 @@ import {
   isTournamentComplete,
   requestReferee,
   removeSetResult,
+  issuePlayerWarning,
+  getMatchWarnings,
+  getPlayerWarnings,
 } from './tournament'
 import { initialTournament } from '../data/mockTournament'
 
@@ -302,5 +305,124 @@ describe('Tournament Domain Logic', () => {
     const lastAudit = tournament.matches[0].auditTrail[tournament.matches[0].auditTrail.length - 1]
     expect(lastAudit.type).toBe('organizer_override')
     expect(lastAudit.addedTo).toEqual([{ playerId: 'p2', count: 1 }])
+  })
+
+  it('allows issuing warning to a player, updating player and match warning history with audit trail entry', () => {
+    let tournament = { ...initialTournament }
+    const matchId = tournament.matches[0].id
+    const targetPlayerId = tournament.matches[0].playerAId
+
+    tournament = issuePlayerWarning(tournament, matchId, targetPlayerId, {
+      reason: 'Noteikumu pārkāpums',
+      note: 'Pārkāpta borta līnija sitiena laikā',
+      issuedBy: 'Galvenais tiesnesis',
+    })
+
+    const updatedMatch = tournament.matches.find((m) => m.id === matchId)
+    const matchWarnings = getMatchWarnings(updatedMatch, targetPlayerId)
+    expect(matchWarnings).toHaveLength(1)
+    expect(matchWarnings[0].reason).toBe('Noteikumu pārkāpums')
+    expect(matchWarnings[0].note).toBe('Pārkāpta borta līnija sitiena laikā')
+    expect(matchWarnings[0].issuedBy).toBe('Galvenais tiesnesis')
+
+    const lastAudit = updatedMatch.auditTrail[updatedMatch.auditTrail.length - 1]
+    expect(lastAudit.type).toBe('player_warning')
+    expect(lastAudit.actorRole).toBe('referee')
+    expect(lastAudit.message).toContain('Brīdinājums spēlētājam')
+    expect(lastAudit.message).toContain('Noteikumu pārkāpums')
+    expect(lastAudit.message).toContain('Pārkāpta borta līnija sitiena laikā')
+
+    const playerWarningsCount = getPlayerWarnings(tournament, targetPlayerId)
+    expect(playerWarningsCount).toBe(1)
+  })
+
+  it('allows referee to fill in audit explanation after a referee call without changing the match result', () => {
+    let tournament = {
+      ...initialTournament,
+      matches: [
+        {
+          id: 'ref-call-test-m1',
+          round: 4,
+          table: 3,
+          playerAId: 'p1',
+          playerBId: 'p2',
+          setResults: [{ winnerId: 'p1' }, { winnerId: 'p2' }],
+          status: 'disputed',
+          refereeRequested: true,
+          refereeRequestedBy: 'p2',
+          contestMeta: { reason: 'Strīds par kauliņa atrašanās vietu pie borta' },
+          confirmations: { p1: false, p2: false },
+          auditTrail: [
+            { id: 'aud-call-1', actor: 'p2', actorRole: 'player', type: 'referee_requested', message: 'Izsaukts tiesnesis pie galda' },
+          ],
+        },
+      ],
+    }
+
+    const currentSets = tournament.matches[0].setResults
+    expect(currentSets).toHaveLength(2)
+
+    // Referee comes to the table, decides existing score 1:1 is correct, and explains reason in audit
+    tournament = forceOverrideResult(tournament, 'ref-call-test-m1', currentSets, {
+      reason: 'referee_decision',
+      note: 'Tiesnesis pārbaudīja kauliņa stāvokli; punkts piešķirts korekti, rezultāts paliek 1:1',
+      editedBy: 'Tiesnesis',
+    })
+
+    const updatedMatch = tournament.matches[0]
+    // Result unchanged
+    expect(updatedMatch.setResults).toHaveLength(2)
+    expect(updatedMatch.setResults[0].winnerId).toBe('p1')
+    expect(updatedMatch.setResults[1].winnerId).toBe('p2')
+
+    // Dispute resolved
+    expect(updatedMatch.refereeRequested).toBe(false)
+    expect(updatedMatch.refereeRequestedBy).toBeNull()
+    expect(updatedMatch.contestMeta).toBeNull()
+    expect(updatedMatch.status).toBe('in_progress')
+
+    // Audit recorded with referee's explanation
+    const lastAudit = updatedMatch.auditTrail[updatedMatch.auditTrail.length - 1]
+    expect(lastAudit.actorRole).toBe('referee')
+    expect(lastAudit.message).toContain('Tiesneša lēmums')
+    expect(lastAudit.message).toContain('Tiesnesis pārbaudīja kauliņa stāvokli; punkts piešķirts korekti, rezultāts paliek 1:1')
+    expect(lastAudit.addedTo).toEqual([])
+    expect(lastAudit.takenFrom).toEqual([])
+  })
+
+  it('can issue player warning simultaneously with referee audit submission', () => {
+    let tournament = {
+      ...initialTournament,
+      matches: [
+        {
+          id: 'ref-warn-m1',
+          round: 4,
+          table: 1,
+          playerAId: 'p1',
+          playerBId: 'p2',
+          setResults: [{ winnerId: 'p1' }],
+          status: 'disputed',
+          refereeRequested: true,
+          auditTrail: [],
+        },
+      ],
+    }
+
+    tournament = forceOverrideResult(tournament, 'ref-warn-m1', [{ winnerId: 'p1' }], {
+      reason: 'referee_decision',
+      note: 'Rezultāts apstiprināts, spēlētājam izteikts brīdinājums par aizkavēšanu',
+      editedBy: 'Tiesnesis',
+      warning: {
+        playerId: 'p2',
+        reason: 'Aizkavēta spēle',
+        note: 'Pārsniegts sitiena laika limits',
+      },
+    })
+
+    const match = tournament.matches[0]
+    expect(match.warnings).toHaveLength(1)
+    expect(match.warnings[0].playerId).toBe('p2')
+    expect(match.warnings[0].reason).toBe('Aizkavēta spēle')
+    expect(getPlayerWarnings(tournament, 'p2')).toBe(1)
   })
 })

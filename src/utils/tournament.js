@@ -63,6 +63,7 @@ export function getOverrideAuditLabel(match) {
 
   const labels = {
     referee_decision: 'Tiesneša lēmums',
+    player_warning: 'Brīdinājums spēlētājam',
     score_entry_error: 'Nepareizi ievadīts rezultāts',
     accidental_tap: 'Nejaušs pieskāriens',
     duplicate_entry: 'Dubulta ievade',
@@ -458,8 +459,67 @@ export function resetMatchInvestigation(tournament, matchId) {
   })
 }
 
+export function issuePlayerWarning(tournament, matchId, playerId, { reason = 'Noteikumu pārkāpums', note = '', issuedBy = 'Tiesnesis' } = {}) {
+  const match = tournament.matches.find((m) => m.id === matchId)
+  if (!match) return tournament
+
+  const player = tournament.players.find((p) => p.id === playerId)
+  const playerName = player?.name || playerId
+  const timestamp = new Date().toLocaleTimeString('lv-LV', { hour: '2-digit', minute: '2-digit' })
+
+  const warningEntry = {
+    id: `warn-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+    playerId,
+    playerName,
+    reason,
+    note: typeof note === 'string' ? note.trim() : '',
+    timestamp,
+    issuedBy,
+  }
+
+  const auditEntry = {
+    actor: issuedBy,
+    actorRole: 'referee',
+    type: 'player_warning',
+    message: `Brīdinājums spēlētājam ${playerName}: ${reason}${warningEntry.note ? ` ("${warningEntry.note}")` : ''}`,
+    details: warningEntry,
+    timestamp,
+  }
+
+  return {
+    ...tournament,
+    players: tournament.players.map((p) => {
+      if (p.id !== playerId) return p
+      return {
+        ...p,
+        warnings: (p.warnings || 0) + 1,
+        warningHistory: [...(p.warningHistory || []), { ...warningEntry, matchId, table: match.table }],
+      }
+    }),
+    matches: tournament.matches.map((m) => {
+      if (m.id !== matchId) return m
+      return {
+        ...m,
+        warnings: [...(m.warnings || []), warningEntry],
+        auditTrail: recordAuditEntry(m, auditEntry),
+      }
+    }),
+  }
+}
+
+export function getMatchWarnings(match, playerId = null) {
+  if (!match || !Array.isArray(match.warnings)) return []
+  if (!playerId) return match.warnings
+  return match.warnings.filter((w) => w.playerId === playerId)
+}
+
+export function getPlayerWarnings(tournament, playerId) {
+  const player = tournament.players?.find((p) => p.id === playerId)
+  return player?.warnings || 0
+}
+
 export function forceOverrideResult(tournament, matchId, setResults, metadata = {}) {
-  return updateMatch(tournament, matchId, (match) => {
+  let updatedTournament = updateMatch(tournament, matchId, (match) => {
     const allowedWinnerIds = new Set([match.playerAId, match.playerBId])
     const submittedSetResults = Array.isArray(setResults)
       ? setResults
@@ -476,6 +536,21 @@ export function forceOverrideResult(tournament, matchId, setResults, metadata = 
 
     return buildOverriddenMatch(match, nextSetResults, metadata, tournament.maxSetsPerMatch)
   })
+
+  if (metadata.warning && metadata.warning.playerId) {
+    updatedTournament = issuePlayerWarning(
+      updatedTournament,
+      matchId,
+      metadata.warning.playerId,
+      {
+        reason: metadata.warning.reason || 'Noteikumu pārkāpums',
+        note: metadata.warning.note || metadata.note || '',
+        issuedBy: metadata.editedBy || 'Tiesnesis',
+      }
+    )
+  }
+
+  return updatedTournament
 }
 
 export function swapMatchTables(tournament, sourceMatchId, targetMatchId) {
@@ -768,11 +843,20 @@ function buildOverriddenMatch(match, setResults, metadata, maxSetsPerMatch = mat
     editedAt: metadata.editedAt || 'Tikko',
   }
 
+  const isScoreUnchanged = deltaA === 0 && deltaB === 0
+  const isReferee = metadata.reason === 'referee_decision' || metadata.actorRole === 'referee'
+
+  const message = isScoreUnchanged
+    ? isReferee
+      ? `Tiesneša lēmums: ${metadata.note ? `"${metadata.note}"` : 'Rezultāts atstāts nemainīts'}`
+      : `${getOverrideAuditLabel({ overrideMeta: metadata })}: ${metadata.note ? `"${metadata.note}"` : 'Rezultāts nemainīts'}`
+    : `Organizatora labojums: ${getOverrideAuditLabel({ overrideMeta: metadata })}${metadata.note ? ` ("${metadata.note}")` : ''}`
+
   const overrideAudit = {
-    actor: metadata.editedBy || 'Organizators',
-    actorRole: 'organizer',
-    type: 'organizer_override',
-    message: `Organizatora labojums: ${getOverrideAuditLabel({ overrideMeta: metadata })}${metadata.note ? ` ("${metadata.note}")` : ''}`,
+    actor: metadata.editedBy || (isReferee ? 'Tiesnesis' : 'Organizators'),
+    actorRole: metadata.actorRole || (isReferee ? 'referee' : 'organizer'),
+    type: metadata.type || 'organizer_override',
+    message,
     addedTo,
     takenFrom,
     details: auditEntry,
@@ -791,6 +875,7 @@ function buildOverriddenMatch(match, setResults, metadata, maxSetsPerMatch = mat
       : resetConfirmations(match),
     refereeRequested: false,
     refereeRequestedBy: null,
+    contestMeta: null,
     status: isFinalResult ? 'completed' : setResults.length > 0 ? 'in_progress' : 'scheduled',
     auditTrail,
     overrideMeta: {

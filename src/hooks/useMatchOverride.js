@@ -12,6 +12,9 @@ export function useMatchOverride(match, tournament) {
   const [setResults, setSetResults] = useState([])
   const [reason, setReason] = useState('')
   const [note, setNote] = useState('')
+  const [warnedPlayerId, setWarnedPlayerId] = useState('')
+  const [warningReason, setWarningReason] = useState('Noteikumu pārkāpums')
+  const [warningNote, setWarningNote] = useState('')
 
   const maxSets = tournament?.maxSetsPerMatch ?? 9
   const players = tournament?.players ?? []
@@ -26,11 +29,17 @@ export function useMatchOverride(match, tournament) {
       setSetResults([])
       setReason('')
       setNote('')
+      setWarnedPlayerId('')
+      setWarningReason('Noteikumu pārkāpums')
+      setWarningNote('')
       return
     }
     setSetResults(match.setResults ? match.setResults.map((set) => ({ winnerId: set.winnerId })) : [])
     setReason(match.overrideMeta?.reason || '')
     setNote(match.overrideMeta?.note || '')
+    setWarnedPlayerId('')
+    setWarningReason('Noteikumu pārkāpums')
+    setWarningNote('')
   }, [match])
 
   useEffect(() => {
@@ -80,7 +89,7 @@ export function useMatchOverride(match, tournament) {
     return setResults.some((set, index) => set.winnerId !== matchSets[index]?.winnerId)
   }, [match, setResults])
 
-  const canSubmit = hasResultChanged && Boolean(reason)
+  const canSubmit = Boolean(reason)
 
   const updateSetWinner = useCallback((index, winnerId) => {
     setSetResults((prev) =>
@@ -105,6 +114,12 @@ export function useMatchOverride(match, tournament) {
     setReason,
     note,
     setNote,
+    warnedPlayerId,
+    setWarnedPlayerId,
+    warningReason,
+    setWarningReason,
+    warningNote,
+    setWarningNote,
     winnerOptions,
     currentScore,
     draftScore,
