@@ -30,14 +30,14 @@ export function PlayerView({
 
   if (!player) {
     return (
-      <main className="mx-auto flex min-h-[calc(100vh-80px)] max-w-md items-center px-4 py-8">
+      <main className="mx-auto flex min-h-screen max-w-md items-center px-4 py-8">
         <form
           onSubmit={(event) => {
             event.preventDefault()
             const ok = onCheckIn(code)
             setError(ok ? '' : 'Reģistrācijas kods netika atrasts. Lūdzu pārbaudiet kodu.')
           }}
-          className="w-full rounded-3xl border border-black/[0.08] bg-white p-7 shadow-apple-modal"
+          className="w-full rounded-3xl border border-white/80 bg-white/65 p-7 shadow-[inset_0_1px_2px_rgba(255,255,255,1),0_20px_50px_rgba(0,0,0,0.08)] backdrop-blur-3xl"
         >
           <div className="mb-6 flex items-center gap-4">
             <div className="flex size-14 items-center justify-center rounded-2xl bg-apple-blue text-white shadow-sm">
@@ -83,13 +83,13 @@ export function PlayerView({
   }
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-80px)] max-w-lg px-4 py-6">
+    <main className="mx-auto min-h-screen max-w-lg px-4 py-4 sm:py-6">
       {/* iOS style Top Bar Card */}
-      <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-black/[0.06] bg-white p-3.5 shadow-sm">
+      <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-white/80 bg-white/65 p-3.5 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.95),0_8px_24px_rgba(0,0,0,0.04)] backdrop-blur-xl">
         <button
           type="button"
           onClick={onSignOut}
-          className="flex min-h-[44px] items-center gap-1.5 rounded-xl border border-black/[0.08] bg-black/[0.03] px-3.5 text-xs font-medium text-[#1C1C1E] transition hover:bg-black/[0.06] active:bg-black/[0.1]"
+          className="flex min-h-[44px] items-center gap-1.5 rounded-xl border border-white/80 bg-white/70 px-3.5 text-xs font-medium text-[#1C1C1E] transition hover:bg-white/90 active:bg-white"
         >
           <LogOut size={14} className="text-apple-secondary" />
           Iziet
@@ -109,7 +109,7 @@ export function PlayerView({
       </div>
 
       {/* Tournament location pill */}
-      <div className="mb-4 flex items-center justify-between rounded-xl border border-black/[0.06] bg-white/70 px-4 py-2.5 text-xs text-[#636366] backdrop-blur shadow-sm">
+      <div className="mb-4 flex items-center justify-between rounded-xl border border-white/70 bg-white/50 px-4 py-2.5 text-xs text-[#636366] backdrop-blur-md shadow-xs">
         <div className="flex items-center gap-2 truncate">
           <MapPin size={15} className="shrink-0 text-apple-blue" />
           <span className="truncate font-medium">{tournament.name}</span>
@@ -136,7 +136,7 @@ export function PlayerView({
           onCancelReferee={onCancelReferee}
         />
       ) : (
-        <section className="rounded-2xl border border-black/[0.06] bg-white p-8 text-center shadow-sm">
+        <section className="rounded-2xl border border-white/80 bg-white/60 p-8 text-center shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.95),0_12px_36px_rgba(0,0,0,0.04)] backdrop-blur-2xl">
           <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-black/[0.04] text-apple-secondary">
             <User size={28} />
           </div>

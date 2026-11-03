@@ -69,7 +69,8 @@ export default function App() {
   return (
     <AppShell
       title={screen === 'home' ? 'Turnīra izvēlne' : 'Novusa turnīra vadība'}
-      showBack={screen !== 'home'}
+      showBack={screen !== 'home' && screen !== 'player'}
+      hideHeader={screen === 'home' || screen === 'player'}
       onBack={() => {
         setOrganizerView('dashboard')
         setScreen('home')
@@ -80,11 +81,18 @@ export default function App() {
           tournament={tournament}
           selectedPlayer={selectedPlayer}
           hasPlayerSession={Boolean(selectedPlayer)}
+          organizerAuthenticated={organizerAuthenticated}
+          onOrganizerLogin={({ email, password }) => {
+            setOrganizerAuthenticated(true)
+            setOrganizerView('dashboard')
+            setScreen('organizer')
+          }}
           onOrganizer={() => {
             setOrganizerView('dashboard')
             setScreen(organizerAuthenticated ? 'organizer' : 'organizer-login')
           }}
           onPlayer={() => setScreen('player')}
+          onPlayerCheckIn={handleCheckIn}
         />
       ) : null}
 
@@ -158,7 +166,7 @@ function OrganizerLogin({ onSubmit }) {
           event.preventDefault()
           onSubmit({ email, password })
         }}
-        className="w-full rounded-2xl border border-black/[0.08] bg-white p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
+        className="w-full rounded-2xl border border-white/80 bg-white/65 p-6 sm:p-8 shadow-[inset_0_1px_2px_rgba(255,255,255,1),0_20px_50px_rgba(0,0,0,0.08)] backdrop-blur-3xl"
       >
         <div className="mb-6">
           <span className="inline-flex items-center rounded-full bg-apple-blue/10 px-2.5 py-0.5 text-xs font-semibold tracking-wide text-apple-blue">

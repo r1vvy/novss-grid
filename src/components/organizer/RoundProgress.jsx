@@ -8,7 +8,7 @@ export function RoundProgress({ tournament, canGenerate, onGenerate, embedded = 
   const percent = tournament.totalRounds > 0 ? Math.min(100, (tournament.currentRound / tournament.totalRounds) * 100) : 0
 
   return (
-    <section className={embedded ? 'px-5 py-4' : 'rounded-2xl border border-black/[0.08] bg-white p-5 shadow-apple-card'}>
+    <section className={embedded ? 'px-5 py-4' : 'rounded-2xl border border-white/80 bg-white/60 p-5 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.95),0_12px_36px_rgba(0,0,0,0.04)] backdrop-blur-2xl'}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2.5 text-xs text-[#636366]">
           <div className={`flex size-7 items-center justify-center rounded-lg shrink-0 ${isComplete ? 'bg-apple-green/15 text-apple-green' : 'bg-apple-blue/10 text-apple-blue'}`}>

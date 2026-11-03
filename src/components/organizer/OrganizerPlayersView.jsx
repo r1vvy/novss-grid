@@ -28,7 +28,7 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
 
   return (
     <main className="mx-auto max-w-[1700px] space-y-5 px-4 py-6">
-      <header className="rounded-2xl border border-black/[0.08] bg-white p-5 sm:p-6 shadow-apple-card">
+      <header className="rounded-2xl border border-white/80 bg-white/60 p-5 sm:p-6 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.95),0_12px_36px_rgba(0,0,0,0.04)] backdrop-blur-2xl">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex items-center gap-2 text-xs font-medium text-[#8E8E93]">
@@ -44,7 +44,7 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-black/[0.08] bg-black/[0.03] px-3.5 text-xs font-semibold text-[#1C1C1E] shadow-apple-subtle transition hover:bg-black/[0.06] active:scale-[0.98]"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-white/80 bg-white/70 backdrop-blur-md px-3.5 text-xs font-semibold text-[#1C1C1E] shadow-[inset_0_1px_1px_rgba(255,255,255,0.8),0_2px_8px_rgba(0,0,0,0.03)] transition hover:bg-white/90 active:scale-[0.98]"
             >
               <ChevronLeft size={16} strokeWidth={2.3} />
               Atpakaļ uz vadības paneli
@@ -58,7 +58,7 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
       </header>
 
       {/* Apple Spotlight Style Search Field */}
-      <section className="rounded-2xl border border-black/[0.08] bg-white p-4 shadow-apple-card">
+      <section className="rounded-2xl border border-white/80 bg-white/60 p-4 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.95),0_8px_24px_rgba(0,0,0,0.03)] backdrop-blur-2xl">
         <div className="relative">
           <Search size={16} strokeWidth={2.2} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-apple-secondary" />
           <input
@@ -66,7 +66,7 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Meklēt pēc vārda vai pārstāvniecības..."
-            className="min-h-[44px] w-full rounded-xl border border-black/[0.08] bg-[#F2F2F7] pl-10 pr-12 text-sm font-medium text-[#1C1C1E] transition focus:bg-white focus:border-apple-blue focus:ring-4 focus:ring-apple-blue/20"
+            className="min-h-[44px] w-full rounded-xl border border-white/80 bg-white/50 backdrop-blur-md pl-10 pr-12 text-sm font-medium text-[#1C1C1E] transition focus:bg-white focus:border-apple-blue focus:ring-4 focus:ring-apple-blue/20"
           />
           {searchQuery && (
             <button
@@ -82,7 +82,7 @@ export function OrganizerPlayersView({ tournament, onBack, onSavePlayer }) {
       </section>
 
       {/* Players List Table */}
-      <section className="overflow-hidden rounded-2xl border border-black/[0.08] bg-white shadow-apple-card">
+      <section className="overflow-hidden rounded-2xl border border-white/80 bg-white/60 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.95),0_12px_36px_rgba(0,0,0,0.04)] backdrop-blur-2xl">
         <div className="border-b border-black/[0.06] px-5 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-bold text-[#1C1C1E]">
             <SquarePen size={16} className="text-apple-blue" strokeWidth={2.3} />
