@@ -93,5 +93,57 @@ describe('MatchCard Organizer Audit Trail', () => {
     expect(screen.getAllByText('Anna Kalniņa').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Jānis Bērziņš').length).toBeGreaterThan(0)
   })
+
+  it('displays warning badge next to player and allows issuing warning via onOpenWarning', () => {
+    const handleOpenWarning = vi.fn()
+    const match = {
+      id: 'm-warn',
+      table: 3,
+      round: 1,
+      playerAId: 'p1',
+      playerBId: 'p2',
+      status: 'in_progress',
+      setResults: [{ winnerId: 'p1' }],
+      warnings: [
+        { id: 'w1', playerId: 'p1', reason: 'Aizkavēta spēle' },
+      ],
+      auditTrail: [
+        {
+          id: 'aud-w',
+          timestamp: '14:40',
+          actor: 'Tiesnesis',
+          actorRole: 'referee',
+          type: 'player_warning',
+          message: 'Brīdinājums spēlētājam Anna Kalniņa: Aizkavēta spēle',
+        },
+      ],
+    }
+
+    render(
+      <MatchCard
+        tournament={mockTournament}
+        match={match}
+        onClearAlert={vi.fn()}
+        onMarkInvestigating={vi.fn()}
+        onOpenOverride={vi.fn()}
+        onOpenWarning={handleOpenWarning}
+      />
+    )
+
+    // Player line has warning badge
+    expect(screen.getByText('1 brīdinājums')).toBeInTheDocument()
+
+    // Warning action button
+    const warnBtn = screen.getByRole('button', { name: /Brīdinājums/i })
+    expect(warnBtn).toBeInTheDocument()
+    fireEvent.click(warnBtn)
+    expect(handleOpenWarning).toHaveBeenCalledWith(match)
+
+    // Expand audit
+    const auditBtn = screen.getByRole('button', { name: /Pārslēgt audita žurnālu/i })
+    fireEvent.click(auditBtn)
+    expect(screen.getByText('⚠️ Brīdinājums')).toBeInTheDocument()
+    expect(screen.getByText(/Brīdinājums spēlētājam Anna Kalniņa: Aizkavēta spēle/i)).toBeInTheDocument()
+  })
 })
 

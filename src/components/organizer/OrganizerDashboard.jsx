@@ -4,6 +4,7 @@ import { AlertRail } from './AlertRail'
 import { CompactLegend, TableGrid } from './TableGrid'
 import { RoundProgress } from './RoundProgress'
 import { TournamentHeader } from './TournamentHeader'
+import { WarningModal } from './WarningModal'
 import { useModalDismiss } from '../../hooks/useModalDismiss'
 import { useMatchOverride } from '../../hooks/useMatchOverride'
 import { useStandingsPagination } from '../../hooks/useStandingsPagination'
@@ -24,6 +25,7 @@ export function OrganizerDashboard({
   onMarkInvestigating,
   onResetInvestigation,
   onForceOverride,
+  onIssueWarning,
   onSwapTables,
   onGenerateRound,
   onOpenPlayers,
@@ -33,6 +35,7 @@ export function OrganizerDashboard({
   const [sortBy, setSortBy] = useState('table')
   const [viewMode, setViewMode] = useState('cards')
   const [overrideMatch, setOverrideMatch] = useState(null)
+  const [warningMatch, setWarningMatch] = useState(null)
   const [setup, setSetup] = useState({
     name: tournament.name,
     format: tournament.format || 'target_wins',
@@ -89,6 +92,7 @@ export function OrganizerDashboard({
           onMarkInvestigating={onMarkInvestigating}
           onResetInvestigation={onResetInvestigation}
           onOpenOverride={setOverrideMatch}
+          onOpenWarning={setWarningMatch}
           onSwapTables={onSwapTables}
           titleActions={(
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -189,11 +193,12 @@ export function OrganizerDashboard({
           onMarkInvestigating={onMarkInvestigating}
           onResetInvestigation={onResetInvestigation}
           onOpenOverride={setOverrideMatch}
+          onOpenWarning={setWarningMatch}
           onClearAlert={onClearAlert}
         />
 
         {/* Apple Inset Grouped Standings Panel */}
-        <section className="rounded-2xl border border-black/[0.08] bg-white p-4 shadow-apple-card">
+        <section className="rounded-2xl border border-white/80 bg-white/60 p-4 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.95),0_12px_36px_rgba(0,0,0,0.04)] backdrop-blur-2xl">
           <div className="mb-3.5 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-sm font-bold text-[#1C1C1E]">
               <div className="flex size-7 items-center justify-center rounded-lg bg-apple-blue/10 text-apple-blue">
@@ -268,7 +273,7 @@ export function OrganizerDashboard({
           onMouseDown={settingsDismiss.onBackdropClick}
           className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 backdrop-blur-md px-4 py-6"
         >
-          <div className="max-h-[calc(100vh-48px)] w-full max-w-2xl overflow-y-auto rounded-3xl border border-black/[0.08] bg-white p-6 shadow-apple-modal">
+          <div className="max-h-[calc(100vh-48px)] w-full max-w-2xl overflow-y-auto rounded-3xl border border-white/85 bg-white/85 p-6 shadow-[inset_0_1px_2px_rgba(255,255,255,1),0_25px_65px_rgba(0,0,0,0.2)] backdrop-blur-3xl">
             <div className="mb-5 flex items-center justify-between gap-3 border-b border-black/[0.06] pb-4">
               <div className="flex items-center gap-2.5">
                 <div className="flex size-9 items-center justify-center rounded-xl bg-apple-blue/10 text-apple-blue">
@@ -397,6 +402,19 @@ export function OrganizerDashboard({
         </div>
       ) : null}
 
+      {/* Dedicated Warning Modal */}
+      {warningMatch ? (
+        <WarningModal
+          tournament={tournament}
+          match={warningMatch}
+          onClose={() => setWarningMatch(null)}
+          onSubmit={(playerId, warningData) => {
+            onIssueWarning?.(warningMatch.id, playerId, warningData)
+            setWarningMatch(null)
+          }}
+        />
+      ) : null}
+
       {/* Single-Sheet Override Modal with Inlined Audit Reason & Notes */}
       {overrideMatch ? (
         <OverrideModal
@@ -481,6 +499,12 @@ function OverrideModal({
     setReason,
     note,
     setNote,
+    warnedPlayerId,
+    setWarnedPlayerId,
+    warningReason,
+    setWarningReason,
+    warningNote,
+    setWarningNote,
     winnerOptions,
     currentScore,
     draftScore,
@@ -511,11 +535,18 @@ function OverrideModal({
 
   function handleSave() {
     if (!canSubmit) return
+    const warning = warnedPlayerId ? {
+      playerId: warnedPlayerId,
+      reason: warningReason || 'Noteikumu pārkāpums',
+      note: warningNote || note || '',
+    } : null
+
     onSubmit(setResults, {
       reason,
       note,
-      editedBy: 'Organizators',
+      editedBy: 'Tiesnesis',
       editedAt: 'Tikko',
+      warning,
     })
   }
 
@@ -527,7 +558,7 @@ function OverrideModal({
       onMouseDown={modalDismiss.onBackdropClick}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md px-4 py-6"
     >
-      <div className="flex max-h-[calc(100vh-48px)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-black/[0.08] bg-white shadow-apple-modal">
+      <div className="flex max-h-[calc(100vh-48px)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-white/85 bg-white/85 shadow-[inset_0_1px_2px_rgba(255,255,255,1),0_25px_65px_rgba(0,0,0,0.2)] backdrop-blur-3xl">
         {/* Modal Header */}
         <div className="border-b border-black/[0.06] px-6 py-4">
           <div className="flex items-center justify-between gap-4">
@@ -646,6 +677,7 @@ function OverrideModal({
                 >
                   <option value="">Izvēlieties iemeslu</option>
                   <option value="referee_decision">Tiesneša lēmums</option>
+                  <option value="player_warning">Brīdinājums spēlētājam</option>
                   <option value="score_entry_error">Nepareizi ievadīts rezultāts</option>
                   <option value="other">Cits iemesls</option>
                 </select>
@@ -661,6 +693,65 @@ function OverrideModal({
                   placeholder="Īss skaidrojums auditam..."
                 />
               </label>
+            </div>
+          </div>
+
+          {/* Optional Referee Warning to a Player */}
+          <div className="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-apple-card">
+            <div className="pb-3 border-b border-black/[0.06]">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-apple-orange">Disciplinārsods</span>
+              <h4 className="mt-0.5 text-base font-bold text-[#1C1C1E]">Izteikt brīdinājumu spēlētājam (pēc izvēles)</h4>
+              <p className="text-xs text-[#8E8E93]">Ja spēles laikā fiksēts pārkāpums, piešķiriet brīdinājumu spēlētājam.</p>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setWarnedPlayerId('')}
+                  className={`min-h-[44px] rounded-xl border px-3 text-xs font-semibold transition ${
+                    !warnedPlayerId
+                      ? 'border-black/[0.1] bg-black/[0.06] text-[#1C1C1E]'
+                      : 'border-black/[0.06] bg-[#F2F2F7] text-[#8E8E93]'
+                  }`}
+                >
+                  Bez brīdinājuma
+                </button>
+                {winnerOptions.map((player) => (
+                  <button
+                    key={player.id}
+                    type="button"
+                    onClick={() => setWarnedPlayerId(player.id)}
+                    className={`min-h-[44px] rounded-xl border px-3 text-xs font-semibold transition truncate ${
+                      warnedPlayerId === player.id
+                        ? 'border-apple-orange bg-apple-orange/15 text-apple-orange shadow-2xs'
+                        : 'border-black/[0.06] bg-[#F2F2F7] text-[#1C1C1E] hover:bg-black/[0.04]'
+                    }`}
+                  >
+                    ⚠️ {player.name}
+                  </button>
+                ))}
+              </div>
+
+              {warnedPlayerId ? (
+                <div className="pt-2 border-t border-black/[0.06] space-y-2">
+                  <label className="block text-xs font-semibold text-[#636366]">
+                    Pārkāpuma iemesls:
+                    <select
+                      value={warningReason}
+                      onChange={(e) => setWarningReason(e.target.value)}
+                      className="mt-1 min-h-[44px] w-full rounded-xl border border-black/[0.1] bg-[#F2F2F7] px-3.5 text-sm font-medium text-[#1C1C1E] transition focus:bg-white focus:border-apple-orange focus:ring-4 focus:ring-apple-orange/20"
+                    >
+                      <option value="Noteikumu pārkāpums">Noteikumu pārkāpums</option>
+                      <option value="Aizkavēta spēle">Aizkavēta spēle</option>
+                      <option value="Nesportiska rīcība">Nesportiska rīcība</option>
+                      <option value="Nepareizs sitiens">Nepareizs sitiens</option>
+                      <option value="Borta pārkāpums">Borta pārkāpums</option>
+                      <option value="Cits">Cits</option>
+                    </select>
+                  </label>
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -742,10 +833,10 @@ function OverrideModal({
         <div className="border-t border-black/[0.06] bg-white px-6 py-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-xs text-[#8E8E93]">
-              {!hasResultChanged
-                ? 'Veiciet izmaiņas setu sarakstā, lai saglabātu.'
-                : !reason
-                  ? 'Lūdzu izvēlieties audita iemeslu, lai pabeigtu.'
+              {!reason
+                ? 'Lūdzu izvēlieties audita iemeslu, lai pabeigtu.'
+                : !hasResultChanged
+                  ? 'Tiesneša lēmums tiks fiksēts auditā bez rezultāta maiņas.'
                   : isDraftValid
                     ? 'Gala rezultāts ir pabeigts un gatavs apstiprināšanai.'
                     : 'Daļējo rezultātu var saglabāt spēles turpināšanai.'}

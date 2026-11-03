@@ -9,6 +9,7 @@ export function AlertRail({
   onMarkInvestigating,
   onResetInvestigation,
   onOpenOverride,
+  onOpenWarning,
   onClearAlert,
 }) {
   const players = tournament?.players || []
@@ -78,6 +79,13 @@ export function AlertRail({
           </div>
         )}
 
+        {match.warnings?.length > 0 && (
+          <div className="mt-2 flex items-center gap-1.5 rounded-lg border border-apple-orange/20 bg-apple-orange/10 px-2 py-1 text-[11px] font-semibold text-apple-orange">
+            <AlertTriangle size={12} strokeWidth={2.3} />
+            <span>{match.warnings.length} {match.warnings.length === 1 ? 'brīdinājums' : 'brīdinājumi'}</span>
+          </div>
+        )}
+
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {onMarkInvestigating && (
             <button
@@ -87,6 +95,18 @@ export function AlertRail({
             >
               <Search size={14} strokeWidth={2.3} />
               <span>Marķēt kā izmeklē</span>
+            </button>
+          )}
+
+          {onOpenWarning && (
+            <button
+              type="button"
+              onClick={() => onOpenWarning(match)}
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-apple-orange/30 bg-apple-orange/10 px-3 text-xs font-semibold text-apple-orange transition hover:bg-apple-orange/20 active:scale-[0.98]"
+              title="Izteikt brīdinājumu spēlētājam"
+            >
+              <AlertTriangle size={14} strokeWidth={2.3} />
+              <span>Brīdināt</span>
             </button>
           )}
 
@@ -168,6 +188,13 @@ export function AlertRail({
           </div>
         )}
 
+        {match.warnings?.length > 0 && (
+          <div className="mt-2 flex items-center gap-1.5 rounded-lg border border-apple-orange/20 bg-apple-orange/10 px-2 py-1 text-[11px] font-semibold text-apple-orange">
+            <AlertTriangle size={12} strokeWidth={2.3} />
+            <span>{match.warnings.length} {match.warnings.length === 1 ? 'brīdinājums' : 'brīdinājumi'}</span>
+          </div>
+        )}
+
         {investigationAudit?.timestamp && (
           <div className="mt-2 flex items-center gap-1.5 text-[10px] text-[#8E8E93]">
             <Clock size={11} strokeWidth={2.2} />
@@ -176,6 +203,18 @@ export function AlertRail({
         )}
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
+          {onOpenWarning && (
+            <button
+              type="button"
+              onClick={() => onOpenWarning(match)}
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-apple-orange/30 bg-apple-orange/10 px-3 text-xs font-semibold text-apple-orange transition hover:bg-apple-orange/20 active:scale-[0.98]"
+              title="Izteikt brīdinājumu spēlētājam"
+            >
+              <AlertTriangle size={14} strokeWidth={2.3} />
+              <span>Brīdināt</span>
+            </button>
+          )}
+
           {onOpenOverride && (
             <button
               type="button"
@@ -204,7 +243,7 @@ export function AlertRail({
   }
 
   return (
-    <section className="rounded-2xl border border-black/[0.08] bg-white p-4 shadow-apple-card">
+    <section className="rounded-2xl border border-white/80 bg-white/65 p-4 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.95),0_12px_36px_rgba(0,0,0,0.04)] backdrop-blur-2xl">
       <div className="mb-3.5 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <div

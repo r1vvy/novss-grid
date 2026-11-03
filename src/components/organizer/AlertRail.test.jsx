@@ -163,5 +163,29 @@ describe('AlertRail Component', () => {
     expect(screen.getByText('Galds 4')).toBeInTheDocument()
     expect(screen.getByText('Tiek izmeklēts')).toBeInTheDocument()
   })
+
+  it('renders Brīdināt button and triggers onOpenWarning', () => {
+    const handleOpenWarning = vi.fn()
+    const matchWithWarnings = {
+      ...mockDisputedMatch,
+      warnings: [{ id: 'w1', playerId: 'p1', reason: 'Aizkavēta spēle' }],
+    }
+
+    render(
+      <AlertRail
+        tournament={mockTournament}
+        alerts={[matchWithWarnings]}
+        investigations={[]}
+        onOpenWarning={handleOpenWarning}
+      />
+    )
+
+    expect(screen.getByText('1 brīdinājums')).toBeInTheDocument()
+
+    const warnBtn = screen.getByRole('button', { name: /Brīdināt/i })
+    expect(warnBtn).toBeInTheDocument()
+    fireEvent.click(warnBtn)
+    expect(handleOpenWarning).toHaveBeenCalledWith(matchWithWarnings)
+  })
 })
 

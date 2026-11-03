@@ -17,7 +17,7 @@ const statusLabels = {
   completed: 'Pabeigts',
 }
 
-export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating, onOpenOverride, dragProps = {} }) {
+export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating, onOpenOverride, onOpenWarning, dragProps = {} }) {
   const [showAudit, setShowAudit] = useState(false)
   const { playerA, playerB } = getMatchPlayers(match, tournament.players)
   const status = deriveMatchStatus(match, tournament.maxSetsPerMatch)
@@ -25,6 +25,8 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
   const scoreB = getSetScore(match, match.playerBId)
   const perfectA = getMatchPerfectPlays(match, match.playerAId)
   const perfectB = getMatchPerfectPlays(match, match.playerBId)
+  const warningsA = (match.warnings || []).filter((w) => w.playerId === match.playerAId).length
+  const warningsB = (match.warnings || []).filter((w) => w.playerId === match.playerBId).length
   const auditTrail = match.auditTrail || []
   const isDisputed = status === 'disputed'
   const isInvestigating = status === 'investigating'
@@ -42,7 +44,7 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
       : 'border-black/[0.08]'
 
   return (
-    <article className={`rounded-2xl border bg-white p-4 shadow-apple-card transition-all ${cardBorder}`} {...dragProps}>
+    <article className={`rounded-2xl border bg-white/65 hover:bg-white/80 backdrop-blur-xl p-4 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.9),0_10px_28px_rgba(0,0,0,0.04)] transition-all ${cardBorder}`} {...dragProps}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-baseline gap-2">
           <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">Galds</span>
@@ -59,27 +61,38 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
       )}
 
       <div className="mt-3.5 space-y-2.5 rounded-2xl border border-black/[0.04] bg-[#F2F2F7]/60 p-3">
-        <PlayerLine name={playerA?.name || 'TBD'} club={playerA?.representation} score={scoreA} perfectPlays={perfectA} />
+        <PlayerLine name={playerA?.name || 'TBD'} club={playerA?.representation} score={scoreA} perfectPlays={perfectA} warnings={warningsA} />
         <div className="border-t border-black/[0.04]" />
-        <PlayerLine name={playerB?.name || 'TBD'} club={playerB?.representation} score={scoreB} perfectPlays={perfectB} />
+        <PlayerLine name={playerB?.name || 'TBD'} club={playerB?.representation} score={scoreB} perfectPlays={perfectB} warnings={warningsB} />
       </div>
 
-      <div className="mt-3.5 grid gap-2 sm:grid-cols-2">
+      <div className="mt-3.5 flex flex-wrap gap-2">
         {isDisputed ? (
           <button
             type="button"
             onClick={() => onMarkInvestigating(match.id)}
-            className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-apple-orange/30 bg-apple-orange/10 px-3 text-xs font-semibold text-apple-orange transition hover:bg-apple-orange/20 active:scale-[0.98]"
+            className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-apple-orange/30 bg-apple-orange/10 px-3 text-xs font-semibold text-apple-orange transition hover:bg-apple-orange/20 active:scale-[0.98]"
           >
             <Search size={14} strokeWidth={2.3} />
             <span>Marķēt kā izmeklē</span>
+          </button>
+        ) : null}
+        {onOpenWarning ? (
+          <button
+            type="button"
+            onClick={() => onOpenWarning(match)}
+            className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-apple-orange/30 bg-apple-orange/10 px-3 text-xs font-semibold text-apple-orange transition hover:bg-apple-orange/20 active:scale-[0.98]"
+            title="Izteikt brīdinājumu spēlētājam"
+          >
+            <AlertTriangle size={14} strokeWidth={2.3} />
+            <span>Brīdinājums</span>
           </button>
         ) : null}
         {canEditResult ? (
           <button
             type="button"
             onClick={() => onOpenOverride(match)}
-            className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-apple-blue/20 bg-apple-blue/10 px-3 text-xs font-semibold text-apple-blue transition hover:bg-apple-blue/20 active:scale-[0.98]"
+            className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-apple-blue/20 bg-apple-blue/10 px-3 text-xs font-semibold text-apple-blue transition hover:bg-apple-blue/20 active:scale-[0.98]"
           >
             <Pencil size={14} strokeWidth={2.3} />
             <span>{editLabel}</span>
@@ -136,16 +149,28 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
                 {[...auditTrail].reverse().map((entry) => {
                   const actorName = getAuditActorName(entry.actor, tournament.players)
                   const isPlayer = entry.actorRole === 'player'
+                  const isWarning = entry.type === 'player_warning'
+                  const isReferee = entry.actorRole === 'referee' || isWarning || entry.type === 'referee_decision'
                   return (
                     <div
                       key={entry.id}
-                      className="rounded-lg border border-black/[0.04] bg-white p-2 text-[11px] shadow-2xs"
+                      className={`rounded-lg border p-2 text-[11px] shadow-2xs ${
+                        isWarning
+                          ? 'border-apple-orange/30 bg-apple-orange/[0.06]'
+                          : 'border-black/[0.04] bg-white'
+                      }`}
                     >
                       <div className="flex items-center justify-between gap-1 text-[#8E8E93]">
                         <span className={`inline-block rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
-                          isPlayer ? 'bg-apple-blue/10 text-apple-blue' : 'bg-black/[0.06] text-[#1C1C1E]'
+                          isWarning
+                            ? 'bg-apple-orange/20 text-apple-orange'
+                            : isReferee
+                              ? 'bg-apple-purple/15 text-apple-purple'
+                              : isPlayer
+                                ? 'bg-apple-blue/10 text-apple-blue'
+                                : 'bg-black/[0.06] text-[#1C1C1E]'
                         }`}>
-                          {actorName}
+                          {isWarning ? '⚠️ Brīdinājums' : isReferee && actorName === 'referee' ? 'Tiesnesis' : actorName}
                         </span>
                         <span className="font-mono text-[10px] tabular-nums shrink-0">{entry.timestamp}</span>
                       </div>
@@ -200,7 +225,7 @@ function getEditLabel(status) {
   return 'Koriģēt rezultātu'
 }
 
-function PlayerLine({ name, club, score, perfectPlays = 0 }) {
+function PlayerLine({ name, club, score, perfectPlays = 0, warnings = 0 }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="min-w-0">
@@ -209,6 +234,15 @@ function PlayerLine({ name, club, score, perfectPlays = 0 }) {
           {perfectPlays > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-700">
               <Star size={10} className="fill-amber-500 text-amber-500" /> {perfectPlays}
+            </span>
+          )}
+          {warnings > 0 && (
+            <span
+              title={`Spēlētājam izteikts ${warnings} brīdinājums(-i)`}
+              className="inline-flex items-center gap-1 rounded-full border border-apple-orange/30 bg-apple-orange/15 px-2 py-0.5 text-[10px] font-bold text-apple-orange"
+            >
+              <AlertTriangle size={10} className="stroke-apple-orange" />
+              <span>{warnings} {warnings === 1 ? 'brīdinājums' : 'brīdinājumi'}</span>
             </span>
           )}
         </div>

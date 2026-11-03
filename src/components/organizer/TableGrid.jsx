@@ -30,20 +30,21 @@ export function TableGrid({
   onMarkInvestigating,
   onResetInvestigation,
   onOpenOverride,
+  onOpenWarning,
   onSwapTables,
   headerContent = null,
   titleActions = null,
 }) {
   if (matches.length === 0) {
     return (
-      <section className="rounded-2xl border border-dashed border-black/[0.1] bg-white p-8 text-center text-sm text-[#8E8E93] shadow-sm">
+      <section className="rounded-2xl border border-dashed border-white/80 bg-white/50 p-8 text-center text-sm text-[#8E8E93] shadow-sm backdrop-blur-xl">
         Nav aktīvu kārtas galdu. Reģistrācijas turnīrs ir sagatavots.
       </section>
     )
   }
 
   return (
-    <section className="w-full overflow-hidden rounded-2xl border border-black/[0.08] bg-white shadow-apple-card">
+    <section className="w-full overflow-hidden rounded-2xl border border-white/80 bg-white/60 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.95),0_12px_36px_rgba(0,0,0,0.04)] backdrop-blur-2xl">
       <div className="flex flex-col gap-3 border-b border-black/[0.06] px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <span className="size-2 rounded-full bg-apple-blue" />
@@ -52,14 +53,14 @@ export function TableGrid({
       </div>
 
       {headerContent || titleActions ? (
-        <div className="border-b border-black/[0.06] bg-[#F2F2F7]/30">
+        <div className="border-b border-black/[0.06] bg-white/30 backdrop-blur-md">
           {headerContent}
           {titleActions ? <div className="px-5 py-3">{titleActions}</div> : null}
         </div>
       ) : null}
 
       {viewMode === 'cards' ? (
-        <div className="p-4 sm:p-5 bg-[#F2F2F7]/40">
+        <div className="p-4 sm:p-5 bg-white/20 backdrop-blur-md">
           <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
             {matches.map((match) => (
               <MatchCard
@@ -69,6 +70,7 @@ export function TableGrid({
                 onClearAlert={onClearAlert}
                 onMarkInvestigating={onMarkInvestigating}
                 onOpenOverride={onOpenOverride}
+                onOpenWarning={onOpenWarning}
                 dragProps={buildDragProps(match.id, onSwapTables, canReassignTables)}
               />
             ))}

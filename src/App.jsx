@@ -16,6 +16,7 @@ import {
   createRegistrationTournament,
   forceOverrideResult,
   getPlayerById,
+  issuePlayerWarning,
   markMatchInvestigating,
   resetMatchInvestigation,
   removeSetResult,
@@ -106,6 +107,7 @@ export default function App() {
             onMarkInvestigating={(matchId) => setTournament((current) => markMatchInvestigating(current, matchId))}
             onResetInvestigation={(matchId) => setTournament((current) => resetMatchInvestigation(current, matchId))}
             onForceOverride={(matchId, setResults, metadata) => setTournament((current) => forceOverrideResult(current, matchId, setResults, metadata))}
+            onIssueWarning={(matchId, playerId, warningData) => setTournament((current) => issuePlayerWarning(current, matchId, playerId, warningData))}
             onSwapTables={(sourceMatchId, targetMatchId) => setTournament((current) => swapMatchTables(current, sourceMatchId, targetMatchId))}
             onGenerateRound={(nextTournament) => setTournament(nextTournament)}
             onOpenPlayers={() => setOrganizerView('players')}

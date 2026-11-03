@@ -94,5 +94,46 @@ describe('PlayerMatchCard Integration & Workflows', () => {
 
     expect(onContest).toHaveBeenCalledWith('m2', 'p2', '')
   })
+
+  it('renders prominent warning banner when player has received a referee warning', () => {
+    const match = {
+      id: 'm-warn-test',
+      table: 2,
+      round: 2,
+      playerAId: 'p1',
+      playerBId: 'p2',
+      status: 'in_progress',
+      setResults: [{ winnerId: 'p1' }],
+      warnings: [
+        {
+          id: 'w10',
+          playerId: 'p1',
+          reason: 'Aizkavēta spēle',
+          note: 'Pārsniegts 30 sekunžu sitiena sagatavošanās laiks',
+          timestamp: '15:10',
+        },
+      ],
+      arrivals: { p1: true, p2: true },
+      ready: { p1: true, p2: true },
+    }
+
+    render(
+      <PlayerMatchCard
+        tournament={mockTournament}
+        match={match}
+        player={{ id: 'p1', name: 'Anna Kalniņa' }}
+        onScoreAdd={vi.fn()}
+        onScoreRemove={vi.fn()}
+        onCallReferee={vi.fn()}
+        onCancelReferee={vi.fn()}
+      />
+    )
+
+    // Player sees their warning banner
+    expect(screen.getByText('Tiesneša brīdinājums (1)')).toBeInTheDocument()
+    expect(screen.getByText('Aizkavēta spēle')).toBeInTheDocument()
+    expect(screen.getByText('Pārsniegts 30 sekunžu sitiena sagatavošanās laiks')).toBeInTheDocument()
+    expect(screen.getByText('15:10')).toBeInTheDocument()
+  })
 })
 

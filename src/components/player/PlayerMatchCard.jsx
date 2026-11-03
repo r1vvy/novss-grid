@@ -16,6 +16,7 @@ import {
   deriveMatchStatus,
   getMatchPerfectPlays,
   getMatchPlayers,
+  getMatchWarnings,
   getOpponentId,
   getSetScore,
 } from '../../utils/tournament'
@@ -62,9 +63,10 @@ export function PlayerMatchCard({
   const playerArrived = Boolean(match.arrivals?.[player.id])
   const opponentArrived = Boolean(match.arrivals?.[opponentId])
   const playerReady = Boolean(match.ready?.[player.id])
+  const myWarnings = getMatchWarnings(match, player.id)
 
   return (
-    <section className="rounded-3xl border border-black/[0.08] bg-white p-5 sm:p-6 shadow-apple-card">
+    <section className="rounded-3xl border border-white/80 bg-white/65 p-5 sm:p-6 shadow-[inset_0_1px_2px_rgba(255,255,255,1),0_16px_45px_rgba(0,0,0,0.06)] backdrop-blur-2xl">
       {/* Table & Status Header */}
       <div className="flex items-center justify-between gap-3 pb-4 border-b border-black/[0.06]">
         <div className="flex items-center gap-3">
@@ -82,6 +84,27 @@ export function PlayerMatchCard({
 
         <StatusBadge status={status} />
       </div>
+
+      {/* Player Warning Alert Banner */}
+      {myWarnings.length > 0 && (
+        <div className="mt-4 rounded-2xl border border-apple-orange/35 bg-apple-orange/10 p-4 text-apple-orange shadow-2xs">
+          <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-apple-orange">
+            <AlertTriangle size={16} strokeWidth={2.4} />
+            <span>Tiesneša brīdinājums ({myWarnings.length})</span>
+          </div>
+          <div className="mt-2 space-y-1.5">
+            {myWarnings.map((w) => (
+              <div key={w.id} className="rounded-xl border border-apple-orange/20 bg-white/80 p-2.5 text-xs text-[#1C1C1E]">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-apple-orange">{w.reason}</span>
+                  <span className="font-mono text-[10px] text-[#8E8E93]">{w.timestamp}</span>
+                </div>
+                {w.note ? <p className="mt-1 text-[11px] text-[#636366]">{w.note}</p> : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Arrival & Ready Banner for Scheduled Matches */}
       {status === 'scheduled' && (
