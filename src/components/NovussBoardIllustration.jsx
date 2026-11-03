@@ -1,221 +1,198 @@
 import React from 'react'
 
-export function NovussBoardIllustration({ className = 'w-full max-w-[280px] sm:max-w-[320px]' }) {
+export function NovussBoardIllustration({
+  className = 'w-full max-w-[360px] sm:max-w-[440px]',
+  children,
+}) {
+  // Puck starting positions (4 on each side of the center divider, lined up against cushion)
+  const topBlackPuckX = [440, 470, 500, 530, 560, 590, 620, 650]
+  const bottomRedPuckX = [440, 470, 500, 530, 560, 590, 620, 650]
+
   return (
     <div className={`relative aspect-square select-none ${className}`}>
       {/* Ambient background glow */}
-      <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-amber-500/20 via-orange-400/15 to-blue-500/15 blur-xl pointer-events-none" />
+      <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-amber-500/20 via-orange-400/15 to-blue-500/15 blur-2xl pointer-events-none" />
 
+      {/* Main SVG of the Novuss Table (explicit z-0) */}
       <svg
-        viewBox="0 0 320 320"
+        viewBox="0 0 1090 1090"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="relative z-10 w-full h-full drop-shadow-[0_12px_32px_rgba(0,0,0,0.12)] transition-transform duration-300 hover:scale-[1.02]"
+        className="relative z-0 w-full h-full drop-shadow-[0_16px_40px_rgba(0,0,0,0.16)] transition-transform duration-300 hover:scale-[1.01]"
         aria-label="Novusa galda vizualizācija"
         role="img"
       >
         <defs>
-          {/* Wood cushion frame gradient */}
+          {/* Cushion Frame Gradient (Cēlkoka apmales) */}
           <linearGradient id="boardFrameGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#78350F" />
-            <stop offset="50%" stopColor="#92400E" />
-            <stop offset="100%" stopColor="#451A03" />
+            <stop offset="0%" stopColor="#672D0B" />
+            <stop offset="30%" stopColor="#853E0F" />
+            <stop offset="70%" stopColor="#9A4E17" />
+            <stop offset="100%" stopColor="#4A1E06" />
           </linearGradient>
 
-          {/* Playing field birch gradient */}
+          {/* Playing Field Birch Plywood Gradient (1000x1000 mm) */}
           <linearGradient id="birchSurfaceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#FFFDF7" />
-            <stop offset="50%" stopColor="#F9F2E3" />
-            <stop offset="100%" stopColor="#EFE4CD" />
+            <stop offset="40%" stopColor="#FAF2E2" />
+            <stop offset="80%" stopColor="#F2E6CD" />
+            <stop offset="100%" stopColor="#E9D9B9" />
           </linearGradient>
 
-          {/* Red puck 3D gradient */}
-          <radialGradient id="redPuckGrad" cx="35%" cy="35%" r="65%">
+          {/* Corner Pocket Deep Hole (Ø 100 mm) */}
+          <radialGradient id="pocketGrad" cx="38%" cy="38%" r="62%">
+            <stop offset="0%" stopColor="#1E293B" />
+            <stop offset="45%" stopColor="#0F172A" />
+            <stop offset="100%" stopColor="#000000" />
+          </radialGradient>
+
+          {/* Red Puck (Ø 30 mm) 3D Radial */}
+          <radialGradient id="redPuckGrad" cx="35%" cy="30%" r="65%">
             <stop offset="0%" stopColor="#FF6B6B" />
-            <stop offset="45%" stopColor="#E11D48" />
-            <stop offset="90%" stopColor="#9F1239" />
+            <stop offset="40%" stopColor="#E11D48" />
+            <stop offset="85%" stopColor="#9F1239" />
             <stop offset="100%" stopColor="#881337" />
           </radialGradient>
 
-          {/* Black puck 3D gradient */}
-          <radialGradient id="blackPuckGrad" cx="35%" cy="35%" r="65%">
+          {/* Black Puck (Ø 30 mm) 3D Radial */}
+          <radialGradient id="blackPuckGrad" cx="35%" cy="30%" r="65%">
             <stop offset="0%" stopColor="#64748B" />
-            <stop offset="45%" stopColor="#1E293B" />
-            <stop offset="90%" stopColor="#0F172A" />
+            <stop offset="40%" stopColor="#334155" />
+            <stop offset="85%" stopColor="#0F172A" />
             <stop offset="100%" stopColor="#020617" />
           </radialGradient>
 
-          {/* Striker (Māte) wood & amber gradient */}
-          <radialGradient id="strikerGrad" cx="35%" cy="35%" r="65%">
-            <stop offset="0%" stopColor="#FEF3C7" />
-            <stop offset="45%" stopColor="#FDE68A" />
-            <stop offset="85%" stopColor="#D97706" />
-            <stop offset="100%" stopColor="#B45309" />
-          </radialGradient>
-
-          {/* Cue stick gradient */}
-          <linearGradient id="cueGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#78350F" />
-            <stop offset="50%" stopColor="#B45309" />
-            <stop offset="90%" stopColor="#FDE68A" />
-            <stop offset="100%" stopColor="#FFFFFF" />
-          </linearGradient>
-
-          {/* Corner pocket deep hole */}
-          <radialGradient id="pocketGrad" cx="40%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="#334155" />
-            <stop offset="50%" stopColor="#0F172A" />
-            <stop offset="100%" stopColor="#020617" />
-          </radialGradient>
-
-          {/* Puck Drop Shadows */}
-          <filter id="shadowPuck" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="1" dy="3" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.25" />
-          </filter>
-          <filter id="shadowStriker" x="-30%" y="-30%" width="160%" height="160%">
-            <feDropShadow dx="2" dy="4" stdDeviation="3.5" floodColor="#000000" floodOpacity="0.3" />
+          {/* Drop Shadows */}
+          <filter id="puckShadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="1" dy="2.5" stdDeviation="2" floodColor="#000000" floodOpacity="0.35" />
           </filter>
         </defs>
 
-        {/* Outer Wooden Cushion Frame (Borts) */}
+        {/* 1. Outer Cushion Frame (45 mm apmale, 1090 × 1090 mm kopējais izmērs) */}
         <rect
-          x="12"
-          y="12"
-          width="296"
-          height="296"
-          rx="22"
-          fill="url(#boardFrameGrad)"
-          stroke="#451A03"
-          strokeWidth="3"
-        />
-
-        {/* Inner Wooden Cushion Border Highlight */}
-        <rect
-          x="16"
-          y="16"
-          width="288"
-          height="288"
+          x="0"
+          y="0"
+          width="1090"
+          height="1090"
           rx="18"
-          fill="none"
-          stroke="#B45309"
-          strokeWidth="1"
-          opacity="0.4"
+          fill="url(#boardFrameGrad)"
+          stroke="#381503"
+          strokeWidth="4"
         />
 
-        {/* Playing Field (Birch plywood surface) */}
+        {/* Inner Cushion Chamfer Highlight */}
         <rect
-          x="28"
-          y="28"
-          width="264"
-          height="264"
-          rx="12"
-          fill="url(#birchSurfaceGrad)"
-          stroke="#78350F"
+          x="6"
+          y="6"
+          width="1078"
+          height="1078"
+          rx="14"
+          fill="none"
+          stroke="#C27838"
           strokeWidth="1.5"
-        />
-
-        {/* Subdued wood grain lines */}
-        <path
-          d="M30 75 Q160 80 290 75 M30 145 Q160 148 290 145 M30 215 Q160 212 290 215"
-          stroke="#D97706"
-          strokeWidth="0.5"
-          opacity="0.25"
-          fill="none"
-        />
-
-        {/* Zone & Baseline Markings (10 cm zone guidelines) */}
-        <rect
-          x="54"
-          y="54"
-          width="212"
-          height="212"
-          rx="6"
-          fill="none"
-          stroke="#B45309"
-          strokeWidth="1"
           opacity="0.35"
         />
 
-        {/* Quadrant Crosshair lines */}
-        <line x1="160" y1="28" x2="160" y2="292" stroke="#B45309" strokeWidth="1" opacity="0.3" />
-        <line x1="28" y1="160" x2="292" y2="160" stroke="#B45309" strokeWidth="1" opacity="0.3" />
+        {/* 2. Playing Surface (Spēles virsma: 1000 × 1000 mm) */}
+        <rect
+          x="45"
+          y="45"
+          width="1000"
+          height="1000"
+          rx="4"
+          fill="url(#birchSurfaceGrad)"
+          stroke="#78350F"
+          strokeWidth="2"
+        />
 
-        {/* Center Target Rings (Centra aplis) */}
-        <circle cx="160" cy="160" r="44" stroke="#B45309" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.5" />
-        <circle cx="160" cy="160" r="22" stroke="#B45309" strokeWidth="1.5" opacity="0.5" />
-        <circle cx="160" cy="160" r="4" fill="#B45309" opacity="0.75" />
+        {/* Realistic Birch Grain Texture (subtle horizontal lines) */}
+        <path
+          d="M50 120 Q545 135 1040 120 M50 240 Q545 255 1040 240 M50 360 Q545 345 1040 360 M50 480 Q545 495 1040 480 M50 600 Q545 585 1040 600 M50 720 Q545 735 1040 720 M50 840 Q545 825 1040 840 M50 960 Q545 975 1040 960"
+          stroke="#C2853E"
+          strokeWidth="1"
+          opacity="0.22"
+          fill="none"
+        />
 
-        {/* 4 Corner Pockets (Bedrītes) */}
-        {/* Top-Left */}
-        <circle cx="44" cy="44" r="15" fill="url(#pocketGrad)" stroke="#1E293B" strokeWidth="1.5" />
-        {/* Top-Right */}
-        <circle cx="276" cy="44" r="15" fill="url(#pocketGrad)" stroke="#1E293B" strokeWidth="1.5" />
-        {/* Bottom-Left */}
-        <circle cx="44" cy="276" r="15" fill="url(#pocketGrad)" stroke="#1E293B" strokeWidth="1.5" />
-        {/* Bottom-Right */}
-        <circle cx="276" cy="276" r="15" fill="url(#pocketGrad)" stroke="#1E293B" strokeWidth="1.5" />
+        {/* 3. Official Zone Markings (Līnijas no viena borta līdz otram, veidojot 130x130 mm stūra laukumus) */}
+        {/* Top Horizontal Line (y = 175 mm, 130 mm no augšējā borta) */}
+        <line x1="45" y1="175" x2="1045" y2="175" stroke="#1C1C1E" strokeWidth="2.5" />
 
-        {/* Pocket mesh net pattern highlights */}
-        <path d="M37 44 Q44 50 51 44 M44 37 Q50 44 44 51" stroke="#94A3B8" strokeWidth="0.8" opacity="0.4" fill="none" />
-        <path d="M269 44 Q276 50 283 44 M276 37 Q282 44 276 51" stroke="#94A3B8" strokeWidth="0.8" opacity="0.4" fill="none" />
-        <path d="M37 276 Q44 282 51 276 M44 269 Q50 276 44 283" stroke="#94A3B8" strokeWidth="0.8" opacity="0.4" fill="none" />
-        <path d="M269 276 Q276 282 283 276 M276 269 Q282 276 276 283" stroke="#94A3B8" strokeWidth="0.8" opacity="0.4" fill="none" />
+        {/* Bottom Horizontal Line (y = 915 mm, 130 mm no apakšējā borta) */}
+        <line x1="45" y1="915" x2="1045" y2="915" stroke="#1C1C1E" strokeWidth="2.5" />
 
-        {/* Game Discs (Kauliņi) */}
-        {/* Red Puck 1 (Center Left) */}
-        <g filter="url(#shadowPuck)">
-          <circle cx="132" cy="138" r="13" fill="url(#redPuckGrad)" />
-          <circle cx="132" cy="138" r="8" stroke="#FDA4AF" strokeWidth="0.75" opacity="0.7" fill="none" />
-          <circle cx="132" cy="138" r="3.5" fill="#4C0519" />
-        </g>
+        {/* Left Vertical Line (x = 175 mm, 130 mm no kreisā borta) */}
+        <line x1="175" y1="45" x2="175" y2="1045" stroke="#1C1C1E" strokeWidth="2.5" />
 
-        {/* Red Puck 2 (Upper right zone) */}
-        <g filter="url(#shadowPuck)">
-          <circle cx="204" cy="108" r="13" fill="url(#redPuckGrad)" />
-          <circle cx="204" cy="108" r="8" stroke="#FDA4AF" strokeWidth="0.75" opacity="0.7" fill="none" />
-          <circle cx="204" cy="108" r="3.5" fill="#4C0519" />
-        </g>
+        {/* Right Vertical Line (x = 915 mm, 130 mm no labā borta) */}
+        <line x1="915" y1="45" x2="915" y2="1045" stroke="#1C1C1E" strokeWidth="2.5" />
 
-        {/* Black Puck 1 (Center Right) */}
-        <g filter="url(#shadowPuck)">
-          <circle cx="188" cy="154" r="13" fill="url(#blackPuckGrad)" />
-          <circle cx="188" cy="154" r="8" stroke="#94A3B8" strokeWidth="0.75" opacity="0.7" fill="none" />
-          <circle cx="188" cy="154" r="3.5" fill="#020617" />
-        </g>
+        {/* 4. Zone Center Divider Lines (Sadala apmales zonas uz pusēm) */}
+        {/* Top Zone Divider (vertikāla līnija no borta līdz zonas līnijai pie x = 545) */}
+        <line x1="545" y1="45" x2="545" y2="175" stroke="#1C1C1E" strokeWidth="2.5" />
 
-        {/* Black Puck 2 (Upper left zone) */}
-        <g filter="url(#shadowPuck)">
-          <circle cx="106" cy="94" r="13" fill="url(#blackPuckGrad)" />
-          <circle cx="106" cy="94" r="8" stroke="#94A3B8" strokeWidth="0.75" opacity="0.7" fill="none" />
-          <circle cx="106" cy="94" r="3.5" fill="#020617" />
-        </g>
+        {/* Bottom Zone Divider (vertikāla līnija no zonas līnijas līdz bortam pie x = 545) */}
+        <line x1="545" y1="915" x2="545" y2="1045" stroke="#1C1C1E" strokeWidth="2.5" />
 
-        {/* Māte (The Striker - Lielais kauliņš) on bottom baseline */}
-        <g filter="url(#shadowStriker)">
-          <circle cx="160" cy="242" r="17" fill="url(#strikerGrad)" stroke="#B45309" strokeWidth="1" />
-          <circle cx="160" cy="242" r="11" stroke="#E11D48" strokeWidth="1.2" opacity="0.85" fill="none" />
-          <circle cx="160" cy="242" r="4.5" fill="#78350F" />
-        </g>
+        {/* Left Zone Divider (horizontāla līnija no borta līdz zonas līnijai pie y = 545) */}
+        <line x1="45" y1="545" x2="175" y2="545" stroke="#1C1C1E" strokeWidth="2.5" />
 
-        {/* Cue Stick (Kija) pointing toward the striker */}
-        <g opacity="0.9">
-          <line
-            x1="228"
-            y1="288"
-            x2="174"
-            y2="252"
-            stroke="url(#cueGrad)"
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
-          {/* Cue tip indicator */}
-          <circle cx="174" cy="252" r="2.5" fill="#3B82F6" opacity="0.85" />
-        </g>
+        {/* Right Zone Divider (horizontāla līnija no zonas līnijas līdz bortam pie y = 545) */}
+        <line x1="915" y1="545" x2="1045" y2="545" stroke="#1C1C1E" strokeWidth="2.5" />
 
-        {/* Subtle decorative badges inside corner corners */}
-        <text x="32" y="24" fill="#B45309" fontSize="6" fontWeight="bold" opacity="0.4" letterSpacing="0.5">NVSS</text>
-        <text x="264" y="24" fill="#B45309" fontSize="6" fontWeight="bold" opacity="0.4" letterSpacing="0.5">100cm</text>
+        {/* 5. Center Circle (Vidus aplis: Ø 250 mm -> rādiuss 125 mm, centrā 545, 545) */}
+        <circle
+          cx="545"
+          cy="545"
+          r="125"
+          stroke="#1C1C1E"
+          strokeWidth="3"
+          fill="none"
+        />
+
+        {/* Center Crosshairs (Perpendikulārās asis TIKAI iekš vidus apļa!) */}
+        <line x1="420" y1="545" x2="670" y2="545" stroke="#1C1C1E" strokeWidth="2.5" />
+        <line x1="545" y1="420" x2="545" y2="670" stroke="#1C1C1E" strokeWidth="2.5" />
+
+        {/* 6. Four Corner Pockets (Caurumi stūros: Ø 100 mm -> rādiuss 50 mm, 15 mm no borta) */}
+        {/* Top-Left Pocket (centrs 110, 110) */}
+        <circle cx="110" cy="110" r="50" fill="url(#pocketGrad)" stroke="#000000" strokeWidth="2" />
+
+        {/* Top-Right Pocket (centrs 980, 110) */}
+        <circle cx="980" cy="110" r="50" fill="url(#pocketGrad)" stroke="#000000" strokeWidth="2" />
+
+        {/* Bottom-Left Pocket (centrs 110, 980) */}
+        <circle cx="110" cy="980" r="50" fill="url(#pocketGrad)" stroke="#000000" strokeWidth="2" />
+
+        {/* Bottom-Right Pocket (centrs 980, 980) */}
+        <circle cx="980" cy="980" r="50" fill="url(#pocketGrad)" stroke="#000000" strokeWidth="2" />
+
+        {/* 7. Game Pucks (Spēles kauliņi sākuma izvietojumā: 8 melnie augšā, 8 sarkanie apakšā) */}
+        {/* Top Black Pucks (8 melnie kauliņi gar augšējo bortu, 4 katrā pusē no centra līnijas) */}
+        {topBlackPuckX.map((cx, i) => (
+          <g key={`black-puck-${i}`} filter="url(#puckShadow)">
+            <circle cx={cx} cy="60" r="15" fill="url(#blackPuckGrad)" />
+            <circle cx={cx} cy="60" r="10" stroke="#94A3B8" strokeWidth="0.8" opacity="0.65" fill="none" />
+            <circle cx={cx} cy="60" r="4" fill="#020617" />
+          </g>
+        ))}
+
+        {/* Bottom Red Pucks (8 sarkanie kauliņi gar apakšējo bortu, 4 katrā pusē no centra līnijas) */}
+        {bottomRedPuckX.map((cx, i) => (
+          <g key={`red-puck-${i}`} filter="url(#puckShadow)">
+            <circle cx={cx} cy="1030" r="15" fill="url(#redPuckGrad)" />
+            <circle cx={cx} cy="1030" r="10" stroke="#FDA4AF" strokeWidth="0.8" opacity="0.75" fill="none" />
+            <circle cx={cx} cy="1030" r="4" fill="#4C0519" />
+          </g>
+        ))}
       </svg>
+
+      {/* Children placed directly over the table with high z-index (z-20) */}
+      {children && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center p-3 sm:p-5 pointer-events-none">
+          {children}
+        </div>
+      )}
     </div>
   )
 }

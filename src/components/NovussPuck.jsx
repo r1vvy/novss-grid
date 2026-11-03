@@ -18,7 +18,7 @@ export function NovussPuck({
       className={`relative inline-block select-none ${interactive ? 'cursor-pointer transition-transform duration-200 hover:scale-110 active:scale-95' : ''} ${className}`}
       aria-label={
         isStriker
-          ? 'Novusa māte (sitējs)'
+          ? 'Novusa ripa (māte)'
           : isRed
             ? 'Sarkanais novusa kauliņš'
             : 'Melnais novusa kauliņš'
@@ -32,7 +32,6 @@ export function NovussPuck({
         className="w-full h-full"
       >
         <defs>
-          {/* Drop shadow */}
           {withShadow && (
             <filter id={`puck-shadow-${idSuffix}`} x="-25%" y="-25%" width="150%" height="150%">
               <feDropShadow
@@ -45,7 +44,7 @@ export function NovussPuck({
             </filter>
           )}
 
-          {/* Red Puck Gradient */}
+          {/* Red Puck Gradient (Ø 30 mm) */}
           <radialGradient id={`red-grad-${idSuffix}`} cx="35%" cy="30%" r="65%">
             <stop offset="0%" stopColor="#FF6B6B" />
             <stop offset="35%" stopColor="#E11D48" />
@@ -53,7 +52,7 @@ export function NovussPuck({
             <stop offset="100%" stopColor="#881337" />
           </radialGradient>
 
-          {/* Black Puck Gradient */}
+          {/* Black Puck Gradient (Ø 30 mm) */}
           <radialGradient id={`black-grad-${idSuffix}`} cx="35%" cy="30%" r="65%">
             <stop offset="0%" stopColor="#64748B" />
             <stop offset="35%" stopColor="#334155" />
@@ -61,12 +60,12 @@ export function NovussPuck({
             <stop offset="100%" stopColor="#090D16" />
           </radialGradient>
 
-          {/* Striker (Māte) Amber Wood Gradient */}
+          {/* Striker Ripa (Ø 44.5 mm) Natural Solid Wood */}
           <radialGradient id={`striker-grad-${idSuffix}`} cx="35%" cy="30%" r="65%">
-            <stop offset="0%" stopColor="#FEF3C7" />
-            <stop offset="30%" stopColor="#FDE68A" />
-            <stop offset="70%" stopColor="#D97706" />
-            <stop offset="100%" stopColor="#92400E" />
+            <stop offset="0%" stopColor="#FEF9ED" />
+            <stop offset="30%" stopColor="#F5E6CA" />
+            <stop offset="70%" stopColor="#DEBE91" />
+            <stop offset="100%" stopColor="#B38B57" />
           </radialGradient>
 
           {/* Bevel rim highlight */}
@@ -107,29 +106,18 @@ export function NovussPuck({
             cx="32"
             cy="32"
             r={isStriker ? '18' : '17'}
-            stroke={isStriker ? '#E11D48' : isRed ? '#FDA4AF' : '#94A3B8'}
-            strokeWidth={isStriker ? '1.8' : '1.2'}
-            strokeOpacity={isStriker ? '0.9' : '0.6'}
+            stroke={isStriker ? '#8C6636' : isRed ? '#FDA4AF' : '#94A3B8'}
+            strokeWidth={isStriker ? '1.5' : '1.2'}
+            strokeOpacity={isStriker ? '0.7' : '0.6'}
             fill="none"
           />
 
-          {/* Drilled Center Hole (Aukla / Caurums) */}
+          {/* Drilled Center Hole (Kauliņam 8mm/30mm=26.7%, Ripai 10mm/44.5mm=22.5%) */}
           <circle
             cx="32"
             cy="32"
-            r={isStriker ? '7' : '6'}
-            fill={isStriker ? '#78350F' : isRed ? '#4C0519' : '#020617'}
-          />
-
-          {/* Center Hole Inner Shadow & Rim */}
-          <circle
-            cx="32"
-            cy="32"
-            r={isStriker ? '6.8' : '5.8'}
-            stroke="#000000"
-            strokeWidth="0.8"
-            strokeOpacity="0.5"
-            fill="none"
+            r={isStriker ? '6.3' : '7.5'}
+            fill={isStriker ? '#4A2609' : isRed ? '#4C0519' : '#020617'}
           />
 
           {/* Specular Reflection Highlight */}
