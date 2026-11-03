@@ -1,3 +1,30 @@
+export const activeTournamentsList = [
+  {
+    id: 'novuss-riga-open-2026',
+    name: 'Riga Open Novuss Swiss',
+    venue: 'Galvenā Zāle',
+    currentRound: 4,
+    totalRounds: 11,
+    tablesCount: 16,
+    playersCount: 32,
+    status: 'active',
+    statusLabel: 'Tiešraide',
+    format: 'Šveices sistēma',
+  },
+  {
+    id: 'novuss-kurzeme-cup-2026',
+    name: 'Kurzemes Pavasara Kauss',
+    venue: 'Liepājas Novusa Klubs',
+    currentRound: 2,
+    totalRounds: 7,
+    tablesCount: 8,
+    playersCount: 16,
+    status: 'active',
+    statusLabel: 'Tiešraide',
+    format: 'Šveices sistēma',
+  },
+]
+
 export const initialTournament = {
   id: 'novuss-riga-open-2026',
   name: 'Riga Open Novuss Swiss',
