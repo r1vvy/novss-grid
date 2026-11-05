@@ -743,6 +743,7 @@ export function generateNextSwissRound(tournament) {
 }
 
 export function getCurrentRoundMatches(tournament) {
+  if (!tournament || !Array.isArray(tournament.matches)) return []
   return tournament.matches.filter((match) => match.round === tournament.currentRound)
 }
 
@@ -885,7 +886,7 @@ function buildOverriddenMatch(match, setResults, metadata, maxSetsPerMatch = mat
   }
 }
 
-function havePlayed(playerAId, playerBId, tournament) {
+export function havePlayed(playerAId, playerBId, tournament) {
   return tournament.matches.some(
     (match) =>
       (match.playerAId === playerAId && match.playerBId === playerBId)
@@ -898,3 +899,6 @@ function sortByStanding(a, b) {
   if (b.buchholz !== a.buchholz) return b.buchholz - a.buchholz
   return a.name.localeCompare(b.name)
 }
+
+export { getSwissPairingExplanation } from '../hooks/useSwissExplainer'
+
