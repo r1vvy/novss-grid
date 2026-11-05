@@ -4,6 +4,7 @@ import { AlertRail } from './AlertRail'
 import { CompactLegend, TableGrid } from './TableGrid'
 import { RoundProgress } from './RoundProgress'
 import { TournamentHeader } from './TournamentHeader'
+import { OrganizerBentoGrid } from './OrganizerBentoGrid'
 import { WarningModal } from './WarningModal'
 import { useModalDismiss } from '../../hooks/useModalDismiss'
 import { useMatchOverride } from '../../hooks/useMatchOverride'
@@ -29,6 +30,7 @@ export function OrganizerDashboard({
   onSwapTables,
   onGenerateRound,
   onOpenPlayers,
+  onOpenKiosk,
 }) {
   const STANDINGS_PAGE_SIZE = 30
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -75,12 +77,15 @@ export function OrganizerDashboard({
   return (
     <main className="mx-auto grid max-w-[1700px] gap-5 px-4 py-6 lg:grid-cols-[1fr_340px]">
       <section className="min-w-0 space-y-5">
-        <TournamentHeader
+        <OrganizerBentoGrid
           tournament={tournament}
           matches={currentMatches}
           alerts={alerts}
-          onOpenSettings={() => setIsSettingsOpen(true)}
+          canGenerate={canGenerate}
+          onGenerateRound={() => onGenerateRound(generateNextSwissRound(tournament))}
           onOpenPlayers={onOpenPlayers}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenKiosk={onOpenKiosk}
         />
 
         <TableGrid

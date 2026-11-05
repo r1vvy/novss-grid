@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
 import { AlertTriangle, CheckCircle2, ChevronDown, Clock, History, Pencil, Search, Star } from 'lucide-react'
+import { GlassCard } from '../ui/GlassCard'
+import { SwissExplanationPill } from '../common/SwissExplanationPill'
+import { CalmDisputeBanner } from '../player/CalmDisputeBanner'
 import {
   deriveMatchStatus,
   getAuditActorName,
@@ -44,7 +47,12 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
       : 'border-black/[0.08]'
 
   return (
-    <article className={`rounded-2xl border bg-white/65 hover:bg-white/80 backdrop-blur-xl p-4 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.9),0_10px_28px_rgba(0,0,0,0.04)] transition-all ${cardBorder}`} {...dragProps}>
+    <GlassCard
+      as="article"
+      elevation="subtle"
+      className={`p-4 transition-all ${cardBorder}`}
+      {...dragProps}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-baseline gap-2">
           <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E93]">Galds</span>
@@ -53,7 +61,18 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
         <StatusBadge status={status} />
       </div>
 
-      {match.contestMeta?.reason && (
+      {/* Algorithmic Swiss Pairing Explanation */}
+      <SwissExplanationPill match={match} tournament={tournament} className="mt-2.5" />
+
+      {isDisputed && (
+        <CalmDisputeBanner
+          match={match}
+          onCancelDispute={() => onClearAlert(match.id)}
+          className="mt-3"
+        />
+      )}
+
+      {match.contestMeta?.reason && !isDisputed && (
         <div className="mt-2.5 rounded-xl border border-apple-red/25 bg-apple-red/10 px-3 py-2 text-xs font-semibold text-apple-red">
           <span className="font-bold">Strīds: </span>
           <span>{match.contestMeta.reason}</span>
@@ -213,7 +232,7 @@ export function MatchCard({ tournament, match, onClearAlert, onMarkInvestigating
           </div>
         )}
       </div>
-    </article>
+    </GlassCard>
   )
 }
 

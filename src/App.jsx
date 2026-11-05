@@ -5,6 +5,8 @@ import { HomeScreen } from './components/HomeScreen'
 import { OrganizerDashboard } from './components/organizer/OrganizerDashboard'
 import { OrganizerPlayersView } from './components/organizer/OrganizerPlayersView'
 import { PlayerView } from './components/player/PlayerView'
+import { KioskView } from './components/kiosk/KioskView'
+import { LiveAnnouncer } from './components/common/LiveAnnouncer'
 import {
   adjustCurrentSetPerfectPlays,
   appendSetResult,
@@ -69,13 +71,14 @@ export default function App() {
   return (
     <AppShell
       title={screen === 'home' ? 'Turnīra izvēlne' : 'Novusa turnīra vadība'}
-      showBack={screen !== 'home' && screen !== 'player'}
-      hideHeader={screen === 'home' || screen === 'player'}
+      showBack={screen !== 'home' && screen !== 'player' && screen !== 'kiosk'}
+      hideHeader={screen === 'home' || screen === 'player' || screen === 'kiosk'}
       onBack={() => {
         setOrganizerView('dashboard')
         setScreen('home')
       }}
     >
+      <LiveAnnouncer />
       {screen === 'home' ? (
         <HomeScreen
           tournament={tournament}
@@ -119,6 +122,7 @@ export default function App() {
             onSwapTables={(sourceMatchId, targetMatchId) => setTournament((current) => swapMatchTables(current, sourceMatchId, targetMatchId))}
             onGenerateRound={(nextTournament) => setTournament(nextTournament)}
             onOpenPlayers={() => setOrganizerView('players')}
+            onOpenKiosk={() => setScreen('kiosk')}
           />
         ) : (
           <OrganizerPlayersView
@@ -127,6 +131,13 @@ export default function App() {
             onSavePlayer={(playerId, nextPlayer) => setTournament((current) => updatePlayer(current, playerId, nextPlayer))}
           />
         )
+      ) : null}
+
+      {screen === 'kiosk' ? (
+        <KioskView
+          tournament={tournament}
+          onClose={() => setScreen('organizer')}
+        />
       ) : null}
 
       {screen === 'player' ? (
