@@ -117,3 +117,16 @@ html {
 .animate-float-alt {
   animation: floatGentleAlt 6.5s ease-in-out infinite;
 }
+
+/* Apple HIG Prefers-Reduced-Transparency Guardrail */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-card,
+  [data-glass="true"] {
+    background-color: #FFFFFF !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: #E5E5EA !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
