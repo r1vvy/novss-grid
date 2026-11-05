@@ -12,6 +12,11 @@ import {
 } from 'lucide-react'
 import { RefereeButton } from './RefereeButton'
 import { ScoreStepper } from './ScoreStepper'
+import { CalmDisputeBanner } from './CalmDisputeBanner'
+import { PlayerActionBar } from './PlayerActionBar'
+import { GlassCard } from '../ui/GlassCard'
+import { SwissExplanationPill } from '../common/SwissExplanationPill'
+import { triggerHaptic } from '../../utils/haptics'
 import {
   deriveMatchStatus,
   getMatchPerfectPlays,
@@ -66,7 +71,7 @@ export function PlayerMatchCard({
   const myWarnings = getMatchWarnings(match, player.id)
 
   return (
-    <section className="rounded-3xl border border-white/80 bg-white/65 p-5 sm:p-6 shadow-[inset_0_1px_2px_rgba(255,255,255,1),0_16px_45px_rgba(0,0,0,0.06)] backdrop-blur-2xl">
+    <GlassCard as="section" elevation="elevated" className="p-5 sm:p-6">
       {/* Table & Status Header */}
       <div className="flex items-center justify-between gap-3 pb-4 border-b border-black/[0.06]">
         <div className="flex items-center gap-3">
@@ -84,6 +89,23 @@ export function PlayerMatchCard({
 
         <StatusBadge status={status} />
       </div>
+
+      {/* Algorithmic Swiss Pairing Transparency Pill */}
+      <SwissExplanationPill match={match} tournament={tournament} className="mt-3.5" />
+
+      {/* Contextual Intent Primary Action Bar (for completed / in-progress states) */}
+      {(status === 'completed' || (status === 'in_progress' && !isScoreKeeper)) && (
+        <PlayerActionBar
+          tournament={tournament}
+          match={match}
+          player={player}
+          onConfirmArrival={onConfirmArrival}
+          onReadyToPlay={onReadyToPlay}
+          onConfirm={onConfirm}
+          onCancelReferee={onCancelReferee}
+          className="mt-3.5"
+        />
+      )}
 
       {/* Player Warning Alert Banner */}
       {myWarnings.length > 0 && (
@@ -133,7 +155,10 @@ export function PlayerMatchCard({
             {!playerArrived && onConfirmArrival && (
               <button
                 type="button"
-                onClick={() => onConfirmArrival(match.id, player.id)}
+                onClick={() => {
+                  triggerHaptic('medium')
+                  onConfirmArrival(match.id, player.id)
+                }}
                 className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-apple-blue px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-apple-blueHover active:scale-[0.98]"
               >
                 <MapPin size={16} />
@@ -144,7 +169,10 @@ export function PlayerMatchCard({
             {playerArrived && !playerReady && onReadyToPlay && (
               <button
                 type="button"
-                onClick={() => onReadyToPlay(match.id, player.id)}
+                onClick={() => {
+                  triggerHaptic('success')
+                  onReadyToPlay(match.id, player.id)
+                }}
                 className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-apple-green px-4 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 active:scale-[0.98]"
               >
                 <Play size={16} fill="currentColor" />
@@ -298,7 +326,10 @@ export function PlayerMatchCard({
             <button
               type="button"
               disabled={playerConfirmed}
-              onClick={() => onConfirm(match.id, player.id)}
+              onClick={() => {
+                triggerHaptic('success')
+                onConfirm(match.id, player.id)
+              }}
               className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-apple-green px-4 text-[16px] font-semibold text-white shadow-sm transition-all duration-150 hover:opacity-90 active:scale-[0.98] disabled:bg-black/[0.1] disabled:text-apple-tertiary disabled:cursor-not-allowed"
             >
               <BadgeCheck size={20} strokeWidth={2.2} />
@@ -310,7 +341,10 @@ export function PlayerMatchCard({
                 {!showContestInput ? (
                   <button
                     type="button"
-                    onClick={() => setShowContestInput(true)}
+                    onClick={() => {
+                      triggerHaptic('selection')
+                      setShowContestInput(true)
+                    }}
                     className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-apple-red/30 bg-apple-red/10 px-4 text-xs font-semibold text-apple-red transition hover:bg-apple-red/20 active:scale-[0.98]"
                   >
                     <XCircle size={16} />
@@ -339,6 +373,7 @@ export function PlayerMatchCard({
                       <button
                         type="button"
                         onClick={() => {
+                          triggerHaptic('warning')
                           onContestScore(match.id, player.id, contestReason)
                           setShowContestInput(false)
                         }}
@@ -368,23 +403,14 @@ export function PlayerMatchCard({
         </div>
       )}
 
+      {/* Calm De-escalating Dispute Banner */}
       {status === 'disputed' && (
-        <div className="mt-4 rounded-2xl border border-apple-red/25 bg-apple-red/10 p-3.5 text-center text-xs font-medium text-apple-red">
-          <div className="flex items-center justify-center gap-1.5 font-bold">
-            <ShieldAlert size={16} />
-            <span>Tiesneša izsaukums aktīvs</span>
-          </div>
-          <p className="mt-1">
-            {playerRequestedReferee
-              ? 'Jūs esat izsaucis tiesnesi. Ja jautājums atrisināts, varat atsaukt izsaukumu.'
-              : 'Pretinieks ir izsaucis tiesnesi. Rezultātu ievade ir bloķēta līdz tiesneša lēmumam.'}
-          </p>
-          {match.contestMeta?.reason && (
-            <p className="mt-1 font-semibold">
-              Iemesls: {match.contestMeta.reason}
-            </p>
-          )}
-        </div>
+        <CalmDisputeBanner
+          match={match}
+          playerId={player.id}
+          onCancelDispute={onCancelReferee}
+          className="mt-4"
+        />
       )}
 
       <div className="mt-4">
@@ -395,7 +421,7 @@ export function PlayerMatchCard({
           requireConfirm={!playerRequestedReferee}
         />
       </div>
-    </section>
+    </GlassCard>
   )
 }
 
@@ -403,7 +429,7 @@ function StatusBadge({ status }) {
   const configs = {
     scheduled: { label: 'Ieplānots', icon: Clock, badge: 'border-black/[0.08] bg-black/[0.04] text-[#8E8E93]' },
     in_progress: { label: 'Notiek', icon: Clock, badge: 'border-apple-blue/20 bg-apple-blue/10 text-apple-blue animate-pulse' },
-    disputed: { label: 'Strīds', icon: AlertTriangle, badge: 'border-apple-red/25 bg-apple-red/10 text-apple-red' },
+    disputed: { label: 'Strīds', icon: AlertTriangle, badge: 'border-amber-500/30 bg-amber-500/10 text-amber-700' },
     investigating: { label: 'Izmeklē', icon: Clock, badge: 'border-apple-orange/25 bg-apple-orange/10 text-apple-orange' },
     awaiting_confirmation: { label: 'Gaida apstiprinājumu', icon: Clock, badge: 'border-apple-purple/25 bg-apple-purple/10 text-apple-purple' },
     completed: { label: 'Pabeigts', icon: CheckCircle2, badge: 'border-apple-green/20 bg-apple-green/10 text-apple-green' },
