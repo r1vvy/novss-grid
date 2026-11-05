@@ -1,5 +1,7 @@
 import React from 'react'
 import { Minus, Plus, Star } from 'lucide-react'
+import { triggerHaptic } from '../../utils/haptics'
+
 
 export function ScoreStepper({
   disabled,
@@ -64,6 +66,26 @@ function ScoreRow({
   const isRemoveDisabled = disabled || score <= 0
   const isAddDisabled = disabled || addDisabled
 
+  function handleRemove() {
+    triggerHaptic('selection')
+    onRemove?.()
+  }
+
+  function handleAdd() {
+    triggerHaptic('selection')
+    onAdd?.()
+  }
+
+  function handlePerfectPlayRemove() {
+    triggerHaptic('selection')
+    onPerfectPlayRemove?.()
+  }
+
+  function handlePerfectPlayAdd() {
+    triggerHaptic('selection')
+    onPerfectPlayAdd?.()
+  }
+
   return (
     <div className="rounded-2xl border border-black/[0.06] bg-[#F2F2F7]/60 p-3.5 transition-all">
       <div className="flex items-center justify-between gap-3">
@@ -78,7 +100,7 @@ function ScoreRow({
             type="button"
             aria-label={`Noņemt setu: ${name}`}
             disabled={isRemoveDisabled}
-            onClick={onRemove}
+            onClick={handleRemove}
             className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white text-[#1C1C1E] shadow-apple-sm transition-all hover:bg-black/[0.04] active:scale-95 disabled:bg-transparent disabled:text-apple-tertiary disabled:shadow-none disabled:cursor-not-allowed"
           >
             <Minus size={18} strokeWidth={2.5} />
@@ -92,7 +114,7 @@ function ScoreRow({
             type="button"
             aria-label={`Pievienot setu: ${name}`}
             disabled={isAddDisabled}
-            onClick={onAdd}
+            onClick={handleAdd}
             className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-apple-blue text-white shadow-apple-sm transition-all hover:bg-apple-blueHover active:scale-95 disabled:bg-transparent disabled:text-apple-tertiary disabled:shadow-none disabled:cursor-not-allowed"
           >
             <Plus size={18} strokeWidth={2.5} />
@@ -120,7 +142,7 @@ function ScoreRow({
               type="button"
               aria-label={`Noņemt ideālo gājienu: ${name}`}
               disabled={disabled || perfectPlays <= 0}
-              onClick={onPerfectPlayRemove}
+              onClick={handlePerfectPlayRemove}
               className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-[#636366] transition hover:bg-black/[0.05] active:scale-95 disabled:text-apple-tertiary disabled:cursor-not-allowed"
             >
               <Minus size={14} strokeWidth={2.5} />
@@ -132,7 +154,7 @@ function ScoreRow({
               type="button"
               aria-label={`Pievienot ideālo gājienu: ${name}`}
               disabled={isAddDisabled}
-              onClick={onPerfectPlayAdd}
+              onClick={handlePerfectPlayAdd}
               className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-amber-600 transition hover:bg-amber-500/10 active:scale-95 disabled:text-apple-tertiary disabled:cursor-not-allowed"
             >
               <Plus size={14} strokeWidth={2.5} />
